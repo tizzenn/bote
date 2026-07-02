@@ -75,7 +75,11 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "Publicar Bote $GITHUB_REF_NAME"
-          git push
+          # Reintentos con rebase por si otra release publicó a la vez
+          for intento in 1 2 3; do
+            git push && break
+            git pull --rebase
+          done
 
       - name: Crear release en GitHub con el APK
         env:
