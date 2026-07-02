@@ -1,0 +1,228 @@
+package com.bote.app.ui
+
+import android.content.Intent
+import android.os.Bundle
+import android.view.View
+import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import com.bote.app.BaseActivity
+import com.bote.app.R
+import com.bote.app.data.AppDatabase
+import com.bote.app.data.Calculadora
+import com.bote.app.data.Dinero
+import com.bote.app.data.EventoCompleto
+import com.bote.app.databinding.ActivityInformeBinding
+import com.bote.app.databinding.ItemSaldoBinding
+import com.bote.app.notification.NotificationScheduler
+import kotlinx.coroutines.launch
+import java.text.DateFormat
+import java.util.Date
+
+class InformeActivity : BaseActivity() {
+
+    companion object {
+        const val EXTRA_EVENTO_ID = "evento_id"
+    }
+
+    private lateinit var binding: ActivityInformeBinding
+    private var eventoId: Long = 0
+    private var datos: EventoCompleto? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityInformeBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        eventoId = intent.getLongExtra(EXTRA_EVENTO_ID, 0)
+        binding.btnCompartirInforme.setOnClickListener { compartir() }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        cargar()
+    }
+
+    private fun cargar() {
+        lifecycleScope.launch {
+            val completo = AppDatabase.get(this@InformeActivity).dao()
+                .eventoCompleto(eventoId) ?: run { finish(); return@launch }
+            datos = completo
+            pintar(completo)
+        }
+    }
+
+    private fun nombreDe(asistente: com.bote.app.data.Asistente): String =
+        asistente.nombre.ifBlank { getString(R.string.asistente_sin_nombre) }
+
+    private fun pintar(completo: EventoCompleto) {
+        val evento = completo.evento
+        val fecha = DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(evento.fechaMillis))
+        supportActionBar?.title = evento.titulo.ifBlank { fecha }
+
+        binding.subtitulo.setText(
+            if (evento.cerrado) R.string.informe_definitivo else R.string.informe_parcial
+        )
+        binding.total.text =
+            getString(R.string.total_evento_fmt, Dinero.formatear(completo.totalGastadoCents))
+
+        val saldos = Calculadora.saldos(completo)
+
+        binding.listaSaldos.removeAllViews()
+        for (saldo in saldos) {
+            val fila = ItemSaldoBinding.inflate(layoutInflater, binding.listaSaldos, false)
+            val nombre = nombreDe(saldo.asistente)
+            AvatarUtil.aplicar(fila.avatar, nombre)
+            fila.nombre.text = nombre
+            fila.detalle.text =
+                getString(R.string.pago_total_fmt, Dinero.formatear(saldo.pagadoCents)) +
+                    " · " +
+                    getString(R.string.corresponde_fmt, Dinero.formatear(saldo.correspondeCents))
+            when {
+                saldo.saldoCents > 0 -> {
+                    fila.saldo.text =
+                        getString(R.string.saldo_favor_fmt, Dinero.formatear(saldo.saldoCents))
+                    fila.saldo.setTextColor(
+                        ContextCompat.getColor(this, R.color.saldo_positivo)
+                    )
+                }
+                saldo.saldoCents < 0 -> {
+                    fila.saldo.text =
+                        getString(R.string.saldo_contra_fmt, Dinero.formatear(-saldo.saldoCents))
+                    fila.saldo.setTextColor(
+                        ContextCompat.getColor(this, R.color.saldo_negativo)
+                    )
+                }
+                else -> {
+                    fila.saldo.setText(R.string.saldo_cero)
+                    fila.saldo.setTextColor(
+                        ContextCompat.getColor(this, R.color.text_secondary)
+                    )
+                }
+            }
+
+            // Cada uno marca su pago; el creador puede marcar el de cualquiera.
+            val puedeMarcar = evento.cerrado &&
+                (evento.soyCreador || saldo.asistente.id == evento.miAsistenteId)
+            fila.liquidado.isChecked = saldo.asistente.liquidado
+            fila.liquidado.isEnabled = puedeMarcar
+            fila.liquidado.setOnCheckedChangeListener { _, marcado ->
+                marcarLiquidado(saldo.asistente.id, marcado)
+            }
+            binding.listaSaldos.addView(fila.root)
+        }
+
+        binding.listaTransferencias.removeAllViews()
+        val transferencias = Calculadora.transferencias(saldos)
+        if (transferencias.isEmpty()) {
+            binding.listaTransferencias.addView(textoTransferencia(getString(R.string.sin_transferencias)))
+        } else {
+            for (t in transferencias) {
+                binding.listaTransferencias.addView(
+                    textoTransferencia(
+                        getString(
+                            R.string.transferencia_fmt,
+                            nombreDe(t.de), Dinero.formatear(t.cents), nombreDe(t.a)
+                        )
+                    )
+                )
+            }
+        }
+    }
+
+    private fun textoTransferencia(texto: String): TextView =
+        TextView(this).apply {
+            text = texto
+            textSize = 15f
+            setTextColor(ContextCompat.getColor(this@InformeActivity, R.color.text_primary))
+            setPadding(0, 8, 0, 8)
+        }
+
+    private fun marcarLiquidado(asistenteId: Long, marcado: Boolean) {
+        lifecycleScope.launch {
+            val dao = AppDatabase.get(this@InformeActivity).dao()
+            val completo = dao.eventoCompleto(eventoId) ?: return@launch
+            val asistente = completo.asistentes.firstOrNull { it.id == asistenteId }
+                ?: return@launch
+            dao.actualizarAsistente(
+                asistente.copy(
+                    liquidado = marcado,
+                    liquidadoMillis = if (marcado) System.currentTimeMillis() else 0
+                )
+            )
+            val actualizado = dao.eventoCompleto(eventoId) ?: return@launch
+            // Si todos han liquidado, la cuenta queda a cero: fuera recordatorios.
+            NotificationScheduler.reprogramar(
+                this@InformeActivity, actualizado.evento,
+                pagosPendientes = actualizado.evento.cerrado && !actualizado.todosLiquidados
+            )
+            datos = actualizado
+            pintar(actualizado)
+        }
+    }
+
+    private fun compartir() {
+        val completo = datos ?: return
+        val fecha = DateFormat.getDateInstance(DateFormat.MEDIUM)
+            .format(Date(completo.evento.fechaMillis))
+        val saldos = Calculadora.saldos(completo)
+        val transferencias = Calculadora.transferencias(saldos)
+        val texto = buildString {
+            appendLine(completo.evento.titulo.ifBlank { fecha })
+            appendLine(
+                getString(
+                    if (completo.evento.cerrado) R.string.informe_definitivo
+                    else R.string.informe_parcial
+                )
+            )
+            appendLine(
+                getString(R.string.total_evento_fmt, Dinero.formatear(completo.totalGastadoCents))
+            )
+            appendLine()
+            for (saldo in saldos) {
+                append("· ").append(nombreDe(saldo.asistente)).append(": ")
+                append(getString(R.string.pago_total_fmt, Dinero.formatear(saldo.pagadoCents)))
+                append(" · ")
+                append(
+                    getString(R.string.corresponde_fmt, Dinero.formatear(saldo.correspondeCents))
+                )
+                append(" · ")
+                appendLine(
+                    when {
+                        saldo.saldoCents > 0 -> getString(
+                            R.string.saldo_favor_fmt, Dinero.formatear(saldo.saldoCents)
+                        )
+                        saldo.saldoCents < 0 -> getString(
+                            R.string.saldo_contra_fmt, Dinero.formatear(-saldo.saldoCents)
+                        )
+                        else -> getString(R.string.saldo_cero)
+                    }
+                )
+            }
+            appendLine()
+            if (transferencias.isEmpty()) {
+                appendLine(getString(R.string.sin_transferencias))
+            } else {
+                for (t in transferencias) {
+                    appendLine(
+                        getString(
+                            R.string.transferencia_fmt,
+                            nombreDe(t.de), Dinero.formatear(t.cents), nombreDe(t.a)
+                        )
+                    )
+                }
+            }
+        }
+        startActivity(
+            Intent.createChooser(
+                Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, texto)
+                },
+                getString(R.string.compartir_informe)
+            )
+        )
+    }
+}

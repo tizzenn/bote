@@ -1,0 +1,159 @@
+<resources>
+    <string name="app_name">Bote</string>
+
+    <!-- Main list -->
+    <string name="titulo_lista">My events</string>
+    <string name="sin_eventos">No events yet.\nTap + to create the first one.</string>
+    <string name="filtro_activos">Active</string>
+    <string name="filtro_saldados">Settled</string>
+    <string name="filtro_todos">All</string>
+    <string name="accion_ajustes">Settings</string>
+    <string name="accion_importar">Import event</string>
+    <string name="nuevo_evento">New event</string>
+    <string name="num_asistentes">%1$d attendees</string>
+    <string name="pendiente_liquidar">Pending settlement</string>
+    <string name="evento_saldado">Settled</string>
+    <string name="total_fmt">Total: %1$s</string>
+
+    <!-- Event form -->
+    <string name="titulo_nuevo_evento">New event</string>
+    <string name="titulo_editar_evento">Edit event</string>
+    <string name="campo_titulo">Title (optional)</string>
+    <string name="campo_descripcion">Description (optional)</string>
+    <string name="campo_fecha">Date</string>
+    <string name="campo_ubicacion">Location (optional)</string>
+    <string name="cd_foto_evento">Event photo</string>
+    <string name="cambiar_foto">Photo</string>
+    <string name="seccion_modo">MODE</string>
+    <string name="modo_restringido">Restricted</string>
+    <string name="modo_colaborativo">Collaborative</string>
+    <string name="modo_restringido_desc">Only the admin can edit the event and add entries.</string>
+    <string name="modo_colaborativo_desc">Everyone can edit the event and add entries.</string>
+    <string name="seccion_asistentes">ATTENDEES</string>
+    <string name="anadir_manual">Add manually</string>
+    <string name="anadir_contacto">From contacts</string>
+    <string name="campo_nombre">Name</string>
+    <string name="campo_telefono">Phone (optional)</string>
+    <string name="campo_email">Email (optional)</string>
+    <string name="asistente_yo">Me</string>
+    <string name="asistente_admin">Admin</string>
+    <string name="asistente_sin_nombre">Unnamed</string>
+    <string name="error_fecha">Pick a date</string>
+    <string name="error_sin_asistentes">Add at least one attendee</string>
+    <string name="dialog_gastos_titulo">Existing entries</string>
+    <string name="dialog_gastos_msg">This event already has entries. Does %1$s share the costs from the beginning?</string>
+    <string name="gastos_solidario">From the beginning</string>
+    <string name="gastos_limpio">Only from now on</string>
+    <string name="error_asistente_pagador">Cannot remove: this attendee pays some entries.</string>
+    <string name="confirmar_eliminar_evento">Delete this event and all its entries?</string>
+    <string name="accion_guardar">Save</string>
+    <string name="accion_cancelar">Cancel</string>
+    <string name="accion_eliminar">Delete</string>
+    <string name="accion_editar">Edit</string>
+    <string name="permiso_contactos">Contacts permission is needed to pick an attendee.</string>
+
+    <!-- Event detail -->
+    <string name="seccion_apuntes">ENTRIES</string>
+    <string name="sin_apuntes">No entries yet.</string>
+    <string name="nuevo_apunte">New entry</string>
+    <string name="anadir_calendario">Calendar</string>
+    <string name="ver_informe">Report</string>
+    <string name="cerrar_cuenta">Close the tab</string>
+    <string name="evento_cerrado">Tab closed</string>
+    <string name="reabrir_cuenta">Reopen the tab</string>
+    <string name="confirmar_cerrar_cuenta">Lock the event and generate the final report? No more entries can be added.</string>
+    <string name="error_cerrar_apuntes_abiertos">To close the tab, every entry needs its paid amount.</string>
+    <string name="solo_admin">Only the admin can do this (restricted mode).</string>
+    <string name="compartir_evento">Share / sync</string>
+    <string name="paga_fmt">%1$s pays</string>
+    <string name="presupuestado_fmt">Budgeted: %1$s</string>
+    <string name="gastado_fmt">Spent: %1$s</string>
+    <string name="pagado_fmt">Paid: %1$s</string>
+    <string name="apunte_abierto">Open</string>
+    <string name="apunte_cerrado">Closed</string>
+
+    <!-- Entry form -->
+    <string name="titulo_nuevo_apunte">New entry</string>
+    <string name="titulo_editar_apunte">Edit entry</string>
+    <string name="campo_concepto">Concept</string>
+    <string name="campo_pagador">Who pays</string>
+    <string name="campo_presupuestado">Budgeted (optional)</string>
+    <string name="campo_gastado">Spent</string>
+    <string name="campo_pagado">Paid (needed to close the entry)</string>
+    <string name="seccion_categoria">CATEGORY</string>
+    <string name="cat_restaurante">Restaurant</string>
+    <string name="cat_copas">Drinks</string>
+    <string name="cat_regalo">Gift</string>
+    <string name="cat_super">Groceries</string>
+    <string name="cat_alojamiento">Lodging</string>
+    <string name="cat_combustible">Fuel</string>
+    <string name="cat_sustancias">Substances</string>
+    <string name="cat_cash">Cash</string>
+    <string name="cat_otros">Other</string>
+    <string name="seccion_reparto">SPLIT</string>
+    <string name="reparto_igual">Equal parts</string>
+    <string name="reparto_porcentual">Percentages</string>
+    <string name="error_gastado">Enter the amount spent</string>
+    <string name="error_participantes">Select at least one participant</string>
+    <string name="cd_fijar">Pin percentage</string>
+    <string name="pct_fmt">%1$d%%</string>
+
+    <!-- Report -->
+    <string name="titulo_informe">Report</string>
+    <string name="informe_definitivo">Final report</string>
+    <string name="informe_parcial">Provisional report</string>
+    <string name="pago_total_fmt">Paid: %1$s</string>
+    <string name="corresponde_fmt">Share: %1$s</string>
+    <string name="saldo_favor_fmt">Gets back %1$s</string>
+    <string name="saldo_contra_fmt">Owes %1$s</string>
+    <string name="saldo_cero">Even</string>
+    <string name="seccion_transferencias">WHO PAYS WHOM</string>
+    <string name="transferencia_fmt">%1$s pays %2$s to %3$s</string>
+    <string name="sin_transferencias">All settled, nothing pending.</string>
+    <string name="marcar_liquidado">Settled</string>
+    <string name="compartir_informe">Share report</string>
+    <string name="total_evento_fmt">Event total: %1$s</string>
+
+    <!-- Import / sync -->
+    <string name="importar_ok">Event imported.</string>
+    <string name="importar_error">Could not import that file.</string>
+    <string name="importar_quien">Who are you in this event?</string>
+    <string name="sync_asunto">Bote event: %1$s</string>
+    <string name="sync_explicacion">Share the event file with the other attendees; importing it in their Bote keeps everyone in sync.</string>
+
+    <!-- Settings -->
+    <string name="ajustes_titulo">Settings</string>
+    <string name="seccion_tema">THEME</string>
+    <string name="tema_blanco">White</string>
+    <string name="tema_negro">Black</string>
+    <string name="tema_sistema">System</string>
+    <string name="seccion_color_primario">PRIMARY COLOR</string>
+    <string name="seccion_color_acento">ACCENT COLOR</string>
+    <string name="color_negro">Black</string>
+    <string name="color_rojo">Red</string>
+    <string name="color_azul">Blue</string>
+    <string name="color_verde">Green</string>
+    <string name="color_morado">Purple</string>
+    <string name="color_teal">Teal</string>
+    <string name="color_naranja">Orange</string>
+    <string name="color_rosa">Pink</string>
+    <string name="seccion_notificaciones">NOTIFICATIONS</string>
+    <string name="notif_evento">Reminder on the event day</string>
+    <string name="notif_cierre">Alert when a tab is closed</string>
+    <string name="notif_pagos">Remind me about pending payments</string>
+
+    <!-- Notifications -->
+    <string name="notif_canal_nombre">Reminders</string>
+    <string name="notif_canal_desc">Event and payment reminders</string>
+    <string name="notif_evento_hoy_titulo">Today: %1$s</string>
+    <string name="notif_evento_hoy_texto">The event is today.</string>
+    <string name="notif_cierre_titulo">Tab closed: %1$s</string>
+    <string name="notif_cierre_texto">Check the report to settle up.</string>
+    <string name="notif_pagos_titulo">Pending payments: %1$s</string>
+    <string name="notif_pagos_texto">Someone has not settled their share yet.</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_avatar">Avatar</string>
+    <string name="cd_agregar">Add</string>
+    <string name="cd_eliminar_asistente">Remove attendee</string>
+</resources>

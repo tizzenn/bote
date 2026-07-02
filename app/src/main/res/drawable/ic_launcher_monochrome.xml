@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Silueta de la bolsa; el hueco del nudo dibuja la forma en monocromo -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M45,24q9,-5 18,0l-3.5,11q-5.5,-2.5 -11,0z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,45c-14,0 -23,11 -23,24c0,11 10,19 23,19s23,-8 23,-19c0,-13 -9,-24 -23,-24z"/>
+</vector>

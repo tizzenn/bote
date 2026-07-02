@@ -1,0 +1,159 @@
+<resources>
+    <string name="app_name">Bote</string>
+
+    <!-- Lista principal -->
+    <string name="titulo_lista">Mis eventos</string>
+    <string name="sin_eventos">Aún no hay eventos.\nPulsa + para crear el primero.</string>
+    <string name="filtro_activos">Activos</string>
+    <string name="filtro_saldados">Saldados</string>
+    <string name="filtro_todos">Todos</string>
+    <string name="accion_ajustes">Ajustes</string>
+    <string name="accion_importar">Importar evento</string>
+    <string name="nuevo_evento">Nuevo evento</string>
+    <string name="num_asistentes">%1$d asistentes</string>
+    <string name="pendiente_liquidar">Pendiente de liquidar</string>
+    <string name="evento_saldado">Saldado</string>
+    <string name="total_fmt">Total: %1$s</string>
+
+    <!-- Formulario de evento -->
+    <string name="titulo_nuevo_evento">Nuevo evento</string>
+    <string name="titulo_editar_evento">Editar evento</string>
+    <string name="campo_titulo">Título (opcional)</string>
+    <string name="campo_descripcion">Descripción (opcional)</string>
+    <string name="campo_fecha">Fecha</string>
+    <string name="campo_ubicacion">Ubicación (opcional)</string>
+    <string name="cd_foto_evento">Foto del evento</string>
+    <string name="cambiar_foto">Foto</string>
+    <string name="seccion_modo">MODO</string>
+    <string name="modo_restringido">Restringido</string>
+    <string name="modo_colaborativo">Colaborativo</string>
+    <string name="modo_restringido_desc">Solo el administrador puede modificar el evento y añadir apuntes.</string>
+    <string name="modo_colaborativo_desc">Todos pueden modificar el evento y añadir apuntes.</string>
+    <string name="seccion_asistentes">ASISTENTES</string>
+    <string name="anadir_manual">Añadir a mano</string>
+    <string name="anadir_contacto">Desde contactos</string>
+    <string name="campo_nombre">Nombre</string>
+    <string name="campo_telefono">Teléfono (opcional)</string>
+    <string name="campo_email">Email (opcional)</string>
+    <string name="asistente_yo">Yo</string>
+    <string name="asistente_admin">Admin</string>
+    <string name="asistente_sin_nombre">Sin nombre</string>
+    <string name="error_fecha">Elige una fecha</string>
+    <string name="error_sin_asistentes">Añade al menos un asistente</string>
+    <string name="dialog_gastos_titulo">Gastos ya apuntados</string>
+    <string name="dialog_gastos_msg">Este evento ya tiene apuntes. ¿%1$s asume los gastos desde el principio?</string>
+    <string name="gastos_solidario">Desde el principio</string>
+    <string name="gastos_limpio">Solo desde ahora</string>
+    <string name="error_asistente_pagador">No se puede quitar: este asistente paga algún apunte.</string>
+    <string name="confirmar_eliminar_evento">¿Eliminar este evento y todos sus apuntes?</string>
+    <string name="accion_guardar">Guardar</string>
+    <string name="accion_cancelar">Cancelar</string>
+    <string name="accion_eliminar">Eliminar</string>
+    <string name="accion_editar">Editar</string>
+    <string name="permiso_contactos">Hace falta el permiso de contactos para elegir un asistente.</string>
+
+    <!-- Detalle de evento -->
+    <string name="seccion_apuntes">APUNTES</string>
+    <string name="sin_apuntes">Aún no hay apuntes.</string>
+    <string name="nuevo_apunte">Nuevo apunte</string>
+    <string name="anadir_calendario">Calendario</string>
+    <string name="ver_informe">Informe</string>
+    <string name="cerrar_cuenta">Cerrar la cuenta</string>
+    <string name="evento_cerrado">Cuenta cerrada</string>
+    <string name="reabrir_cuenta">Reabrir la cuenta</string>
+    <string name="confirmar_cerrar_cuenta">¿Poner el candado y generar el informe definitivo? Ya no se podrán añadir apuntes.</string>
+    <string name="error_cerrar_apuntes_abiertos">Para cerrar la cuenta, todos los apuntes deben tener su importe pagado.</string>
+    <string name="solo_admin">Solo el administrador puede hacerlo (modo restringido).</string>
+    <string name="compartir_evento">Compartir / sincronizar</string>
+    <string name="paga_fmt">Paga %1$s</string>
+    <string name="presupuestado_fmt">Presupuestado: %1$s</string>
+    <string name="gastado_fmt">Gastado: %1$s</string>
+    <string name="pagado_fmt">Pagado: %1$s</string>
+    <string name="apunte_abierto">Abierto</string>
+    <string name="apunte_cerrado">Cerrado</string>
+
+    <!-- Formulario de apunte -->
+    <string name="titulo_nuevo_apunte">Nuevo apunte</string>
+    <string name="titulo_editar_apunte">Editar apunte</string>
+    <string name="campo_concepto">Concepto</string>
+    <string name="campo_pagador">Quién paga</string>
+    <string name="campo_presupuestado">Presupuestado (opcional)</string>
+    <string name="campo_gastado">Gastado</string>
+    <string name="campo_pagado">Pagado (necesario para cerrar el apunte)</string>
+    <string name="seccion_categoria">CATEGORÍA</string>
+    <string name="cat_restaurante">Restaurante</string>
+    <string name="cat_copas">Copas</string>
+    <string name="cat_regalo">Regalo</string>
+    <string name="cat_super">Supermercado</string>
+    <string name="cat_alojamiento">Alojamiento</string>
+    <string name="cat_combustible">Combustible</string>
+    <string name="cat_sustancias">Sustancias</string>
+    <string name="cat_cash">Efectivo</string>
+    <string name="cat_otros">Otros</string>
+    <string name="seccion_reparto">REPARTO</string>
+    <string name="reparto_igual">A partes iguales</string>
+    <string name="reparto_porcentual">Porcentajes</string>
+    <string name="error_gastado">Indica el importe gastado</string>
+    <string name="error_participantes">Marca al menos un participante</string>
+    <string name="cd_fijar">Fijar porcentaje</string>
+    <string name="pct_fmt">%1$d%%</string>
+
+    <!-- Informe -->
+    <string name="titulo_informe">Informe</string>
+    <string name="informe_definitivo">Informe definitivo</string>
+    <string name="informe_parcial">Informe provisional</string>
+    <string name="pago_total_fmt">Pagó: %1$s</string>
+    <string name="corresponde_fmt">Le corresponde: %1$s</string>
+    <string name="saldo_favor_fmt">Recupera %1$s</string>
+    <string name="saldo_contra_fmt">Debe %1$s</string>
+    <string name="saldo_cero">En paz</string>
+    <string name="seccion_transferencias">QUIÉN PAGA A QUIÉN</string>
+    <string name="transferencia_fmt">%1$s paga %2$s a %3$s</string>
+    <string name="sin_transferencias">Todo cuadrado, nada pendiente.</string>
+    <string name="marcar_liquidado">Ha liquidado</string>
+    <string name="compartir_informe">Compartir informe</string>
+    <string name="total_evento_fmt">Total del evento: %1$s</string>
+
+    <!-- Importar / sincronizar -->
+    <string name="importar_ok">Evento importado.</string>
+    <string name="importar_error">No se pudo importar ese archivo.</string>
+    <string name="importar_quien">¿Quién eres tú en este evento?</string>
+    <string name="sync_asunto">Evento de Bote: %1$s</string>
+    <string name="sync_explicacion">Comparte el archivo del evento con los demás asistentes; al importarlo en su Bote todos quedan sincronizados.</string>
+
+    <!-- Ajustes -->
+    <string name="ajustes_titulo">Ajustes</string>
+    <string name="seccion_tema">TEMA</string>
+    <string name="tema_blanco">Blanco</string>
+    <string name="tema_negro">Negro</string>
+    <string name="tema_sistema">Sistema</string>
+    <string name="seccion_color_primario">COLOR PRINCIPAL</string>
+    <string name="seccion_color_acento">COLOR DE ACENTO</string>
+    <string name="color_negro">Negro</string>
+    <string name="color_rojo">Rojo</string>
+    <string name="color_azul">Azul</string>
+    <string name="color_verde">Verde</string>
+    <string name="color_morado">Morado</string>
+    <string name="color_teal">Teal</string>
+    <string name="color_naranja">Naranja</string>
+    <string name="color_rosa">Rosa</string>
+    <string name="seccion_notificaciones">NOTIFICACIONES</string>
+    <string name="notif_evento">Recordatorio el día del evento</string>
+    <string name="notif_cierre">Aviso al cerrar una cuenta</string>
+    <string name="notif_pagos">Recordar pagos pendientes</string>
+
+    <!-- Notificaciones -->
+    <string name="notif_canal_nombre">Recordatorios</string>
+    <string name="notif_canal_desc">Recordatorios de eventos y pagos</string>
+    <string name="notif_evento_hoy_titulo">Hoy: %1$s</string>
+    <string name="notif_evento_hoy_texto">El evento es hoy.</string>
+    <string name="notif_cierre_titulo">Cuenta cerrada: %1$s</string>
+    <string name="notif_cierre_texto">Consulta el informe para liquidar.</string>
+    <string name="notif_pagos_titulo">Pagos pendientes: %1$s</string>
+    <string name="notif_pagos_texto">Aún hay gente sin liquidar su parte.</string>
+
+    <!-- Descripciones de accesibilidad -->
+    <string name="cd_avatar">Avatar</string>
+    <string name="cd_agregar">Añadir</string>
+    <string name="cd_eliminar_asistente">Quitar asistente</string>
+</resources>
