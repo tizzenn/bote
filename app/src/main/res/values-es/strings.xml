@@ -93,6 +93,8 @@
     <string name="foto_recibo">Tique</string>
     <string name="quitar_foto">Quitar foto</string>
     <string name="cd_foto_recibo">Foto del tique</string>
+    <string name="accion_compartir">Compartir</string>
+    <string name="compartir_recibo_asunto">Tique: %1$s</string>
     <string name="seccion_reparto">REPARTO</string>
     <string name="reparto_igual">A partes iguales</string>
     <string name="reparto_porcentual">Porcentajes</string>
@@ -117,7 +119,7 @@
     <string name="compartir_informe">Compartir informe</string>
     <string name="total_evento_fmt">Total del evento: %1$s</string>
     <string name="seccion_por_categoria">POR CATEGORÍA</string>
-    <string name="pedir_pago">Pedir el pago</string>
+    <string name="pedir_pago">Plata o plomo</string>
 
     <!-- Importar / sincronizar -->
     <string name="compartir_archivo">Archivo</string>
@@ -148,11 +150,11 @@
     <string name="color_teal">Teal</string>
     <string name="color_naranja">Naranja</string>
     <string name="color_rosa">Rosa</string>
-    <string name="seccion_cobros">MENSAJES DE COBRO</string>
-    <string name="ajuste_cobro">Mensajes de cobro</string>
+    <string name="seccion_cobros">EXTORSIÓN</string>
+    <string name="ajuste_cobro">Modo extorsión («plata o plomo»)</string>
     <string name="ajuste_cobro_plantilla">Plantilla del mensaje</string>
     <string name="cobro_ayuda">Puedes usar {nombre}, {importe} y {evento}.</string>
-    <string name="cobro_plantilla_defecto">Hola {nombre}: tu parte pendiente de {evento} es {importe}.</string>
+    <string name="cobro_plantilla_defecto">Plata o plomo, {nombre}: me debes {importe} de {evento}. Tú decides.</string>
     <string name="seccion_notificaciones">NOTIFICACIONES</string>
     <string name="notif_evento">Recordatorio el día del evento</string>
     <string name="notif_cierre">Aviso al cerrar una cuenta</string>
@@ -167,6 +169,23 @@
     <string name="notif_cierre_texto">Consulta el informe para liquidar.</string>
     <string name="notif_pagos_titulo">Pagos pendientes: %1$s</string>
     <string name="notif_pagos_texto">Aún hay gente sin liquidar su parte.</string>
+
+    <!-- Registro de actividad -->
+    <string name="registro_titulo">Registro</string>
+    <string name="sin_registro">Aún no hay actividad.</string>
+    <string name="reg_evento_creado">Evento creado</string>
+    <string name="reg_evento_editado">Se editó la ficha del evento</string>
+    <string name="reg_asistente_nuevo">Se une %1$s</string>
+    <string name="reg_asistente_solidario">%1$s asume los gastos desde el principio</string>
+    <string name="reg_asistente_quitado">Se quita a %1$s</string>
+    <string name="reg_apunte_nuevo">Nuevo apunte: %1$s (%2$s)</string>
+    <string name="reg_apunte_editado">Apunte editado: %1$s (%2$s)</string>
+    <string name="reg_apunte_borrado">Apunte borrado: %1$s</string>
+    <string name="reg_pago_marcado">%1$s liquida su parte</string>
+    <string name="reg_pago_desmarcado">%1$s vuelve a estar pendiente</string>
+    <string name="reg_cuenta_cerrada">Cuenta cerrada (candado)</string>
+    <string name="reg_cuenta_reabierta">Cuenta reabierta</string>
+    <string name="reg_importado">Sincronizado desde otro dispositivo</string>
 
     <!-- Descripciones de accesibilidad -->
     <string name="cd_avatar">Avatar</string>

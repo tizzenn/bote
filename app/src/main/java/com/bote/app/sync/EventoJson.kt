@@ -7,6 +7,7 @@ import com.bote.app.data.BoteDao
 import com.bote.app.data.Evento
 import com.bote.app.data.EventoCompleto
 import com.bote.app.data.Modo
+import com.bote.app.data.Registro
 import com.bote.app.data.Reparto
 import org.json.JSONArray
 import org.json.JSONObject
@@ -23,7 +24,11 @@ object EventoJson {
 
     private const val FORMATO = 2
 
-    fun exportar(datos: EventoCompleto, borrados: List<ApunteBorrado>): String {
+    fun exportar(
+        datos: EventoCompleto,
+        borrados: List<ApunteBorrado>,
+        registro: List<Registro> = emptyList()
+    ): String {
         val evento = datos.evento
         val raiz = JSONObject()
         raiz.put("formato", FORMATO)
@@ -91,6 +96,17 @@ object EventoJson {
         }
         raiz.put("borrados", jBorrados)
 
+        val jRegistro = JSONArray()
+        for (r in registro) {
+            val j = JSONObject()
+            j.put("uuid", r.uuid)
+            j.put("tipo", r.tipo)
+            j.put("texto", r.texto)
+            j.put("millis", r.millis)
+            jRegistro.put(j)
+        }
+        raiz.put("registro", jRegistro)
+
         return raiz.toString()
     }
 
@@ -149,6 +165,7 @@ object EventoJson {
             if (borrados.containsKey(j.getString("uuid"))) continue
             insertarApunteDeJson(dao, j, eventoId, idPorUuid)
         }
+        unirRegistro(dao, raiz, eventoId, emptySet())
         return eventoId
     }
 
@@ -242,7 +259,34 @@ object EventoJson {
                 dao.guardarRepartos(existente.apunte.id, repartosDeJson(j, existente.apunte.id, idPorUuid))
             }
         }
+
+        val uuidsRegistro = dao.registroDeEvento(eventoId).map { it.uuid }.toSet()
+        unirRegistro(dao, raiz, eventoId, uuidsRegistro)
         return eventoId
+    }
+
+    /** Une el registro de actividad de ambos dispositivos sin duplicar entradas. */
+    private suspend fun unirRegistro(
+        dao: BoteDao,
+        raiz: JSONObject,
+        eventoId: Long,
+        existentes: Set<String>
+    ) {
+        val jRegistro = raiz.optJSONArray("registro") ?: return
+        for (i in 0 until jRegistro.length()) {
+            val j = jRegistro.getJSONObject(i)
+            val uuid = j.getString("uuid")
+            if (existentes.contains(uuid)) continue
+            dao.insertarRegistro(
+                Registro(
+                    eventoId = eventoId,
+                    uuid = uuid,
+                    tipo = j.optString("tipo"),
+                    texto = j.optString("texto"),
+                    millis = j.optLong("millis", System.currentTimeMillis())
+                )
+            )
+        }
     }
 
     // ── Piezas comunes ────────────────────────────────────────────

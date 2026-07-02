@@ -17,6 +17,8 @@ import com.bote.app.data.AppDatabase
 import com.bote.app.data.CategoriaApunte
 import com.bote.app.data.Dinero
 import com.bote.app.data.EventoCompleto
+import com.bote.app.data.Registro
+import com.bote.app.data.TipoRegistro
 import com.bote.app.databinding.ActivityEventoDetalleBinding
 import com.bote.app.databinding.ItemApunteBinding
 import com.bote.app.databinding.ItemAsistenteMiniBinding
@@ -269,6 +271,13 @@ class EventoDetalleActivity : BaseActivity() {
                         modificadoMillis = System.currentTimeMillis()
                     )
                 )
+                dao.insertarRegistro(
+                    Registro(
+                        eventoId = eventoId,
+                        tipo = TipoRegistro.CANDADO,
+                        texto = getString(R.string.reg_cuenta_reabierta)
+                    )
+                )
                 dao.evento(eventoId)?.let {
                     NotificationScheduler.reprogramar(this@EventoDetalleActivity, it, false)
                 }
@@ -285,6 +294,13 @@ class EventoDetalleActivity : BaseActivity() {
                 completo.evento.copy(
                     cerrado = true,
                     modificadoMillis = System.currentTimeMillis()
+                )
+            )
+            dao.insertarRegistro(
+                Registro(
+                    eventoId = eventoId,
+                    tipo = TipoRegistro.CANDADO,
+                    texto = getString(R.string.reg_cuenta_cerrada)
                 )
             )
             val cerrado = dao.evento(eventoId) ?: return@launch
@@ -329,12 +345,13 @@ class EventoDetalleActivity : BaseActivity() {
         lifecycleScope.launch {
             val dao = AppDatabase.get(this@EventoDetalleActivity).dao()
             val borrados = dao.borradosDeEvento(eventoId)
+            val registro = dao.registroDeEvento(eventoId)
             val uri = withContext(Dispatchers.IO) {
                 val directorio = File(cacheDir, "compartir").apply { mkdirs() }
                 val nombre = completo.evento.titulo.ifBlank { "evento" }
                     .replace(Regex("[^A-Za-z0-9_-]"), "_")
                 val archivo = File(directorio, "bote-$nombre.json")
-                archivo.writeText(EventoJson.exportar(completo, borrados))
+                archivo.writeText(EventoJson.exportar(completo, borrados, registro))
                 FileProvider.getUriForFile(
                     this@EventoDetalleActivity,
                     "$packageName.fileprovider",
@@ -405,6 +422,13 @@ class EventoDetalleActivity : BaseActivity() {
             startActivity(
                 Intent(this, AddEditEventoActivity::class.java)
                     .putExtra(AddEditEventoActivity.EXTRA_EVENTO_ID, eventoId)
+            )
+            true
+        }
+        R.id.accionRegistro -> {
+            startActivity(
+                Intent(this, RegistroActivity::class.java)
+                    .putExtra(RegistroActivity.EXTRA_EVENTO_ID, eventoId)
             )
             true
         }

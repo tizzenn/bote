@@ -20,7 +20,9 @@ import com.bote.app.data.Calculadora
 import com.bote.app.data.Evento
 import com.bote.app.data.EventoCompleto
 import com.bote.app.data.Modo
+import com.bote.app.data.Registro
 import com.bote.app.data.Reparto
+import com.bote.app.data.TipoRegistro
 import com.bote.app.databinding.ActivityAddEditEventoBinding
 import com.bote.app.databinding.DialogAsistenteBinding
 import com.bote.app.databinding.ItemAsistenteEditBinding
@@ -369,7 +371,34 @@ class AddEditEventoActivity : BaseActivity() {
                 for (asistente in eliminados) {
                     dao.eliminarRepartosDeAsistente(asistente.id)
                     dao.eliminarAsistente(asistente)
+                    dao.insertarRegistro(
+                        Registro(
+                            eventoId = guardadoId,
+                            tipo = TipoRegistro.ASISTENTE_FUERA,
+                            texto = getString(
+                                R.string.reg_asistente_quitado,
+                                asistente.nombre.ifBlank { getString(R.string.asistente_sin_nombre) }
+                            )
+                        )
+                    )
                 }
+                dao.insertarRegistro(
+                    Registro(
+                        eventoId = guardadoId,
+                        tipo = TipoRegistro.EVENTO,
+                        texto = getString(R.string.reg_evento_editado)
+                    )
+                )
+            }
+
+            if (eventoId == 0L) {
+                dao.insertarRegistro(
+                    Registro(
+                        eventoId = guardadoId,
+                        tipo = TipoRegistro.EVENTO,
+                        texto = getString(R.string.reg_evento_creado)
+                    )
+                )
             }
 
             var miAsistenteId = datos?.evento?.miAsistenteId ?: 0L
@@ -378,7 +407,26 @@ class AddEditEventoActivity : BaseActivity() {
                 if (asistente.id == 0L) {
                     val id = dao.insertarAsistente(asistente.copy(eventoId = guardadoId))
                     if (asistente.esCreador) miAsistenteId = id
-                    if (solidarios.contains(asistente.uuid)) idsSolidarios.add(id)
+                    val nombre = asistente.nombre.ifBlank {
+                        getString(R.string.asistente_sin_nombre)
+                    }
+                    dao.insertarRegistro(
+                        Registro(
+                            eventoId = guardadoId,
+                            tipo = TipoRegistro.ASISTENTE,
+                            texto = getString(R.string.reg_asistente_nuevo, nombre)
+                        )
+                    )
+                    if (solidarios.contains(asistente.uuid)) {
+                        idsSolidarios.add(id)
+                        dao.insertarRegistro(
+                            Registro(
+                                eventoId = guardadoId,
+                                tipo = TipoRegistro.ASISTENTE,
+                                texto = getString(R.string.reg_asistente_solidario, nombre)
+                            )
+                        )
+                    }
                 } else {
                     dao.actualizarAsistente(asistente)
                 }

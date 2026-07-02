@@ -50,6 +50,11 @@
             android:parentActivityName=".ui.EventoDetalleActivity" />
 
         <activity
+            android:name=".ui.RegistroActivity"
+            android:exported="false"
+            android:parentActivityName=".ui.EventoDetalleActivity" />
+
+        <activity
             android:name=".ui.SettingsActivity"
             android:exported="false"
             android:parentActivityName=".ui.MainActivity" />

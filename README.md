@@ -39,9 +39,12 @@ y al final genera el informe con las transferencias mínimas para quedar en paz.
 - **Foto del tique** en cada apunte, para poder verificar los importes del
   informe (se guarda en local; no viaja en la sincronización).
 - **Desglose por categorías** en el informe, con barras proporcionales.
-- **Mensajes de cobro** (opcional, desactivado por defecto): botón en el
-  informe que redacta el mensaje a cada deudor a partir de una plantilla
-  editable con {nombre}, {importe} y {evento}.
+- **Modo extorsión** (opcional, desactivado por defecto): botón «plata o
+  plomo» en el informe que redacta el mensaje de cobro a cada deudor a
+  partir de una plantilla editable con {nombre}, {importe} y {evento}.
+- **Registro de actividad** por evento: quién se une, qué se apunta, qué
+  pagos se marcan, cierres de cuenta y sincronizaciones. Viaja con el
+  evento al exportarlo y se une sin duplicados entre dispositivos.
 - **Ajustes**: tema blanco/negro/sistema, color principal y de acento
   elegibles (negro y rojo por defecto) y opciones de notificaciones
   (día del evento, cierre de cuenta y recordatorio de pagos pendientes).

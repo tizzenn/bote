@@ -16,6 +16,8 @@ import com.bote.app.BaseActivity
 import com.bote.app.R
 import com.bote.app.data.AppDatabase
 import com.bote.app.data.EventoCompleto
+import com.bote.app.data.Registro
+import com.bote.app.data.TipoRegistro
 import com.bote.app.databinding.ActivityMainBinding
 import com.bote.app.sync.EventoJson
 import com.bote.app.sync.SyncCodec
@@ -145,6 +147,13 @@ class MainActivity : BaseActivity() {
                 val json = SyncCodec.decodificar(texto)
                 val dao = AppDatabase.get(this@MainActivity).dao()
                 val eventoId = EventoJson.importar(dao, json)
+                dao.insertarRegistro(
+                    Registro(
+                        eventoId = eventoId,
+                        tipo = TipoRegistro.SYNC,
+                        texto = getString(R.string.reg_importado)
+                    )
+                )
                 Toast.makeText(this@MainActivity, R.string.importar_ok, Toast.LENGTH_SHORT).show()
                 startActivity(
                     Intent(this@MainActivity, EventoDetalleActivity::class.java)

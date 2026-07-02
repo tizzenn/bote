@@ -86,6 +86,14 @@ interface BoteDao {
     @Query("SELECT * FROM apuntes_borrados WHERE eventoId = :eventoId")
     suspend fun borradosDeEvento(eventoId: Long): List<ApunteBorrado>
 
+    // ── Registro de actividad ─────────────────────────────────────
+
+    @Insert
+    suspend fun insertarRegistro(registro: Registro)
+
+    @Query("SELECT * FROM registro WHERE eventoId = :eventoId ORDER BY millis DESC")
+    suspend fun registroDeEvento(eventoId: Long): List<Registro>
+
     /** Reemplaza el reparto completo de un apunte. */
     @Transaction
     suspend fun guardarRepartos(apunteId: Long, repartos: List<Reparto>) {

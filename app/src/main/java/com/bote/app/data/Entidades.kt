@@ -143,6 +143,42 @@ data class ApunteBorrado(
     val borradoMillis: Long = System.currentTimeMillis()
 )
 
+/** Tipos de entrada del registro de actividad de un evento. */
+object TipoRegistro {
+    const val EVENTO = "evento"
+    const val ASISTENTE = "asistente"
+    const val ASISTENTE_FUERA = "asistente_fuera"
+    const val APUNTE = "apunte"
+    const val APUNTE_BORRADO = "apunte_borrado"
+    const val PAGO = "pago"
+    const val CANDADO = "candado"
+    const val SYNC = "sync"
+}
+
+/**
+ * Entrada del registro de actividad: quién se une, qué se apunta, qué se
+ * paga… El UUID permite unir los registros de varios dispositivos al
+ * sincronizar sin duplicar entradas.
+ */
+@Entity(
+    tableName = "registro",
+    foreignKeys = [ForeignKey(
+        entity = Evento::class,
+        parentColumns = ["id"],
+        childColumns = ["eventoId"],
+        onDelete = ForeignKey.CASCADE
+    )],
+    indices = [Index("eventoId")]
+)
+data class Registro(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val eventoId: Long = 0,
+    val uuid: String = UUID.randomUUID().toString(),
+    val tipo: String = "",
+    val texto: String = "",
+    val millis: Long = System.currentTimeMillis()
+)
+
 data class ApunteConRepartos(
     @Embedded val apunte: Apunte,
     @Relation(parentColumn = "id", entityColumn = "apunteId")

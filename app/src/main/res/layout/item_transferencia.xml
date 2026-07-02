@@ -22,7 +22,7 @@
         android:layout_height="40dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/pedir_pago"
-        app:srcCompat="@drawable/ic_compartir"
+        app:srcCompat="@drawable/ic_extorsion"
         app:tint="?attr/colorAccent"
         android:visibility="gone" />
 </LinearLayout>

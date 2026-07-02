@@ -15,6 +15,8 @@ import com.bote.app.data.Calculadora
 import com.bote.app.data.CategoriaApunte
 import com.bote.app.data.Dinero
 import com.bote.app.data.EventoCompleto
+import com.bote.app.data.Registro
+import com.bote.app.data.TipoRegistro
 import com.bote.app.databinding.ActivityInformeBinding
 import com.bote.app.databinding.ItemCategoriaBarraBinding
 import com.bote.app.databinding.ItemSaldoBinding
@@ -208,6 +210,17 @@ class InformeActivity : BaseActivity() {
                 asistente.copy(
                     liquidado = marcado,
                     liquidadoMillis = if (marcado) System.currentTimeMillis() else 0
+                )
+            )
+            dao.insertarRegistro(
+                Registro(
+                    eventoId = eventoId,
+                    tipo = TipoRegistro.PAGO,
+                    texto = getString(
+                        if (marcado) R.string.reg_pago_marcado
+                        else R.string.reg_pago_desmarcado,
+                        nombreDe(asistente)
+                    )
                 )
             )
             val actualizado = dao.eventoCompleto(eventoId) ?: return@launch

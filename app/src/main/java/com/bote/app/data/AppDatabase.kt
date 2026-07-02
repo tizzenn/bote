@@ -8,8 +8,11 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [Evento::class, Asistente::class, Apunte::class, Reparto::class, ApunteBorrado::class],
-    version = 2,
+    entities = [
+        Evento::class, Asistente::class, Apunte::class, Reparto::class,
+        ApunteBorrado::class, Registro::class
+    ],
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -47,13 +50,32 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** v1.1 → v1.2: registro de actividad del evento. */
+        private val MIGRACION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `registro` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`eventoId` INTEGER NOT NULL, `uuid` TEXT NOT NULL, " +
+                        "`tipo` TEXT NOT NULL, `texto` TEXT NOT NULL, " +
+                        "`millis` INTEGER NOT NULL, " +
+                        "FOREIGN KEY(`eventoId`) REFERENCES `eventos`(`id`) " +
+                        "ON UPDATE NO ACTION ON DELETE CASCADE)"
+                )
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_registro_eventoId` " +
+                        "ON `registro` (`eventoId`)"
+                )
+            }
+        }
+
         fun get(context: Context): AppDatabase =
             instancia ?: synchronized(this) {
                 instancia ?: Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "bote.db"
-                ).addMigrations(MIGRACION_1_2).build().also { instancia = it }
+                ).addMigrations(MIGRACION_1_2, MIGRACION_2_3).build().also { instancia = it }
             }
     }
 }

@@ -10,6 +10,13 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/accionRegistro"
+        android:icon="@drawable/ic_historial"
+        android:title="@string/registro_titulo"
+        app:iconTint="@android:color/white"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/accionEliminar"
         android:title="@string/accion_eliminar"
         app:showAsAction="never" />

@@ -1,5 +1,6 @@
 package com.bote.app.ui
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
@@ -10,6 +11,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.bote.app.BaseActivity
 import com.bote.app.R
@@ -22,12 +24,17 @@ import com.bote.app.data.Calculadora
 import com.bote.app.data.CategoriaApunte
 import com.bote.app.data.Dinero
 import com.bote.app.data.EventoCompleto
+import com.bote.app.data.Registro
 import com.bote.app.data.Reparto
+import com.bote.app.data.TipoRegistro
 import com.bote.app.databinding.ActivityApunteBinding
 import com.bote.app.databinding.ItemRepartoBinding
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.UUID
 import kotlin.math.roundToInt
 
@@ -114,6 +121,7 @@ class ApunteActivity : BaseActivity() {
             fotoRecibo = ""
             mostrarRecibo()
         }
+        binding.btnCompartirFoto.setOnClickListener { compartirRecibo() }
         binding.fotoRecibo.setOnClickListener { verReciboGrande() }
 
         pintarCategorias()
@@ -124,6 +132,32 @@ class ApunteActivity : BaseActivity() {
         val hay = FotoUtil.cargar(binding.fotoRecibo, fotoRecibo)
         binding.fotoRecibo.visibility = if (hay) View.VISIBLE else View.GONE
         binding.btnQuitarFoto.visibility = if (hay) View.VISIBLE else View.GONE
+        binding.btnCompartirFoto.visibility = if (hay) View.VISIBLE else View.GONE
+    }
+
+    /** Envía la foto del tique por la app que elija el usuario. */
+    private fun compartirRecibo() {
+        if (fotoRecibo.isBlank()) return
+        lifecycleScope.launch {
+            val uri = withContext(Dispatchers.IO) {
+                val directorio = File(cacheDir, "compartir").apply { mkdirs() }
+                val destino = File(directorio, "tique.jpg")
+                File(fotoRecibo).copyTo(destino, overwrite = true)
+                FileProvider.getUriForFile(
+                    this@ApunteActivity, "$packageName.fileprovider", destino
+                )
+            }
+            val concepto = binding.campoConcepto.text?.toString().orEmpty()
+                .ifBlank { getString(categoria.nombreRes) }
+            val asunto = getString(R.string.compartir_recibo_asunto, concepto)
+            val intento = Intent(Intent.ACTION_SEND).apply {
+                type = "image/jpeg"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(Intent.EXTRA_SUBJECT, asunto)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            startActivity(Intent.createChooser(intento, asunto))
+        }
     }
 
     private fun verReciboGrande() {
@@ -396,6 +430,18 @@ class ApunteActivity : BaseActivity() {
                     Reparto(id, fila.asistente.id, puntos[i])
                 }
             )
+            val nombreApunte = concepto.ifBlank { getString(categoria.nombreRes) }
+            dao.insertarRegistro(
+                Registro(
+                    eventoId = eventoId,
+                    tipo = TipoRegistro.APUNTE,
+                    texto = getString(
+                        if (apunteId == 0L) R.string.reg_apunte_nuevo
+                        else R.string.reg_apunte_editado,
+                        nombreApunte, Dinero.formatear(gastado)
+                    )
+                )
+            )
             finish()
         }
     }
@@ -418,6 +464,16 @@ class ApunteActivity : BaseActivity() {
                         // Lápida: que la fusión al sincronizar no lo resucite
                         dao.insertarBorrado(ApunteBorrado(eventoId, apunteUuid))
                         dao.eliminarApunte(apunteId)
+                        val nombreApunte = original?.apunte?.concepto
+                            ?.ifBlank { getString(categoria.nombreRes) }
+                            ?: getString(categoria.nombreRes)
+                        dao.insertarRegistro(
+                            Registro(
+                                eventoId = eventoId,
+                                tipo = TipoRegistro.APUNTE_BORRADO,
+                                texto = getString(R.string.reg_apunte_borrado, nombreApunte)
+                            )
+                        )
                         finish()
                     }
                 }

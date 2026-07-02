@@ -131,11 +131,21 @@
                     app:icon="@drawable/ic_foto" />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCompartirFoto"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="@string/accion_compartir"
+                    app:icon="@drawable/ic_compartir"
+                    android:visibility="gone" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnQuitarFoto"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
+                    android:layout_marginStart="4dp"
                     android:text="@string/quitar_foto"
                     android:visibility="gone" />
             </LinearLayout>

@@ -93,6 +93,8 @@
     <string name="foto_recibo">Receipt</string>
     <string name="quitar_foto">Remove photo</string>
     <string name="cd_foto_recibo">Receipt photo</string>
+    <string name="accion_compartir">Share</string>
+    <string name="compartir_recibo_asunto">Receipt: %1$s</string>
     <string name="seccion_reparto">SPLIT</string>
     <string name="reparto_igual">Equal parts</string>
     <string name="reparto_porcentual">Percentages</string>
@@ -117,7 +119,7 @@
     <string name="compartir_informe">Share report</string>
     <string name="total_evento_fmt">Event total: %1$s</string>
     <string name="seccion_por_categoria">BY CATEGORY</string>
-    <string name="pedir_pago">Request payment</string>
+    <string name="pedir_pago">Silver or lead</string>
 
     <!-- Import / sync -->
     <string name="compartir_archivo">File</string>
@@ -148,11 +150,11 @@
     <string name="color_teal">Teal</string>
     <string name="color_naranja">Orange</string>
     <string name="color_rosa">Pink</string>
-    <string name="seccion_cobros">PAYMENT REQUESTS</string>
-    <string name="ajuste_cobro">Payment request messages</string>
+    <string name="seccion_cobros">EXTORTION</string>
+    <string name="ajuste_cobro">Extortion mode ("silver or lead")</string>
     <string name="ajuste_cobro_plantilla">Message template</string>
     <string name="cobro_ayuda">You can use {nombre}, {importe} and {evento}.</string>
-    <string name="cobro_plantilla_defecto">Hi {nombre}: your pending share for {evento} is {importe}.</string>
+    <string name="cobro_plantilla_defecto">Silver or lead, {nombre}: you owe me {importe} for {evento}. Your call.</string>
     <string name="seccion_notificaciones">NOTIFICATIONS</string>
     <string name="notif_evento">Reminder on the event day</string>
     <string name="notif_cierre">Alert when a tab is closed</string>
@@ -167,6 +169,23 @@
     <string name="notif_cierre_texto">Check the report to settle up.</string>
     <string name="notif_pagos_titulo">Pending payments: %1$s</string>
     <string name="notif_pagos_texto">Someone has not settled their share yet.</string>
+
+    <!-- Activity log -->
+    <string name="registro_titulo">Activity log</string>
+    <string name="sin_registro">No activity yet.</string>
+    <string name="reg_evento_creado">Event created</string>
+    <string name="reg_evento_editado">Event details edited</string>
+    <string name="reg_asistente_nuevo">%1$s joins</string>
+    <string name="reg_asistente_solidario">%1$s shares costs from the beginning</string>
+    <string name="reg_asistente_quitado">%1$s leaves</string>
+    <string name="reg_apunte_nuevo">New entry: %1$s (%2$s)</string>
+    <string name="reg_apunte_editado">Entry edited: %1$s (%2$s)</string>
+    <string name="reg_apunte_borrado">Entry deleted: %1$s</string>
+    <string name="reg_pago_marcado">%1$s settles their share</string>
+    <string name="reg_pago_desmarcado">%1$s is pending again</string>
+    <string name="reg_cuenta_cerrada">Tab closed (locked)</string>
+    <string name="reg_cuenta_reabierta">Tab reopened</string>
+    <string name="reg_importado">Synced from another device</string>
 
     <!-- Content descriptions -->
     <string name="cd_avatar">Avatar</string>
