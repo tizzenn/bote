@@ -31,6 +31,10 @@ interface BoteDao {
     @Query("SELECT * FROM eventos")
     suspend fun todosEventos(): List<Evento>
 
+    /** Direcciones ya usadas, para sugerirlas al crear eventos nuevos. */
+    @Query("SELECT DISTINCT ubicacion FROM eventos WHERE ubicacion != '' ORDER BY ubicacion")
+    suspend fun ubicaciones(): List<String>
+
     @Insert
     suspend fun insertarEvento(evento: Evento): Long
 

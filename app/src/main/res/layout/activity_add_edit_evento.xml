@@ -106,18 +106,24 @@
                     android:inputType="none" />
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- Ubicación con sugerencias de direcciones ya usadas y botón de mapa -->
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/campoUbicacionLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:hint="@string/campo_ubicacion"
-                app:startIconDrawable="@drawable/ic_lugar">
+                app:startIconDrawable="@drawable/ic_lugar"
+                app:endIconMode="custom"
+                app:endIconDrawable="@drawable/ic_mapa"
+                app:endIconContentDescription="@string/ver_mapa">
 
-                <com.google.android.material.textfield.TextInputEditText
+                <AutoCompleteTextView
                     android:id="@+id/campoUbicacion"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textCapSentences" />
+                    android:inputType="textCapSentences"
+                    android:completionThreshold="1" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Modo restringido / colaborativo -->

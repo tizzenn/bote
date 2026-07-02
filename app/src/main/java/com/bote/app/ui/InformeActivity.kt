@@ -18,6 +18,7 @@ import com.bote.app.data.EventoCompleto
 import com.bote.app.data.Registro
 import com.bote.app.data.TipoRegistro
 import com.bote.app.databinding.ActivityInformeBinding
+import com.bote.app.databinding.ItemBalanceFilaBinding
 import com.bote.app.databinding.ItemCategoriaBarraBinding
 import com.bote.app.databinding.ItemSaldoBinding
 import com.bote.app.databinding.ItemTransferenciaBinding
@@ -121,6 +122,7 @@ class InformeActivity : BaseActivity() {
             binding.listaSaldos.addView(fila.root)
         }
 
+        pintarBalance(completo, saldos)
         pintarCategorias(completo)
 
         binding.listaTransferencias.removeAllViews()
@@ -145,6 +147,65 @@ class InformeActivity : BaseActivity() {
                 }
                 binding.listaTransferencias.addView(fila.root)
             }
+        }
+    }
+
+    /** Tabla estilo balance: pagó / le corresponde / saldo, con fila TOTAL y subtotales. */
+    private fun pintarBalance(completo: EventoCompleto, saldos: List<Calculadora.Saldo>) {
+        binding.tablaBalance.removeAllViews()
+
+        fun fila(nombre: String, pagado: String, corresponde: String, saldo: String, negrita: Boolean) {
+            val fila = ItemBalanceFilaBinding.inflate(layoutInflater, binding.tablaBalance, false)
+            fila.colNombre.text = nombre
+            fila.colPagado.text = pagado
+            fila.colCorresponde.text = corresponde
+            fila.colSaldo.text = saldo
+            if (negrita) {
+                fila.colNombre.setTypeface(null, android.graphics.Typeface.BOLD)
+                fila.colPagado.setTypeface(null, android.graphics.Typeface.BOLD)
+                fila.colCorresponde.setTypeface(null, android.graphics.Typeface.BOLD)
+            }
+            binding.tablaBalance.addView(fila.root)
+        }
+
+        fila(
+            getString(R.string.col_asistente), getString(R.string.col_pagado),
+            getString(R.string.col_corresponde), getString(R.string.col_saldo), true
+        )
+        for (saldo in saldos) {
+            val signo = if (saldo.saldoCents > 0) "+" else ""
+            fila(
+                nombreDe(saldo.asistente),
+                Dinero.formatear(saldo.pagadoCents),
+                Dinero.formatear(saldo.correspondeCents),
+                signo + Dinero.formatear(saldo.saldoCents),
+                false
+            )
+        }
+        fila(
+            getString(R.string.fila_total),
+            Dinero.formatear(saldos.sumOf { it.pagadoCents }),
+            Dinero.formatear(saldos.sumOf { it.correspondeCents }),
+            Dinero.formatear(saldos.sumOf { it.saldoCents }),
+            true
+        )
+
+        // Subtotales del evento
+        binding.subtotales.removeAllViews()
+        val presupuestado = completo.apuntes.sumOf { it.apunte.presupuestadoCents ?: 0L }
+        val gastado = completo.apuntes.sumOf { it.apunte.gastadoCents }
+        val pagadoApuntes = completo.apuntes.sumOf { it.apunte.pagadoCents ?: 0L }
+        val saldado = saldos.filter { it.asistente.liquidado }.sumOf { it.correspondeCents }
+        val pendiente = saldos.filter { !it.asistente.liquidado }.sumOf { it.correspondeCents }
+        val lineas = listOf(
+            getString(R.string.sub_presupuestado, Dinero.formatear(presupuestado)),
+            getString(R.string.sub_gastado, Dinero.formatear(gastado)),
+            getString(R.string.sub_pagado, Dinero.formatear(pagadoApuntes)),
+            getString(R.string.sub_saldado, Dinero.formatear(saldado)),
+            getString(R.string.sub_pendiente, Dinero.formatear(pendiente))
+        )
+        for (linea in lineas) {
+            binding.subtotales.addView(textoTransferencia(linea))
         }
     }
 
@@ -181,6 +242,7 @@ class InformeActivity : BaseActivity() {
             .replace("{nombre}", nombreDe(t.de))
             .replace("{importe}", Dinero.formatear(t.cents))
             .replace("{evento}", completo.evento.titulo.ifBlank { fecha })
+            .replace("{telefono}", t.a.telefono.ifBlank { "…" })
         startActivity(
             Intent.createChooser(
                 Intent(Intent.ACTION_SEND).apply {

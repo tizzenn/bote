@@ -2,11 +2,13 @@ package com.bote.app.ui
 
 import android.Manifest
 import android.app.DatePickerDialog
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -121,6 +123,31 @@ class AddEditEventoActivity : BaseActivity() {
         }
         binding.btnGuardar.setOnClickListener { guardar() }
 
+        // Sugerencias de direcciones ya usadas + abrir en el mapa
+        lifecycleScope.launch {
+            val direcciones = AppDatabase.get(this@AddEditEventoActivity).dao().ubicaciones()
+            if (direcciones.isNotEmpty()) {
+                binding.campoUbicacion.setAdapter(
+                    ArrayAdapter(
+                        this@AddEditEventoActivity,
+                        android.R.layout.simple_list_item_1, direcciones
+                    )
+                )
+            }
+        }
+        binding.campoUbicacionLayout.setEndIconOnClickListener {
+            val direccion = binding.campoUbicacion.text?.toString().orEmpty().trim()
+            if (direccion.isNotBlank()) {
+                val intento = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("geo:0,0?q=${Uri.encode(direccion)}")
+                )
+                if (intento.resolveActivity(packageManager) != null) {
+                    startActivity(intento)
+                }
+            }
+        }
+
         if (eventoId == 0L) {
             binding.toggleModo.check(R.id.btnColaborativo)
             fechaMillis = hoy()
@@ -228,24 +255,41 @@ class AddEditEventoActivity : BaseActivity() {
                     pintarAsistentes()
                 }
             }
+            // Tocar la fila permite editar los datos del asistente
+            fila.root.setOnClickListener { dialogoAsistente(asistente) }
             binding.listaAsistentes.addView(fila.root)
         }
     }
 
-    private fun dialogoAsistente() {
+    /** Alta de asistente o, si se pasa uno existente, edición de sus datos. */
+    private fun dialogoAsistente(existente: Asistente? = null) {
         val vista = DialogAsistenteBinding.inflate(layoutInflater)
+        if (existente != null) {
+            vista.campoNombre.setText(existente.nombre)
+            vista.campoTelefono.setText(existente.telefono)
+            vista.campoEmail.setText(existente.email)
+        }
         MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.anadir_manual)
+            .setTitle(if (existente == null) R.string.anadir_manual else R.string.accion_editar)
             .setView(vista.root)
             .setNegativeButton(R.string.accion_cancelar, null)
             .setPositiveButton(R.string.accion_guardar) { _, _ ->
-                agregarAsistente(
-                    Asistente(
-                        nombre = vista.campoNombre.text?.toString().orEmpty().trim(),
-                        telefono = vista.campoTelefono.text?.toString().orEmpty().trim(),
-                        email = vista.campoEmail.text?.toString().orEmpty().trim()
+                val nombre = vista.campoNombre.text?.toString().orEmpty().trim()
+                val telefono = vista.campoTelefono.text?.toString().orEmpty().trim()
+                val email = vista.campoEmail.text?.toString().orEmpty().trim()
+                if (existente == null) {
+                    agregarAsistente(
+                        Asistente(nombre = nombre, telefono = telefono, email = email)
                     )
-                )
+                } else {
+                    val indice = asistentes.indexOf(existente)
+                    if (indice >= 0) {
+                        asistentes[indice] = existente.copy(
+                            nombre = nombre, telefono = telefono, email = email
+                        )
+                        pintarAsistentes()
+                    }
+                }
             }
             .show()
     }

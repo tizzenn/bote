@@ -7,4 +7,9 @@
     <color name="text_secondary">#ABABAB</color>
     <color name="saldo_negativo">#EF5350</color>
     <color name="saldo_positivo">#66BB6A</color>
+
+    <!-- En tema oscuro el "negro" elegible se aclara para no fundirse
+         con el fondo (#121212): toolbar y botones siguen distinguibles. -->
+    <color name="paleta_negro">#37373D</color>
+    <color name="paleta_negro_oscuro">#232327</color>
 </resources>

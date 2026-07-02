@@ -135,6 +135,18 @@ class EventoDetalleActivity : BaseActivity() {
             )
         )
 
+        // Totales de la ficha: presupuestado, gastado y saldado
+        val presupuestado = completo.apuntes.sumOf { it.apunte.presupuestadoCents ?: 0L }
+        val saldos = com.bote.app.data.Calculadora.saldos(completo)
+        val saldado = saldos.filter { it.asistente.liquidado }.sumOf { it.correspondeCents }
+        binding.totales.text = listOf(
+            getString(R.string.presupuestado_fmt, Dinero.formatear(presupuestado)),
+            getString(R.string.gastado_fmt, Dinero.formatear(
+                completo.apuntes.sumOf { it.apunte.gastadoCents }
+            )),
+            getString(R.string.saldado_fmt, Dinero.formatear(saldado))
+        ).joinToString(" · ")
+
         // Candado: solo el creador cierra o reabre la cuenta
         if (evento.soyCreador) {
             binding.btnCandado.visibility = View.VISIBLE

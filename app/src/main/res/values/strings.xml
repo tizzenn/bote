@@ -69,6 +69,8 @@
     <string name="presupuestado_fmt">Budgeted: %1$s</string>
     <string name="gastado_fmt">Spent: %1$s</string>
     <string name="pagado_fmt">Paid: %1$s</string>
+    <string name="saldado_fmt">Settled: %1$s</string>
+    <string name="ver_mapa">View on map</string>
     <string name="apunte_abierto">Open</string>
     <string name="apunte_cerrado">Closed</string>
 
@@ -120,6 +122,17 @@
     <string name="total_evento_fmt">Event total: %1$s</string>
     <string name="seccion_por_categoria">BY CATEGORY</string>
     <string name="pedir_pago">Silver or lead</string>
+    <string name="seccion_balance">BALANCE</string>
+    <string name="col_asistente">Attendee</string>
+    <string name="col_pagado">Paid</string>
+    <string name="col_corresponde">Share</string>
+    <string name="col_saldo">Balance</string>
+    <string name="fila_total">TOTAL</string>
+    <string name="sub_presupuestado">Total budgeted: %1$s</string>
+    <string name="sub_gastado">Total spent: %1$s</string>
+    <string name="sub_pagado">Total paid (entries): %1$s</string>
+    <string name="sub_saldado">Total settled: %1$s</string>
+    <string name="sub_pendiente">Pending settlement: %1$s</string>
 
     <!-- Import / sync -->
     <string name="compartir_archivo">File</string>
@@ -153,8 +166,8 @@
     <string name="seccion_cobros">EXTORTION</string>
     <string name="ajuste_cobro">Extortion mode ("silver or lead")</string>
     <string name="ajuste_cobro_plantilla">Message template</string>
-    <string name="cobro_ayuda">You can use {nombre}, {importe} and {evento}.</string>
-    <string name="cobro_plantilla_defecto">Silver or lead, {nombre}: you owe me {importe} for {evento}. Your call.</string>
+    <string name="cobro_ayuda">You can use {nombre}, {importe}, {evento} and {telefono} (yours, for Bizum).</string>
+    <string name="cobro_plantilla_defecto">Silver or lead, {nombre}: you owe me {importe} for {evento}. Bizum to {telefono}. Your call.</string>
     <string name="seccion_notificaciones">NOTIFICATIONS</string>
     <string name="notif_evento">Reminder on the event day</string>
     <string name="notif_cierre">Alert when a tab is closed</string>

@@ -69,6 +69,8 @@
     <string name="presupuestado_fmt">Presupuestado: %1$s</string>
     <string name="gastado_fmt">Gastado: %1$s</string>
     <string name="pagado_fmt">Pagado: %1$s</string>
+    <string name="saldado_fmt">Saldado: %1$s</string>
+    <string name="ver_mapa">Ver en el mapa</string>
     <string name="apunte_abierto">Abierto</string>
     <string name="apunte_cerrado">Cerrado</string>
 
@@ -120,6 +122,17 @@
     <string name="total_evento_fmt">Total del evento: %1$s</string>
     <string name="seccion_por_categoria">POR CATEGORÍA</string>
     <string name="pedir_pago">Plata o plomo</string>
+    <string name="seccion_balance">BALANCE</string>
+    <string name="col_asistente">Asistente</string>
+    <string name="col_pagado">Pagó</string>
+    <string name="col_corresponde">Debe</string>
+    <string name="col_saldo">Saldo</string>
+    <string name="fila_total">TOTAL</string>
+    <string name="sub_presupuestado">Total presupuestado: %1$s</string>
+    <string name="sub_gastado">Total gastado: %1$s</string>
+    <string name="sub_pagado">Total pagado (apuntes): %1$s</string>
+    <string name="sub_saldado">Total saldado: %1$s</string>
+    <string name="sub_pendiente">Pendiente de liquidar: %1$s</string>
 
     <!-- Importar / sincronizar -->
     <string name="compartir_archivo">Archivo</string>
@@ -153,8 +166,8 @@
     <string name="seccion_cobros">EXTORSIÓN</string>
     <string name="ajuste_cobro">Modo extorsión («plata o plomo»)</string>
     <string name="ajuste_cobro_plantilla">Plantilla del mensaje</string>
-    <string name="cobro_ayuda">Puedes usar {nombre}, {importe} y {evento}.</string>
-    <string name="cobro_plantilla_defecto">Plata o plomo, {nombre}: me debes {importe} de {evento}. Tú decides.</string>
+    <string name="cobro_ayuda">Puedes usar {nombre}, {importe}, {evento} y {telefono} (el tuyo, para el Bizum).</string>
+    <string name="cobro_plantilla_defecto">Plata o plomo, {nombre}: me debes {importe} de {evento}. Bizum al {telefono}. Tú decides.</string>
     <string name="seccion_notificaciones">NOTIFICACIONES</string>
     <string name="notif_evento">Recordatorio el día del evento</string>
     <string name="notif_cierre">Aviso al cerrar una cuenta</string>
