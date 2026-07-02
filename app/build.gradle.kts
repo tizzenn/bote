@@ -23,9 +23,19 @@ android {
             if (rutaKeystore != null) {
                 storeFile = file(rutaKeystore)
                 storeType = "PKCS12"
-                storePassword = System.getenv("BOTE_KEYSTORE_PASS")
-                keyAlias = System.getenv("BOTE_KEY_ALIAS") ?: "bote"
-                keyPassword = System.getenv("BOTE_KEY_PASS") ?: System.getenv("BOTE_KEYSTORE_PASS")
+                val passAlmacen = System.getenv("BOTE_KEYSTORE_PASS")
+                storePassword = passAlmacen
+                keyPassword = System.getenv("BOTE_KEY_PASS") ?: passAlmacen
+                // Si no se indica alias se usa el de la primera clave del almacén
+                // (los PKCS12 exportados por Windows llevan un alias autogenerado).
+                keyAlias = System.getenv("BOTE_KEY_ALIAS") ?: run {
+                    val almacen = java.security.KeyStore.getInstance("PKCS12")
+                    java.io.FileInputStream(rutaKeystore).use {
+                        almacen.load(it, passAlmacen?.toCharArray())
+                    }
+                    java.util.Collections.list(almacen.aliases())
+                        .firstOrNull { almacen.isKeyEntry(it) } ?: "bote"
+                }
             }
         }
     }
