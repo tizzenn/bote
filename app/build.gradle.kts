@@ -1,3 +1,7 @@
+import java.io.FileInputStream
+import java.security.KeyStore
+import java.util.Collections
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -29,12 +33,12 @@ android {
                 // Si no se indica alias se usa el de la primera clave del almacén
                 // (los PKCS12 exportados por Windows llevan un alias autogenerado).
                 keyAlias = System.getenv("BOTE_KEY_ALIAS") ?: run {
-                    val almacen = java.security.KeyStore.getInstance("PKCS12")
-                    java.io.FileInputStream(rutaKeystore).use {
-                        almacen.load(it, passAlmacen?.toCharArray())
+                    val almacen = KeyStore.getInstance("PKCS12")
+                    FileInputStream(rutaKeystore).use { flujo ->
+                        almacen.load(flujo, passAlmacen?.toCharArray())
                     }
-                    java.util.Collections.list(almacen.aliases())
-                        .firstOrNull { almacen.isKeyEntry(it) } ?: "bote"
+                    Collections.list(almacen.aliases())
+                        .firstOrNull { alias -> almacen.isKeyEntry(alias) } ?: "bote"
                 }
             }
         }
