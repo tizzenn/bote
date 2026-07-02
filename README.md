@@ -31,9 +31,17 @@ y al final genera el informe con las transferencias mínimas para quedar en paz.
   solo el creador lo sigue viendo hasta que todos liquiden y quede a cero.
 - **Botón de calendario** para añadir el evento al calendario de Android
   (sin permisos, mediante la pantalla estándar del sistema).
-- **Sincronización sin servidor**: el evento completo se exporta a un archivo
-  JSON y se comparte con los asistentes; al importarlo en su Bote, los UUID
-  casan evento y asistentes y fusionan las marcas de pago.
+- **Sincronización sin servidor**: el evento viaja como archivo JSON o como
+  **código QR** (se escanea desde el otro móvil). Al importar se **fusiona
+  apunte a apunte** por UUID: gana la versión modificada más recientemente,
+  las marcas de pago nunca se pierden y los apuntes borrados no resucitan
+  (lápidas de borrado).
+- **Foto del tique** en cada apunte, para poder verificar los importes del
+  informe (se guarda en local; no viaja en la sincronización).
+- **Desglose por categorías** en el informe, con barras proporcionales.
+- **Mensajes de cobro** (opcional, desactivado por defecto): botón en el
+  informe que redacta el mensaje a cada deudor a partir de una plantilla
+  editable con {nombre}, {importe} y {evento}.
 - **Ajustes**: tema blanco/negro/sistema, color principal y de acento
   elegibles (negro y rojo por defecto) y opciones de notificaciones
   (día del evento, cierre de cuenta y recordatorio de pagos pendientes).

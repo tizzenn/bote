@@ -6,14 +6,19 @@ import android.view.View
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import android.widget.LinearLayout
 import com.bote.app.BaseActivity
 import com.bote.app.R
+import com.bote.app.config.Ajustes
 import com.bote.app.data.AppDatabase
 import com.bote.app.data.Calculadora
+import com.bote.app.data.CategoriaApunte
 import com.bote.app.data.Dinero
 import com.bote.app.data.EventoCompleto
 import com.bote.app.databinding.ActivityInformeBinding
+import com.bote.app.databinding.ItemCategoriaBarraBinding
 import com.bote.app.databinding.ItemSaldoBinding
+import com.bote.app.databinding.ItemTransferenciaBinding
 import com.bote.app.notification.NotificationScheduler
 import kotlinx.coroutines.launch
 import java.text.DateFormat
@@ -114,22 +119,75 @@ class InformeActivity : BaseActivity() {
             binding.listaSaldos.addView(fila.root)
         }
 
+        pintarCategorias(completo)
+
         binding.listaTransferencias.removeAllViews()
         val transferencias = Calculadora.transferencias(saldos)
         if (transferencias.isEmpty()) {
             binding.listaTransferencias.addView(textoTransferencia(getString(R.string.sin_transferencias)))
         } else {
+            val cobroActivo = Ajustes.cobroActivo(this)
             for (t in transferencias) {
-                binding.listaTransferencias.addView(
-                    textoTransferencia(
-                        getString(
-                            R.string.transferencia_fmt,
-                            nombreDe(t.de), Dinero.formatear(t.cents), nombreDe(t.a)
-                        )
-                    )
+                val fila = ItemTransferenciaBinding.inflate(
+                    layoutInflater, binding.listaTransferencias, false
                 )
+                fila.texto.text = getString(
+                    R.string.transferencia_fmt,
+                    nombreDe(t.de), Dinero.formatear(t.cents), nombreDe(t.a)
+                )
+                // El botón de cobro solo aparece si está activado en Ajustes
+                // y la transferencia viene hacia mí.
+                if (cobroActivo && t.a.id == evento.miAsistenteId) {
+                    fila.btnPedirPago.visibility = View.VISIBLE
+                    fila.btnPedirPago.setOnClickListener { pedirPago(completo, t) }
+                }
+                binding.listaTransferencias.addView(fila.root)
             }
         }
+    }
+
+    /** Desglose del gasto por categoría con barras proporcionales. */
+    private fun pintarCategorias(completo: EventoCompleto) {
+        binding.listaCategorias.removeAllViews()
+        val total = completo.totalGastadoCents
+        if (total <= 0) return
+        val porCategoria = completo.apuntes
+            .groupBy { CategoriaApunte.fromNombre(it.apunte.categoria) }
+            .mapValues { entrada -> entrada.value.sumOf { it.apunte.importeEfectivo } }
+            .toList()
+            .sortedByDescending { it.second }
+        for ((categoria, importe) in porCategoria) {
+            if (importe <= 0) continue
+            val fila = ItemCategoriaBarraBinding.inflate(
+                layoutInflater, binding.listaCategorias, false
+            )
+            fila.icono.setImageResource(categoria.iconoRes)
+            fila.nombre.setText(categoria.nombreRes)
+            fila.importe.text = Dinero.formatear(importe)
+            val fraccion = importe.toFloat() / total.toFloat()
+            (fila.barra.layoutParams as LinearLayout.LayoutParams).weight = fraccion
+            (fila.resto.layoutParams as LinearLayout.LayoutParams).weight = 1f - fraccion
+            binding.listaCategorias.addView(fila.root)
+        }
+    }
+
+    /** Mensaje de cobro a partir de la plantilla editable de Ajustes. */
+    private fun pedirPago(completo: EventoCompleto, t: Calculadora.Transferencia) {
+        val fecha = DateFormat.getDateInstance(DateFormat.MEDIUM)
+            .format(Date(completo.evento.fechaMillis))
+        val mensaje = Ajustes.cobroPlantilla(this)
+            .replace("{nombre}", nombreDe(t.de))
+            .replace("{importe}", Dinero.formatear(t.cents))
+            .replace("{evento}", completo.evento.titulo.ifBlank { fecha })
+        startActivity(
+            Intent.createChooser(
+                Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, mensaje)
+                },
+                getString(R.string.pedir_pago)
+            )
+        )
     }
 
     private fun textoTransferencia(texto: String): TextView =

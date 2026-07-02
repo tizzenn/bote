@@ -90,6 +90,9 @@
     <string name="cat_sustancias">Sustancias</string>
     <string name="cat_cash">Efectivo</string>
     <string name="cat_otros">Otros</string>
+    <string name="foto_recibo">Tique</string>
+    <string name="quitar_foto">Quitar foto</string>
+    <string name="cd_foto_recibo">Foto del tique</string>
     <string name="seccion_reparto">REPARTO</string>
     <string name="reparto_igual">A partes iguales</string>
     <string name="reparto_porcentual">Porcentajes</string>
@@ -113,8 +116,16 @@
     <string name="marcar_liquidado">Ha liquidado</string>
     <string name="compartir_informe">Compartir informe</string>
     <string name="total_evento_fmt">Total del evento: %1$s</string>
+    <string name="seccion_por_categoria">POR CATEGORÍA</string>
+    <string name="pedir_pago">Pedir el pago</string>
 
     <!-- Importar / sincronizar -->
+    <string name="compartir_archivo">Archivo</string>
+    <string name="compartir_qr">Código QR</string>
+    <string name="escanear_qr">Escanear QR</string>
+    <string name="qr_demasiado_grande">El evento es demasiado grande para un QR; compártelo como archivo.</string>
+    <string name="qr_ayuda">Escanea este código desde Bote en el otro móvil (Importar evento → Escanear QR).</string>
+    <string name="importar_desde">Importar desde</string>
     <string name="importar_ok">Evento importado.</string>
     <string name="importar_error">No se pudo importar ese archivo.</string>
     <string name="importar_quien">¿Quién eres tú en este evento?</string>
@@ -137,6 +148,11 @@
     <string name="color_teal">Teal</string>
     <string name="color_naranja">Naranja</string>
     <string name="color_rosa">Rosa</string>
+    <string name="seccion_cobros">MENSAJES DE COBRO</string>
+    <string name="ajuste_cobro">Mensajes de cobro</string>
+    <string name="ajuste_cobro_plantilla">Plantilla del mensaje</string>
+    <string name="cobro_ayuda">Puedes usar {nombre}, {importe} y {evento}.</string>
+    <string name="cobro_plantilla_defecto">Hola {nombre}: tu parte pendiente de {evento} es {importe}.</string>
     <string name="seccion_notificaciones">NOTIFICACIONES</string>
     <string name="notif_evento">Recordatorio el día del evento</string>
     <string name="notif_cierre">Aviso al cerrar una cuenta</string>

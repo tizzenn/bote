@@ -54,6 +54,16 @@
                 android:textSize="13sp" />
         </LinearLayout>
 
+        <ImageView
+            android:id="@+id/indicadorRecibo"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginStart="8dp"
+            app:srcCompat="@drawable/ic_foto"
+            app:tint="@color/text_secondary"
+            android:contentDescription="@string/cd_foto_recibo"
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/estado"
             android:layout_width="wrap_content"

@@ -49,6 +49,24 @@ class SettingsActivity : BaseActivity() {
             recreate()
         }
 
+        // Mensajes de cobro (desactivados por defecto)
+        val cobroActivo = Ajustes.cobroActivo(this)
+        binding.switchCobro.isChecked = cobroActivo
+        binding.plantillaLayout.visibility = if (cobroActivo) View.VISIBLE else View.GONE
+        binding.campoPlantilla.setText(Ajustes.cobroPlantilla(this))
+        binding.switchCobro.setOnCheckedChangeListener { _, valor ->
+            Ajustes.guardarCobroActivo(this, valor)
+            binding.plantillaLayout.visibility = if (valor) View.VISIBLE else View.GONE
+        }
+        binding.campoPlantilla.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+            override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                val texto = s?.toString().orEmpty()
+                if (texto.isNotBlank()) Ajustes.guardarCobroPlantilla(this@SettingsActivity, texto)
+            }
+        })
+
         // Notificaciones
         binding.switchEvento.isChecked = Ajustes.notifEvento(this)
         binding.switchEvento.setOnCheckedChangeListener { _, valor ->

@@ -1,25 +1,29 @@
 package com.bote.app.sync
 
 import com.bote.app.data.Apunte
-import com.bote.app.data.ApunteConRepartos
+import com.bote.app.data.ApunteBorrado
 import com.bote.app.data.Asistente
 import com.bote.app.data.BoteDao
 import com.bote.app.data.Evento
 import com.bote.app.data.EventoCompleto
+import com.bote.app.data.Modo
 import com.bote.app.data.Reparto
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlin.math.max
 
 /**
- * Sincronización entre dispositivos sin servidor: el evento completo se
- * exporta a JSON y se comparte con los asistentes; al importarlo, los UUID
- * permiten casar evento y asistentes y fusionar el estado.
+ * Sincronización entre dispositivos sin servidor: el evento completo viaja
+ * como JSON (archivo o QR). Los UUID dan identidad estable a evento,
+ * asistentes y apuntes; al importar se fusiona apunte a apunte (gana la
+ * versión modificada más recientemente) y las lápidas evitan que
+ * reaparezcan apuntes borrados.
  */
 object EventoJson {
 
-    private const val FORMATO = 1
+    private const val FORMATO = 2
 
-    fun exportar(datos: EventoCompleto): String {
+    fun exportar(datos: EventoCompleto, borrados: List<ApunteBorrado>): String {
         val evento = datos.evento
         val raiz = JSONObject()
         raiz.put("formato", FORMATO)
@@ -34,6 +38,7 @@ object EventoJson {
         jEvento.put("modo", evento.modo)
         jEvento.put("cerrado", evento.cerrado)
         jEvento.put("creadoMillis", evento.creadoMillis)
+        jEvento.put("modificadoMillis", evento.modificadoMillis)
         raiz.put("evento", jEvento)
 
         val jAsistentes = JSONArray()
@@ -64,6 +69,7 @@ object EventoJson {
             j.put("repartoIgualitario", a.repartoIgualitario)
             j.put("categoria", a.categoria)
             j.put("fechaMillis", a.fechaMillis)
+            j.put("modificadoMillis", a.modificadoMillis)
             val jRepartos = JSONArray()
             for (r in ac.repartos) {
                 val jr = JSONObject()
@@ -76,13 +82,24 @@ object EventoJson {
         }
         raiz.put("apuntes", jApuntes)
 
-        return raiz.toString(2)
+        val jBorrados = JSONArray()
+        for (b in borrados) {
+            val j = JSONObject()
+            j.put("uuid", b.uuid)
+            j.put("borradoMillis", b.borradoMillis)
+            jBorrados.put(j)
+        }
+        raiz.put("borrados", jBorrados)
+
+        return raiz.toString()
     }
 
     /**
-     * Importa (o actualiza) un evento desde JSON. Si ya existía, conserva
-     * los datos locales de identidad (soy creador, quién soy yo) y fusiona
-     * las marcas de liquidación. Devuelve el id local del evento.
+     * Importa un evento. Si no existía se crea; si ya existía se fusiona:
+     * los datos del evento y de cada apunte los gana la versión con la
+     * modificación más reciente, los asistentes se unen por UUID (la marca
+     * de liquidación nunca se pierde) y los apuntes con lápida se eliminan.
+     * Devuelve el id local del evento.
      */
     suspend fun importar(dao: BoteDao, texto: String): Long {
         val raiz = JSONObject(texto)
@@ -90,91 +107,207 @@ object EventoJson {
         val jEvento = raiz.getJSONObject("evento")
         val uuid = jEvento.getString("uuid")
 
-        // Estado local previo (si el evento ya existía en este dispositivo)
         val previo = dao.eventoPorUuid(uuid)
-        var soyCreador = false
-        var miAsistenteUuid: String? = null
-        val liquidadosLocales = mutableSetOf<String>()
-        if (previo != null) {
-            val completo = dao.eventoCompleto(previo.id)
-            if (completo != null) {
-                soyCreador = completo.evento.soyCreador
-                miAsistenteUuid = completo.miAsistente()?.uuid
-                completo.asistentes.filter { it.liquidado }.forEach {
-                    liquidadosLocales.add(it.uuid)
-                }
-            }
-            dao.eliminarEvento(previo.id)
+        return if (previo == null) {
+            importarNuevo(dao, raiz, jEvento)
+        } else {
+            fusionar(dao, previo.id, raiz, jEvento)
         }
+    }
 
+    // ── Evento que no existía en este dispositivo ─────────────────
+
+    private suspend fun importarNuevo(dao: BoteDao, raiz: JSONObject, jEvento: JSONObject): Long {
         val eventoId = dao.insertarEvento(
             Evento(
-                uuid = uuid,
+                uuid = jEvento.getString("uuid"),
                 titulo = jEvento.optString("titulo"),
                 descripcion = jEvento.optString("descripcion"),
                 fechaMillis = jEvento.optLong("fechaMillis"),
                 ubicacion = jEvento.optString("ubicacion"),
-                modo = jEvento.optString("modo", com.bote.app.data.Modo.COLABORATIVO),
-                soyCreador = soyCreador,
+                modo = jEvento.optString("modo", Modo.COLABORATIVO),
+                soyCreador = false,
                 miAsistenteId = 0,
                 cerrado = jEvento.optBoolean("cerrado"),
-                creadoMillis = jEvento.optLong("creadoMillis", System.currentTimeMillis())
+                creadoMillis = jEvento.optLong("creadoMillis", System.currentTimeMillis()),
+                modificadoMillis = jEvento.optLong("modificadoMillis")
             )
         )
-
         val idPorUuid = mutableMapOf<String, Long>()
-        var miAsistenteId = 0L
+        val jAsistentes = raiz.getJSONArray("asistentes")
+        for (i in 0 until jAsistentes.length()) {
+            val j = jAsistentes.getJSONObject(i)
+            idPorUuid[j.getString("uuid")] = dao.insertarAsistente(asistenteDeJson(j, eventoId))
+        }
+        val borrados = uuidsBorrados(raiz)
+        for ((bUuid, millis) in borrados) {
+            dao.insertarBorrado(ApunteBorrado(eventoId, bUuid, millis))
+        }
+        val jApuntes = raiz.getJSONArray("apuntes")
+        for (i in 0 until jApuntes.length()) {
+            val j = jApuntes.getJSONObject(i)
+            if (borrados.containsKey(j.getString("uuid"))) continue
+            insertarApunteDeJson(dao, j, eventoId, idPorUuid)
+        }
+        return eventoId
+    }
+
+    // ── Fusión con el evento local existente ──────────────────────
+
+    private suspend fun fusionar(dao: BoteDao, eventoId: Long, raiz: JSONObject, jEvento: JSONObject): Long {
+        val local = dao.eventoCompleto(eventoId) ?: return eventoId
+
+        // Datos del evento: gana la modificación más reciente
+        val modImportado = jEvento.optLong("modificadoMillis")
+        if (modImportado > local.evento.modificadoMillis) {
+            dao.actualizarEvento(
+                local.evento.copy(
+                    titulo = jEvento.optString("titulo"),
+                    descripcion = jEvento.optString("descripcion"),
+                    fechaMillis = jEvento.optLong("fechaMillis"),
+                    ubicacion = jEvento.optString("ubicacion"),
+                    modo = jEvento.optString("modo", Modo.COLABORATIVO),
+                    cerrado = jEvento.optBoolean("cerrado"),
+                    modificadoMillis = modImportado
+                )
+            )
+        }
+
+        // Asistentes: unión por UUID; la liquidación nunca retrocede
+        val idPorUuid = mutableMapOf<String, Long>()
+        val localesPorUuid = local.asistentes.associateBy { it.uuid }
+        local.asistentes.forEach { idPorUuid[it.uuid] = it.id }
         val jAsistentes = raiz.getJSONArray("asistentes")
         for (i in 0 until jAsistentes.length()) {
             val j = jAsistentes.getJSONObject(i)
             val aUuid = j.getString("uuid")
-            val id = dao.insertarAsistente(
-                Asistente(
-                    eventoId = eventoId,
-                    uuid = aUuid,
-                    nombre = j.optString("nombre"),
-                    telefono = j.optString("telefono"),
-                    email = j.optString("email"),
-                    esCreador = j.optBoolean("esCreador"),
-                    liquidado = j.optBoolean("liquidado") || liquidadosLocales.contains(aUuid),
-                    liquidadoMillis = j.optLong("liquidadoMillis")
+            val existente = localesPorUuid[aUuid]
+            if (existente == null) {
+                idPorUuid[aUuid] = dao.insertarAsistente(asistenteDeJson(j, eventoId))
+            } else {
+                dao.actualizarAsistente(
+                    existente.copy(
+                        nombre = j.optString("nombre").ifBlank { existente.nombre },
+                        telefono = j.optString("telefono").ifBlank { existente.telefono },
+                        email = j.optString("email").ifBlank { existente.email },
+                        liquidado = existente.liquidado || j.optBoolean("liquidado"),
+                        liquidadoMillis = max(existente.liquidadoMillis, j.optLong("liquidadoMillis"))
+                    )
                 )
-            )
-            idPorUuid[aUuid] = id
-            if (aUuid == miAsistenteUuid) miAsistenteId = id
-        }
-        if (miAsistenteId != 0L) {
-            val evento = dao.evento(eventoId)
-            if (evento != null) dao.actualizarEvento(evento.copy(miAsistenteId = miAsistenteId))
+            }
         }
 
+        // Lápidas: unión, y se aplican a los apuntes locales
+        val borradosLocales = dao.borradosDeEvento(eventoId).associateBy { it.uuid }.toMutableMap()
+        for ((bUuid, millis) in uuidsBorrados(raiz)) {
+            if (!borradosLocales.containsKey(bUuid)) {
+                val lapida = ApunteBorrado(eventoId, bUuid, millis)
+                dao.insertarBorrado(lapida)
+                borradosLocales[bUuid] = lapida
+            }
+        }
+        val apuntesLocales = mutableMapOf<String, com.bote.app.data.ApunteConRepartos>()
+        for (ac in local.apuntes) {
+            if (borradosLocales.containsKey(ac.apunte.uuid)) {
+                dao.eliminarApunte(ac.apunte.id)
+            } else {
+                apuntesLocales[ac.apunte.uuid] = ac
+            }
+        }
+
+        // Apuntes: unión por UUID; en conflicto gana el modificado más reciente
         val jApuntes = raiz.getJSONArray("apuntes")
         for (i in 0 until jApuntes.length()) {
             val j = jApuntes.getJSONObject(i)
-            val apunteId = dao.insertarApunte(
-                Apunte(
-                    eventoId = eventoId,
-                    uuid = j.getString("uuid"),
-                    concepto = j.optString("concepto"),
-                    pagadorId = idPorUuid[j.optString("pagadorUuid")] ?: 0L,
-                    presupuestadoCents = if (j.has("presupuestadoCents")) j.getLong("presupuestadoCents") else null,
-                    gastadoCents = j.optLong("gastadoCents"),
-                    pagadoCents = if (j.has("pagadoCents")) j.getLong("pagadoCents") else null,
-                    repartoIgualitario = j.optBoolean("repartoIgualitario", true),
-                    categoria = j.optString("categoria", "OTROS"),
-                    fechaMillis = j.optLong("fechaMillis", System.currentTimeMillis())
+            val aUuid = j.getString("uuid")
+            if (borradosLocales.containsKey(aUuid)) continue
+            val existente = apuntesLocales[aUuid]
+            if (existente == null) {
+                insertarApunteDeJson(dao, j, eventoId, idPorUuid)
+            } else if (j.optLong("modificadoMillis") > existente.apunte.modificadoMillis) {
+                dao.actualizarApunte(
+                    existente.apunte.copy(
+                        concepto = j.optString("concepto"),
+                        pagadorId = idPorUuid[j.optString("pagadorUuid")]
+                            ?: existente.apunte.pagadorId,
+                        presupuestadoCents = if (j.has("presupuestadoCents"))
+                            j.getLong("presupuestadoCents") else null,
+                        gastadoCents = j.optLong("gastadoCents"),
+                        pagadoCents = if (j.has("pagadoCents")) j.getLong("pagadoCents") else null,
+                        repartoIgualitario = j.optBoolean("repartoIgualitario", true),
+                        categoria = j.optString("categoria", "OTROS"),
+                        modificadoMillis = j.optLong("modificadoMillis")
+                    )
                 )
-            )
-            val jRepartos = j.getJSONArray("repartos")
-            val repartos = mutableListOf<Reparto>()
-            for (k in 0 until jRepartos.length()) {
-                val jr = jRepartos.getJSONObject(k)
-                val asistenteId = idPorUuid[jr.optString("asistenteUuid")] ?: continue
-                repartos.add(Reparto(apunteId, asistenteId, jr.optInt("puntosBasicos")))
+                dao.guardarRepartos(existente.apunte.id, repartosDeJson(j, existente.apunte.id, idPorUuid))
             }
-            if (repartos.isNotEmpty()) dao.insertarRepartos(repartos)
         }
-
         return eventoId
+    }
+
+    // ── Piezas comunes ────────────────────────────────────────────
+
+    private fun asistenteDeJson(j: JSONObject, eventoId: Long): Asistente =
+        Asistente(
+            eventoId = eventoId,
+            uuid = j.getString("uuid"),
+            nombre = j.optString("nombre"),
+            telefono = j.optString("telefono"),
+            email = j.optString("email"),
+            esCreador = j.optBoolean("esCreador"),
+            liquidado = j.optBoolean("liquidado"),
+            liquidadoMillis = j.optLong("liquidadoMillis")
+        )
+
+    private suspend fun insertarApunteDeJson(
+        dao: BoteDao,
+        j: JSONObject,
+        eventoId: Long,
+        idPorUuid: Map<String, Long>
+    ) {
+        val apunteId = dao.insertarApunte(
+            Apunte(
+                eventoId = eventoId,
+                uuid = j.getString("uuid"),
+                concepto = j.optString("concepto"),
+                pagadorId = idPorUuid[j.optString("pagadorUuid")] ?: 0L,
+                presupuestadoCents = if (j.has("presupuestadoCents"))
+                    j.getLong("presupuestadoCents") else null,
+                gastadoCents = j.optLong("gastadoCents"),
+                pagadoCents = if (j.has("pagadoCents")) j.getLong("pagadoCents") else null,
+                repartoIgualitario = j.optBoolean("repartoIgualitario", true),
+                categoria = j.optString("categoria", "OTROS"),
+                fechaMillis = j.optLong("fechaMillis", System.currentTimeMillis()),
+                modificadoMillis = j.optLong("modificadoMillis")
+            )
+        )
+        val repartos = repartosDeJson(j, apunteId, idPorUuid)
+        if (repartos.isNotEmpty()) dao.insertarRepartos(repartos)
+    }
+
+    private fun repartosDeJson(
+        j: JSONObject,
+        apunteId: Long,
+        idPorUuid: Map<String, Long>
+    ): List<Reparto> {
+        val jRepartos = j.optJSONArray("repartos") ?: return emptyList()
+        val repartos = mutableListOf<Reparto>()
+        for (k in 0 until jRepartos.length()) {
+            val jr = jRepartos.getJSONObject(k)
+            val asistenteId = idPorUuid[jr.optString("asistenteUuid")] ?: continue
+            repartos.add(Reparto(apunteId, asistenteId, jr.optInt("puntosBasicos")))
+        }
+        return repartos
+    }
+
+    private fun uuidsBorrados(raiz: JSONObject): Map<String, Long> {
+        val jBorrados = raiz.optJSONArray("borrados") ?: return emptyMap()
+        val resultado = mutableMapOf<String, Long>()
+        for (i in 0 until jBorrados.length()) {
+            val j = jBorrados.getJSONObject(i)
+            resultado[j.getString("uuid")] =
+                j.optLong("borradoMillis", System.currentTimeMillis())
+        }
+        return resultado
     }
 }

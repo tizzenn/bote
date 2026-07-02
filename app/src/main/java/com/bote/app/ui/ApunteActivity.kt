@@ -1,16 +1,21 @@
 package com.bote.app.ui
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import com.bote.app.BaseActivity
 import com.bote.app.R
 import com.bote.app.data.AppDatabase
 import com.bote.app.data.Apunte
+import com.bote.app.data.ApunteBorrado
 import com.bote.app.data.ApunteConRepartos
 import com.bote.app.data.Asistente
 import com.bote.app.data.Calculadora
@@ -23,6 +28,7 @@ import com.bote.app.databinding.ItemRepartoBinding
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
+import java.util.UUID
 import kotlin.math.roundToInt
 
 class ApunteActivity : BaseActivity() {
@@ -52,6 +58,20 @@ class ApunteActivity : BaseActivity() {
     private var actualizando = false
     private var pagadorId: Long = 0
     private var categoria = CategoriaApunte.OTROS
+    private var apunteUuid: String = UUID.randomUUID().toString()
+    private var fotoRecibo: String = ""
+
+    private val elegirFotoRecibo = registerForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            val copia = FotoUtil.copiarFoto(this, uri, "recibo_$apunteUuid")
+            if (copia != null) {
+                fotoRecibo = copia
+                mostrarRecibo()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,9 +105,38 @@ class ApunteActivity : BaseActivity() {
             refrescar()
         }
         binding.btnGuardar.setOnClickListener { guardar() }
+        binding.btnFotoRecibo.setOnClickListener {
+            elegirFotoRecibo.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
+        }
+        binding.btnQuitarFoto.setOnClickListener {
+            fotoRecibo = ""
+            mostrarRecibo()
+        }
+        binding.fotoRecibo.setOnClickListener { verReciboGrande() }
 
         pintarCategorias()
         cargar()
+    }
+
+    private fun mostrarRecibo() {
+        val hay = FotoUtil.cargar(binding.fotoRecibo, fotoRecibo)
+        binding.fotoRecibo.visibility = if (hay) View.VISIBLE else View.GONE
+        binding.btnQuitarFoto.visibility = if (hay) View.VISIBLE else View.GONE
+    }
+
+    private fun verReciboGrande() {
+        if (fotoRecibo.isBlank()) return
+        val imagen = ImageView(this).apply {
+            adjustViewBounds = true
+            scaleType = ImageView.ScaleType.FIT_CENTER
+        }
+        if (!FotoUtil.cargar(imagen, fotoRecibo)) return
+        MaterialAlertDialogBuilder(this)
+            .setView(imagen)
+            .setPositiveButton(R.string.accion_cancelar, null)
+            .show()
     }
 
     private fun cargar() {
@@ -112,6 +161,9 @@ class ApunteActivity : BaseActivity() {
                 categoria = CategoriaApunte.fromNombre(apunte.categoria)
                 modoIgual = apunte.repartoIgualitario
                 pagadorId = apunte.pagadorId
+                apunteUuid = apunte.uuid
+                fotoRecibo = apunte.fotoPath
+                mostrarRecibo()
             } else {
                 pagadorId = completo.evento.miAsistenteId.takeIf { id ->
                     completo.asistentes.any { it.id == id }
@@ -304,17 +356,21 @@ class ApunteActivity : BaseActivity() {
         lifecycleScope.launch {
             val dao = AppDatabase.get(this@ApunteActivity).dao()
             val id: Long
+            val ahora = System.currentTimeMillis()
             if (apunteId == 0L) {
                 id = dao.insertarApunte(
                     Apunte(
                         eventoId = eventoId,
+                        uuid = apunteUuid,
                         concepto = concepto,
                         pagadorId = pagadorId,
                         presupuestadoCents = presupuestado,
                         gastadoCents = gastado,
                         pagadoCents = pagado,
                         repartoIgualitario = modoIgual,
-                        categoria = categoria.name
+                        categoria = categoria.name,
+                        fotoPath = fotoRecibo,
+                        modificadoMillis = ahora
                     )
                 )
             } else {
@@ -328,7 +384,9 @@ class ApunteActivity : BaseActivity() {
                         gastadoCents = gastado,
                         pagadoCents = pagado,
                         repartoIgualitario = modoIgual,
-                        categoria = categoria.name
+                        categoria = categoria.name,
+                        fotoPath = fotoRecibo,
+                        modificadoMillis = ahora
                     )
                 )
             }
@@ -356,7 +414,10 @@ class ApunteActivity : BaseActivity() {
                 .setNegativeButton(R.string.accion_cancelar, null)
                 .setPositiveButton(R.string.accion_eliminar) { _, _ ->
                     lifecycleScope.launch {
-                        AppDatabase.get(this@ApunteActivity).dao().eliminarApunte(apunteId)
+                        val dao = AppDatabase.get(this@ApunteActivity).dao()
+                        // Lápida: que la fusión al sincronizar no lo resucite
+                        dao.insertarBorrado(ApunteBorrado(eventoId, apunteUuid))
+                        dao.eliminarApunte(apunteId)
                         finish()
                     }
                 }

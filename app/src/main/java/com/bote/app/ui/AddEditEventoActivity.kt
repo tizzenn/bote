@@ -362,7 +362,8 @@ class AddEditEventoActivity : BaseActivity() {
                         fechaMillis = fechaMillis,
                         ubicacion = ubicacion,
                         fotoPath = fotoPath,
-                        modo = modo
+                        modo = modo,
+                        modificadoMillis = System.currentTimeMillis()
                     )
                 )
                 for (asistente in eliminados) {

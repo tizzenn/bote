@@ -56,6 +56,8 @@ object Ajustes {
     private const val CLAVE_NOTIF_EVENTO = "notif_evento"
     private const val CLAVE_NOTIF_CIERRE = "notif_cierre"
     private const val CLAVE_NOTIF_PAGOS = "notif_pagos"
+    private const val CLAVE_COBRO_ACTIVO = "cobro_activo"
+    private const val CLAVE_COBRO_PLANTILLA = "cobro_plantilla"
 
     private fun prefs(context: Context): SharedPreferences =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -116,5 +118,23 @@ object Ajustes {
 
     fun guardarNotifPagos(context: Context, valor: Boolean) {
         prefs(context).edit().putBoolean(CLAVE_NOTIF_PAGOS, valor).apply()
+    }
+
+    // ── Mensajes de cobro (desactivados por defecto) ──────────────
+
+    fun cobroActivo(context: Context): Boolean =
+        prefs(context).getBoolean(CLAVE_COBRO_ACTIVO, false)
+
+    fun guardarCobroActivo(context: Context, valor: Boolean) {
+        prefs(context).edit().putBoolean(CLAVE_COBRO_ACTIVO, valor).apply()
+    }
+
+    /** Plantilla editable; admite {nombre}, {importe} y {evento}. */
+    fun cobroPlantilla(context: Context): String =
+        prefs(context).getString(CLAVE_COBRO_PLANTILLA, null)
+            ?: context.getString(R.string.cobro_plantilla_defecto)
+
+    fun guardarCobroPlantilla(context: Context, valor: String) {
+        prefs(context).edit().putString(CLAVE_COBRO_PLANTILLA, valor).apply()
     }
 }

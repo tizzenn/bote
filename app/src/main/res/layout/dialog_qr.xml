@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:padding="24dp">
+
+    <ImageView
+        android:id="@+id/imagenQr"
+        android:layout_width="280dp"
+        android:layout_height="280dp"
+        android:background="@android:color/white"
+        android:padding="8dp"
+        android:contentDescription="@string/compartir_qr" />
+
+    <TextView
+        android:id="@+id/ayudaQr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:text="@string/qr_ayuda"
+        android:textColor="@color/text_secondary"
+        android:textSize="13sp" />
+</LinearLayout>

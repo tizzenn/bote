@@ -20,9 +20,12 @@ import com.bote.app.data.EventoCompleto
 import com.bote.app.databinding.ActivityEventoDetalleBinding
 import com.bote.app.databinding.ItemApunteBinding
 import com.bote.app.databinding.ItemAsistenteMiniBinding
+import com.bote.app.databinding.DialogQrBinding
 import com.bote.app.notification.NotificationHelper
 import com.bote.app.notification.NotificationScheduler
 import com.bote.app.sync.EventoJson
+import com.bote.app.sync.QrUtil
+import com.bote.app.sync.SyncCodec
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -205,6 +208,8 @@ class EventoDetalleActivity : BaseActivity() {
                     if (apunte.estaCerrado) R.color.saldo_positivo else R.color.text_secondary
                 )
             )
+            fila.indicadorRecibo.visibility =
+                if (apunte.fotoPath.isNotBlank()) View.VISIBLE else View.GONE
             if (puedeEditar(completo) && !evento.cerrado) {
                 fila.root.setOnClickListener {
                     startActivity(
@@ -258,7 +263,12 @@ class EventoDetalleActivity : BaseActivity() {
         } else {
             lifecycleScope.launch {
                 val dao = AppDatabase.get(this@EventoDetalleActivity).dao()
-                dao.actualizarEvento(completo.evento.copy(cerrado = false))
+                dao.actualizarEvento(
+                    completo.evento.copy(
+                        cerrado = false,
+                        modificadoMillis = System.currentTimeMillis()
+                    )
+                )
                 dao.evento(eventoId)?.let {
                     NotificationScheduler.reprogramar(this@EventoDetalleActivity, it, false)
                 }
@@ -271,7 +281,12 @@ class EventoDetalleActivity : BaseActivity() {
         val completo = datos ?: return
         lifecycleScope.launch {
             val dao = AppDatabase.get(this@EventoDetalleActivity).dao()
-            dao.actualizarEvento(completo.evento.copy(cerrado = true))
+            dao.actualizarEvento(
+                completo.evento.copy(
+                    cerrado = true,
+                    modificadoMillis = System.currentTimeMillis()
+                )
+            )
             val cerrado = dao.evento(eventoId) ?: return@launch
             val actualizado = dao.eventoCompleto(eventoId)
             NotificationScheduler.reprogramar(
@@ -297,14 +312,29 @@ class EventoDetalleActivity : BaseActivity() {
     }
 
     private fun compartirEvento() {
+        val opciones = arrayOf(
+            getString(R.string.compartir_archivo),
+            getString(R.string.compartir_qr)
+        )
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.compartir_evento)
+            .setItems(opciones) { _, indice ->
+                if (indice == 0) compartirArchivo() else mostrarQr()
+            }
+            .show()
+    }
+
+    private fun compartirArchivo() {
         val completo = datos ?: return
         lifecycleScope.launch {
+            val dao = AppDatabase.get(this@EventoDetalleActivity).dao()
+            val borrados = dao.borradosDeEvento(eventoId)
             val uri = withContext(Dispatchers.IO) {
                 val directorio = File(cacheDir, "compartir").apply { mkdirs() }
                 val nombre = completo.evento.titulo.ifBlank { "evento" }
                     .replace(Regex("[^A-Za-z0-9_-]"), "_")
                 val archivo = File(directorio, "bote-$nombre.json")
-                archivo.writeText(EventoJson.exportar(completo))
+                archivo.writeText(EventoJson.exportar(completo, borrados))
                 FileProvider.getUriForFile(
                     this@EventoDetalleActivity,
                     "$packageName.fileprovider",
@@ -325,6 +355,34 @@ class EventoDetalleActivity : BaseActivity() {
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
             startActivity(Intent.createChooser(intento, asunto))
+        }
+    }
+
+    /** El evento entero cabe en un QR si no es muy grande; si no, archivo. */
+    private fun mostrarQr() {
+        val completo = datos ?: return
+        lifecycleScope.launch {
+            val dao = AppDatabase.get(this@EventoDetalleActivity).dao()
+            val borrados = dao.borradosDeEvento(eventoId)
+            val carga = withContext(Dispatchers.IO) {
+                SyncCodec.comprimir(EventoJson.exportar(completo, borrados))
+            }
+            if (carga.length > QrUtil.MAX_CARACTERES) {
+                Toast.makeText(
+                    this@EventoDetalleActivity,
+                    R.string.qr_demasiado_grande, Toast.LENGTH_LONG
+                ).show()
+                compartirArchivo()
+                return@launch
+            }
+            val bitmap = withContext(Dispatchers.IO) { QrUtil.generar(carga, 800) }
+            val vista = DialogQrBinding.inflate(layoutInflater)
+            vista.imagenQr.setImageBitmap(bitmap)
+            MaterialAlertDialogBuilder(this@EventoDetalleActivity)
+                .setTitle(R.string.compartir_qr)
+                .setView(vista.root)
+                .setPositiveButton(R.string.accion_cancelar, null)
+                .show()
         }
     }
 

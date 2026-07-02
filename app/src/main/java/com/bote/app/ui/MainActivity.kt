@@ -18,6 +18,10 @@ import com.bote.app.data.AppDatabase
 import com.bote.app.data.EventoCompleto
 import com.bote.app.databinding.ActivityMainBinding
 import com.bote.app.sync.EventoJson
+import com.bote.app.sync.SyncCodec
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity() {
@@ -31,8 +35,13 @@ class MainActivity : BaseActivity() {
 
     private val importarArchivo =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-            if (uri != null) importar(uri)
+            if (uri != null) importarDesdeArchivo(uri)
         }
+
+    private val escanearQr = registerForActivityResult(ScanContract()) { resultado ->
+        val contenido = resultado.contents
+        if (contenido != null) importarTexto(contenido)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,14 +98,53 @@ class MainActivity : BaseActivity() {
         else android.view.View.GONE
     }
 
-    private fun importar(uri: android.net.Uri) {
+    private fun elegirOrigenImportacion() {
+        val opciones = arrayOf(
+            getString(R.string.compartir_archivo),
+            getString(R.string.escanear_qr)
+        )
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.importar_desde)
+            .setItems(opciones) { _, indice ->
+                if (indice == 0) {
+                    importarArchivo.launch(
+                        arrayOf("application/json", "application/octet-stream", "text/plain")
+                    )
+                } else {
+                    escanearQr.launch(
+                        ScanOptions()
+                            .setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                            .setBeepEnabled(false)
+                            .setPrompt(getString(R.string.escanear_qr))
+                    )
+                }
+            }
+            .show()
+    }
+
+    private fun importarDesdeArchivo(uri: android.net.Uri) {
+        lifecycleScope.launch {
+            val texto = try {
+                contentResolver.openInputStream(uri)?.use {
+                    it.readBytes().toString(Charsets.UTF_8)
+                }
+            } catch (e: Exception) {
+                null
+            }
+            if (texto == null) {
+                Toast.makeText(this@MainActivity, R.string.importar_error, Toast.LENGTH_LONG).show()
+            } else {
+                importarTexto(texto)
+            }
+        }
+    }
+
+    private fun importarTexto(texto: String) {
         lifecycleScope.launch {
             try {
-                val texto = contentResolver.openInputStream(uri)?.use {
-                    it.readBytes().toString(Charsets.UTF_8)
-                } ?: throw IllegalStateException("Sin contenido")
+                val json = SyncCodec.decodificar(texto)
                 val dao = AppDatabase.get(this@MainActivity).dao()
-                val eventoId = EventoJson.importar(dao, texto)
+                val eventoId = EventoJson.importar(dao, json)
                 Toast.makeText(this@MainActivity, R.string.importar_ok, Toast.LENGTH_SHORT).show()
                 startActivity(
                     Intent(this@MainActivity, EventoDetalleActivity::class.java)
@@ -115,7 +163,7 @@ class MainActivity : BaseActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
         R.id.accionImportar -> {
-            importarArchivo.launch(arrayOf("application/json", "application/octet-stream", "text/plain"))
+            elegirOrigenImportacion()
             true
         }
         R.id.accionAjustes -> {

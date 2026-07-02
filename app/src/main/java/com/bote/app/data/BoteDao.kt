@@ -3,6 +3,7 @@ package com.bote.app.data
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
@@ -76,6 +77,14 @@ interface BoteDao {
 
     @Query("DELETE FROM repartos WHERE apunteId = :apunteId")
     suspend fun eliminarRepartosDeApunte(apunteId: Long)
+
+    // ── Lápidas de apuntes borrados (para la fusión al sincronizar) ──
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertarBorrado(borrado: ApunteBorrado)
+
+    @Query("SELECT * FROM apuntes_borrados WHERE eventoId = :eventoId")
+    suspend fun borradosDeEvento(eventoId: Long): List<ApunteBorrado>
 
     /** Reemplaza el reparto completo de un apunte. */
     @Transaction

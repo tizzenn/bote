@@ -90,6 +90,9 @@
     <string name="cat_sustancias">Substances</string>
     <string name="cat_cash">Cash</string>
     <string name="cat_otros">Other</string>
+    <string name="foto_recibo">Receipt</string>
+    <string name="quitar_foto">Remove photo</string>
+    <string name="cd_foto_recibo">Receipt photo</string>
     <string name="seccion_reparto">SPLIT</string>
     <string name="reparto_igual">Equal parts</string>
     <string name="reparto_porcentual">Percentages</string>
@@ -113,8 +116,16 @@
     <string name="marcar_liquidado">Settled</string>
     <string name="compartir_informe">Share report</string>
     <string name="total_evento_fmt">Event total: %1$s</string>
+    <string name="seccion_por_categoria">BY CATEGORY</string>
+    <string name="pedir_pago">Request payment</string>
 
     <!-- Import / sync -->
+    <string name="compartir_archivo">File</string>
+    <string name="compartir_qr">QR code</string>
+    <string name="escanear_qr">Scan QR</string>
+    <string name="qr_demasiado_grande">The event is too big for a QR; share it as a file.</string>
+    <string name="qr_ayuda">Scan this code from Bote on the other phone (Import event → Scan QR).</string>
+    <string name="importar_desde">Import from</string>
     <string name="importar_ok">Event imported.</string>
     <string name="importar_error">Could not import that file.</string>
     <string name="importar_quien">Who are you in this event?</string>
@@ -137,6 +148,11 @@
     <string name="color_teal">Teal</string>
     <string name="color_naranja">Orange</string>
     <string name="color_rosa">Pink</string>
+    <string name="seccion_cobros">PAYMENT REQUESTS</string>
+    <string name="ajuste_cobro">Payment request messages</string>
+    <string name="ajuste_cobro_plantilla">Message template</string>
+    <string name="cobro_ayuda">You can use {nombre}, {importe} and {evento}.</string>
+    <string name="cobro_plantilla_defecto">Hi {nombre}: your pending share for {evento} is {importe}.</string>
     <string name="seccion_notificaciones">NOTIFICATIONS</string>
     <string name="notif_evento">Reminder on the event day</string>
     <string name="notif_cierre">Alert when a tab is closed</string>

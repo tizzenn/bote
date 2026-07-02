@@ -35,7 +35,9 @@ data class Evento(
     val miAsistenteId: Long = 0,
     /** Candado echado: cuentas finales generadas, no se admiten más apuntes. */
     val cerrado: Boolean = false,
-    val creadoMillis: Long = System.currentTimeMillis()
+    val creadoMillis: Long = System.currentTimeMillis(),
+    /** Última modificación de los datos del evento; decide quién gana al fusionar. */
+    val modificadoMillis: Long = System.currentTimeMillis()
 ) {
     val esRestringido: Boolean get() = modo == Modo.RESTRINGIDO
 }
@@ -91,7 +93,11 @@ data class Apunte(
     val repartoIgualitario: Boolean = true,
     /** Nombre de la CategoriaApunte (restaurante, copas, regalo…). */
     val categoria: String = "OTROS",
-    val fechaMillis: Long = System.currentTimeMillis()
+    /** Foto del tique o recibo (ruta local; no viaja en la sincronización). */
+    val fotoPath: String = "",
+    val fechaMillis: Long = System.currentTimeMillis(),
+    /** Última modificación; al fusionar dos versiones gana la más reciente. */
+    val modificadoMillis: Long = System.currentTimeMillis()
 ) {
     val estaCerrado: Boolean get() = pagadoCents != null
     /** Importe que cuenta para el reparto: lo pagado si existe, si no lo gastado. */
@@ -114,6 +120,27 @@ data class Reparto(
     val apunteId: Long,
     val asistenteId: Long,
     val puntosBasicos: Int
+)
+
+/**
+ * Lápida de un apunte borrado: evita que la fusión al importar
+ * resucite apuntes que alguien eliminó a propósito.
+ */
+@Entity(
+    tableName = "apuntes_borrados",
+    primaryKeys = ["eventoId", "uuid"],
+    foreignKeys = [ForeignKey(
+        entity = Evento::class,
+        parentColumns = ["id"],
+        childColumns = ["eventoId"],
+        onDelete = ForeignKey.CASCADE
+    )],
+    indices = [Index("eventoId")]
+)
+data class ApunteBorrado(
+    val eventoId: Long,
+    val uuid: String,
+    val borradoMillis: Long = System.currentTimeMillis()
 )
 
 data class ApunteConRepartos(
