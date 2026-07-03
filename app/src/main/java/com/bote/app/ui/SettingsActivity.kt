@@ -67,6 +67,23 @@ class SettingsActivity : BaseActivity() {
             }
         })
 
+        // Sincronización en la nube (desactivada por defecto)
+        val syncActivo = Ajustes.syncActivo(this)
+        binding.switchSync.isChecked = syncActivo
+        binding.panelSync.visibility = if (syncActivo) View.VISIBLE else View.GONE
+        binding.campoSyncUrl.setText(Ajustes.syncUrl(this))
+        binding.campoSyncKey.setText(Ajustes.syncKey(this))
+        binding.switchSync.setOnCheckedChangeListener { _, valor ->
+            Ajustes.guardarSyncActivo(this, valor)
+            binding.panelSync.visibility = if (valor) View.VISIBLE else View.GONE
+        }
+        binding.campoSyncUrl.addTextChangedListener(GuardarTexto { texto ->
+            Ajustes.guardarSyncUrl(this, texto)
+        })
+        binding.campoSyncKey.addTextChangedListener(GuardarTexto { texto ->
+            Ajustes.guardarSyncKey(this, texto)
+        })
+
         // Notificaciones
         binding.switchEvento.isChecked = Ajustes.notifEvento(this)
         binding.switchEvento.setOnCheckedChangeListener { _, valor ->
@@ -79,6 +96,15 @@ class SettingsActivity : BaseActivity() {
         binding.switchPagos.isChecked = Ajustes.notifPagos(this)
         binding.switchPagos.setOnCheckedChangeListener { _, valor ->
             Ajustes.guardarNotifPagos(this, valor)
+        }
+    }
+
+    /** TextWatcher mínimo que guarda el texto al cambiar. */
+    private class GuardarTexto(val alCambiar: (String) -> Unit) : android.text.TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+        override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+        override fun afterTextChanged(s: android.text.Editable?) {
+            alCambiar(s?.toString().orEmpty())
         }
     }
 

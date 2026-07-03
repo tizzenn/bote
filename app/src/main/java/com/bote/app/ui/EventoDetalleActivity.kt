@@ -28,6 +28,7 @@ import com.bote.app.notification.NotificationScheduler
 import com.bote.app.sync.EventoJson
 import com.bote.app.sync.QrUtil
 import com.bote.app.sync.SyncCodec
+import com.bote.app.sync.SyncRemoto
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -47,6 +48,7 @@ class EventoDetalleActivity : BaseActivity() {
     private var eventoId: Long = 0
     private var datos: EventoCompleto? = null
     private var identidadPreguntada = false
+    private var sincronizando = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,6 +87,26 @@ class EventoDetalleActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         cargar()
+        sincronizarNube()
+    }
+
+    /** Sincronización automática con la nube, si está configurada en Ajustes. */
+    private fun sincronizarNube() {
+        if (sincronizando || !SyncRemoto.activo(this)) return
+        sincronizando = true
+        lifecycleScope.launch {
+            try {
+                val dao = AppDatabase.get(this@EventoDetalleActivity).dao()
+                val habiaRemoto = SyncRemoto.sincronizar(
+                    this@EventoDetalleActivity, dao, eventoId
+                )
+                if (habiaRemoto) cargar()
+            } catch (e: Exception) {
+                // sin red o servidor caído: la app sigue en local
+            } finally {
+                sincronizando = false
+            }
+        }
     }
 
     private fun puedeEditar(datos: EventoCompleto): Boolean =

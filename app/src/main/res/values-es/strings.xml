@@ -168,6 +168,12 @@
     <string name="ajuste_cobro_plantilla">Plantilla del mensaje</string>
     <string name="cobro_ayuda">Puedes usar {nombre}, {importe}, {evento} y {telefono} (el tuyo, para el Bizum).</string>
     <string name="cobro_plantilla_defecto">Plata o plomo, {nombre}: me debes {importe} de {evento}. Bizum al {telefono}. Tú decides.</string>
+    <string name="seccion_sync_nube">SINCRONIZACIÓN EN LA NUBE</string>
+    <string name="ajuste_sync">Sincronización automática (Supabase)</string>
+    <string name="campo_sync_url">URL del proyecto</string>
+    <string name="campo_sync_key">Clave API (anon)</string>
+    <string name="sync_nube_ayuda">Gratis en supabase.com: crea un proyecto, ejecuta el SQL del README y pega aquí la URL y la clave anon. Todos los asistentes usan los mismos valores.</string>
+    <string name="sync_nube_hecho">Sincronizado con la nube.</string>
     <string name="seccion_notificaciones">NOTIFICACIONES</string>
     <string name="notif_evento">Recordatorio el día del evento</string>
     <string name="notif_cierre">Aviso al cerrar una cuenta</string>

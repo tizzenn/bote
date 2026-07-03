@@ -137,4 +137,31 @@ object Ajustes {
     fun guardarCobroPlantilla(context: Context, valor: String) {
         prefs(context).edit().putString(CLAVE_COBRO_PLANTILLA, valor).apply()
     }
+
+    // ── Sincronización en la nube (desactivada por defecto) ──────
+
+    private const val CLAVE_SYNC_ACTIVO = "sync_activo"
+    private const val CLAVE_SYNC_URL = "sync_url"
+    private const val CLAVE_SYNC_KEY = "sync_key"
+
+    fun syncActivo(context: Context): Boolean =
+        prefs(context).getBoolean(CLAVE_SYNC_ACTIVO, false)
+
+    fun guardarSyncActivo(context: Context, valor: Boolean) {
+        prefs(context).edit().putBoolean(CLAVE_SYNC_ACTIVO, valor).apply()
+    }
+
+    fun syncUrl(context: Context): String =
+        prefs(context).getString(CLAVE_SYNC_URL, "").orEmpty()
+
+    fun guardarSyncUrl(context: Context, valor: String) {
+        prefs(context).edit().putString(CLAVE_SYNC_URL, valor.trim()).apply()
+    }
+
+    fun syncKey(context: Context): String =
+        prefs(context).getString(CLAVE_SYNC_KEY, "").orEmpty()
+
+    fun guardarSyncKey(context: Context, valor: String) {
+        prefs(context).edit().putString(CLAVE_SYNC_KEY, valor.trim()).apply()
+    }
 }

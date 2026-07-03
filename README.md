@@ -49,6 +49,36 @@ y al final genera el informe con las transferencias mínimas para quedar en paz.
   elegibles (negro y rojo por defecto) y opciones de notificaciones
   (día del evento, cierre de cuenta y recordatorio de pagos pendientes).
 
+## Sincronización automática en la nube (opcional)
+
+Además del QR y el archivo, Bote puede sincronizar solo contra una tabla de
+[Supabase](https://supabase.com) (capa gratuita de sobra para uso personal) o
+cualquier PostgREST propio. La fusión sigue siendo local (misma lógica que el
+QR), el servidor es solo un buzón.
+
+1. Crea un proyecto gratuito en supabase.com.
+2. En *SQL Editor*, ejecuta:
+
+```sql
+create table if not exists eventos_sync (
+  uuid text primary key,
+  datos jsonb not null,
+  actualizado timestamptz not null default now()
+);
+alter table eventos_sync enable row level security;
+create policy "acceso anon" on eventos_sync
+  for all using (true) with check (true);
+```
+
+3. En Bote → Ajustes → Sincronización en la nube: activa el interruptor y pega
+   la **URL del proyecto** y la **clave `anon`** (Settings → API). Todos los
+   asistentes ponen los mismos valores.
+
+Al abrir un evento, la app baja la copia remota, la fusiona y sube el
+resultado. Aviso honesto: cualquiera que tenga la clave anon puede leer la
+tabla entera, así que compártela solo con tu grupo (el uuid del evento hace de
+secreto, pero la clave es la llave del buzón). Las fotos no se suben.
+
 ## Compilación
 
 Proyecto Android estándar (Kotlin, Material Components, Room). Requiere
