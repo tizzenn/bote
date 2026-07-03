@@ -16,8 +16,8 @@ android {
         applicationId = "com.bote.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 11
-        versionName = "2.0"
+        versionCode = 12
+        versionName = "2.1"
     }
 
     // La clave de firma llega por variables de entorno (en CI, desde los secrets del repo).
