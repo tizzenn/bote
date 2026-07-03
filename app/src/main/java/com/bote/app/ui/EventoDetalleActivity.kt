@@ -90,16 +90,14 @@ class EventoDetalleActivity : BaseActivity() {
         sincronizarNube()
     }
 
-    /** Sincronización automática con la nube, si está configurada en Ajustes. */
+    /** Sincronización automática con la nube, si este evento tiene servidor. */
     private fun sincronizarNube() {
-        if (sincronizando || !SyncRemoto.activo(this)) return
+        if (sincronizando) return
         sincronizando = true
         lifecycleScope.launch {
             try {
                 val dao = AppDatabase.get(this@EventoDetalleActivity).dao()
-                val habiaRemoto = SyncRemoto.sincronizar(
-                    this@EventoDetalleActivity, dao, eventoId
-                )
+                val habiaRemoto = SyncRemoto.sincronizar(dao, eventoId)
                 if (habiaRemoto) cargar()
             } catch (e: Exception) {
                 // sin red o servidor caído: la app sigue en local

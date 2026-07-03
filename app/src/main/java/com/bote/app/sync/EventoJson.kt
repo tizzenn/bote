@@ -44,6 +44,10 @@ object EventoJson {
         jEvento.put("cerrado", evento.cerrado)
         jEvento.put("creadoMillis", evento.creadoMillis)
         jEvento.put("modificadoMillis", evento.modificadoMillis)
+        // El servidor del grupo viaja con el evento: quien lo importa se conecta solo
+        jEvento.put("syncActivo", evento.syncActivo)
+        jEvento.put("syncUrl", evento.syncUrl)
+        jEvento.put("syncKey", evento.syncKey)
         raiz.put("evento", jEvento)
 
         val jAsistentes = JSONArray()
@@ -146,7 +150,10 @@ object EventoJson {
                 miAsistenteId = 0,
                 cerrado = jEvento.optBoolean("cerrado"),
                 creadoMillis = jEvento.optLong("creadoMillis", System.currentTimeMillis()),
-                modificadoMillis = jEvento.optLong("modificadoMillis")
+                modificadoMillis = jEvento.optLong("modificadoMillis"),
+                syncActivo = jEvento.optBoolean("syncActivo"),
+                syncUrl = jEvento.optString("syncUrl"),
+                syncKey = jEvento.optString("syncKey")
             )
         )
         val idPorUuid = mutableMapOf<String, Long>()
@@ -185,7 +192,10 @@ object EventoJson {
                     ubicacion = jEvento.optString("ubicacion"),
                     modo = jEvento.optString("modo", Modo.COLABORATIVO),
                     cerrado = jEvento.optBoolean("cerrado"),
-                    modificadoMillis = modImportado
+                    modificadoMillis = modImportado,
+                    syncActivo = jEvento.optBoolean("syncActivo", local.evento.syncActivo),
+                    syncUrl = jEvento.optString("syncUrl", local.evento.syncUrl),
+                    syncKey = jEvento.optString("syncKey", local.evento.syncKey)
                 )
             )
         }

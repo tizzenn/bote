@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.bote.app.BaseActivity
 import com.bote.app.R
+import com.bote.app.config.Ajustes
 import com.bote.app.data.AppDatabase
 import com.bote.app.data.Asistente
 import com.bote.app.data.Calculadora
@@ -145,8 +146,11 @@ class AddEditEventoActivity : BaseActivity() {
             }
         }
 
+        binding.toggleSync.addOnButtonCheckedListener { _, _, _ -> refrescarSync() }
+
         if (eventoId == 0L) {
             binding.toggleModo.check(R.id.btnColaborativo)
+            binding.toggleSync.check(R.id.btnSyncLocal)
             fechaMillis = hoy()
             binding.campoFecha.setText(formatoFecha.format(Date(fechaMillis)))
             // El creador del evento entra automáticamente como asistente.
@@ -159,6 +163,33 @@ class AddEditEventoActivity : BaseActivity() {
             cargar()
         }
     }
+
+    /** Muestra los campos de servidor propio solo en la opción "Otro". */
+    private fun refrescarSync() {
+        val otro = binding.toggleSync.checkedButtonId == R.id.btnSyncOtro
+        binding.panelSyncOtro.visibility = if (otro) View.VISIBLE else View.GONE
+        binding.textoSync.setText(
+            when (binding.toggleSync.checkedButtonId) {
+                R.id.btnSyncDefecto -> R.string.sync_defecto_desc
+                R.id.btnSyncOtro -> R.string.sync_otro_desc
+                else -> R.string.sync_local_desc
+            }
+        )
+    }
+
+    /** Resuelve (activo, url, clave) según la opción de sincronización elegida. */
+    private fun resolverSync(): Triple<Boolean, String, String> =
+        when (binding.toggleSync.checkedButtonId) {
+            R.id.btnSyncDefecto ->
+                Triple(true, Ajustes.syncUrl(this), Ajustes.syncKey(this))
+            R.id.btnSyncOtro ->
+                Triple(
+                    true,
+                    binding.campoSyncUrl.text?.toString().orEmpty().trim(),
+                    binding.campoSyncKey.text?.toString().orEmpty().trim()
+                )
+            else -> Triple(false, "", "")
+        }
 
     private fun hoy(): Long = Calendar.getInstance().apply {
         set(Calendar.HOUR_OF_DAY, 12)
@@ -184,6 +215,21 @@ class AddEditEventoActivity : BaseActivity() {
             binding.toggleModo.check(
                 if (evento.esRestringido) R.id.btnRestringido else R.id.btnColaborativo
             )
+
+            // Opción de sincronización según la config guardada del evento
+            when {
+                !evento.syncActivo -> binding.toggleSync.check(R.id.btnSyncLocal)
+                evento.syncUrl == Ajustes.syncUrl(this@AddEditEventoActivity) &&
+                    evento.syncKey == Ajustes.syncKey(this@AddEditEventoActivity) ->
+                    binding.toggleSync.check(R.id.btnSyncDefecto)
+                else -> {
+                    binding.campoSyncUrl.setText(evento.syncUrl)
+                    binding.campoSyncKey.setText(evento.syncKey)
+                    binding.toggleSync.check(R.id.btnSyncOtro)
+                }
+            }
+            refrescarSync()
+
             asistentes.clear()
             asistentes.addAll(completo.asistentes)
             pintarAsistentes()
@@ -368,6 +414,8 @@ class AddEditEventoActivity : BaseActivity() {
                 }
             }
 
+            val (syncActivo, syncUrl, syncKey) = resolverSync()
+
             val guardadoId: Long
             if (eventoId == 0L) {
                 guardadoId = dao.insertarEvento(
@@ -379,7 +427,10 @@ class AddEditEventoActivity : BaseActivity() {
                         ubicacion = ubicacion,
                         fotoPath = fotoPath,
                         modo = modo,
-                        soyCreador = true
+                        soyCreador = true,
+                        syncActivo = syncActivo,
+                        syncUrl = syncUrl,
+                        syncKey = syncKey
                     )
                 )
             } else {
@@ -393,7 +444,10 @@ class AddEditEventoActivity : BaseActivity() {
                         ubicacion = ubicacion,
                         fotoPath = fotoPath,
                         modo = modo,
-                        modificadoMillis = System.currentTimeMillis()
+                        modificadoMillis = System.currentTimeMillis(),
+                        syncActivo = syncActivo,
+                        syncUrl = syncUrl,
+                        syncKey = syncKey
                     )
                 )
                 for (asistente in eliminados) {

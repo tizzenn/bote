@@ -12,7 +12,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         Evento::class, Asistente::class, Apunte::class, Reparto::class,
         ApunteBorrado::class, Registro::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -69,13 +69,23 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** v1.8 → v1.9: servidor de sincronización propio de cada evento. */
+        private val MIGRACION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE eventos ADD COLUMN syncActivo INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE eventos ADD COLUMN syncUrl TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE eventos ADD COLUMN syncKey TEXT NOT NULL DEFAULT ''")
+            }
+        }
+
         fun get(context: Context): AppDatabase =
             instancia ?: synchronized(this) {
                 instancia ?: Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "bote.db"
-                ).addMigrations(MIGRACION_1_2, MIGRACION_2_3).build().also { instancia = it }
+                ).addMigrations(MIGRACION_1_2, MIGRACION_2_3, MIGRACION_3_4)
+                    .build().also { instancia = it }
             }
     }
 }

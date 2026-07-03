@@ -70,14 +70,26 @@ create policy "acceso anon" on eventos_sync
   for all using (true) with check (true);
 ```
 
-3. En Bote → Ajustes → Sincronización en la nube: activa el interruptor y pega
-   la **URL del proyecto** y la **clave `anon`** (Settings → API). Todos los
-   asistentes ponen los mismos valores.
+3. Copia la **URL del proyecto** y la **clave `anon`** (Settings → API).
 
-Al abrir un evento, la app baja la copia remota, la fusiona y sube el
-resultado. Aviso honesto: cualquiera que tenga la clave anon puede leer la
-tabla entera, así que compártela solo con tu grupo (el uuid del evento hace de
-secreto, pero la clave es la llave del buzón). Las fotos no se suben.
+**El servidor es por evento**, no de la app: cada grupo puede tener el suyo, así
+que un mismo usuario puede estar en varios grupos en servidores distintos. Al
+crear un evento eliges en la sección *Sincronización*:
+
+- **Local** — sin nube (solo QR/archivo).
+- **Por defecto** — usa el servidor que tengas guardado en Ajustes (para tu
+  grupo habitual).
+- **Otro** — pegas la URL y la clave de ese grupo concreto.
+
+Lo configura **solo quien crea el evento**. La config del servidor **viaja
+dentro del evento** al compartirlo (QR o archivo), así que los demás asistentes,
+al importarlo, quedan conectados automáticamente sin teclear nada. A partir de
+ahí, al abrir el evento la app baja la copia remota, la fusiona y sube el
+resultado.
+
+Aviso honesto: cualquiera que tenga la clave anon puede leer la tabla entera, así
+que compártela solo con tu grupo (el uuid del evento hace de secreto, pero la
+clave es la llave del buzón). Las fotos no se suben.
 
 ## Compilación
 

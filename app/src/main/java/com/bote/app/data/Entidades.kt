@@ -37,9 +37,16 @@ data class Evento(
     val cerrado: Boolean = false,
     val creadoMillis: Long = System.currentTimeMillis(),
     /** Última modificación de los datos del evento; decide quién gana al fusionar. */
-    val modificadoMillis: Long = System.currentTimeMillis()
+    val modificadoMillis: Long = System.currentTimeMillis(),
+    /** Servidor de sincronización propio de este evento (grupo). Viaja con
+     *  el evento al compartirlo, así quien lo importa queda conectado solo. */
+    val syncActivo: Boolean = false,
+    val syncUrl: String = "",
+    val syncKey: String = ""
 ) {
     val esRestringido: Boolean get() = modo == Modo.RESTRINGIDO
+    val sincronizable: Boolean
+        get() = syncActivo && syncUrl.isNotBlank() && syncKey.isNotBlank()
 }
 
 @Entity(

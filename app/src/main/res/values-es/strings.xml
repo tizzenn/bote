@@ -174,12 +174,20 @@
     <string name="btn_acceso_notif">Conceder acceso a notificaciones</string>
     <string name="notif_pago_titulo">¿Apuntar este pago en Bote?</string>
     <string name="elegir_evento">¿En qué evento lo apunto?</string>
-    <string name="seccion_sync_nube">SINCRONIZACIÓN EN LA NUBE</string>
-    <string name="ajuste_sync">Sincronización automática (Supabase)</string>
+    <string name="seccion_sync_nube">SERVIDOR DE SINCRONIZACIÓN POR DEFECTO</string>
+    <string name="ajuste_sync">Configurar un servidor por defecto</string>
     <string name="campo_sync_url">URL del proyecto</string>
     <string name="campo_sync_key">Clave API (anon)</string>
-    <string name="sync_nube_ayuda">Gratis en supabase.com: crea un proyecto, ejecuta el SQL del README y pega aquí la URL y la clave anon. Todos los asistentes usan los mismos valores.</string>
+    <string name="sync_nube_ayuda">Gratis en supabase.com: crea un proyecto, ejecuta el SQL del README y pega aquí la URL y la clave anon. Se ofrece como opción «Por defecto» al crear un evento; cada grupo puede usar su propio servidor.</string>
     <string name="sync_nube_hecho">Sincronizado con la nube.</string>
+    <!-- Selector de servidor en el formulario de evento -->
+    <string name="seccion_sync_evento">SINCRONIZACIÓN</string>
+    <string name="sync_local">Local</string>
+    <string name="sync_defecto">Por defecto</string>
+    <string name="sync_otro">Otro</string>
+    <string name="sync_local_desc">Este evento se queda en el dispositivo. Compártelo por QR o archivo.</string>
+    <string name="sync_defecto_desc">Usa tu servidor por defecto (Ajustes). Viaja con el evento, así los demás se conectan solos.</string>
+    <string name="sync_otro_desc">Servidor propio de este grupo. Viaja con el evento; quien lo importe se conecta automáticamente.</string>
     <string name="seccion_notificaciones">NOTIFICACIONES</string>
     <string name="notif_evento">Recordatorio el día del evento</string>
     <string name="notif_cierre">Aviso al cerrar una cuenta</string>

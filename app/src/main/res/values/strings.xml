@@ -174,12 +174,20 @@
     <string name="btn_acceso_notif">Grant notification access</string>
     <string name="notif_pago_titulo">Add this payment to Bote?</string>
     <string name="elegir_evento">Which event should it go to?</string>
-    <string name="seccion_sync_nube">CLOUD SYNC</string>
-    <string name="ajuste_sync">Automatic sync (Supabase)</string>
+    <string name="seccion_sync_nube">DEFAULT SYNC SERVER</string>
+    <string name="ajuste_sync">Set up a default server</string>
     <string name="campo_sync_url">Project URL</string>
     <string name="campo_sync_key">API key (anon)</string>
-    <string name="sync_nube_ayuda">Free at supabase.com: create a project, run the SQL from the README and paste the URL and anon key here. Every attendee uses the same values.</string>
+    <string name="sync_nube_ayuda">Free at supabase.com: create a project, run the SQL from the README and paste the URL and anon key here. This is offered as the "Default" option when creating an event; each group can still use its own server.</string>
     <string name="sync_nube_hecho">Synced with the cloud.</string>
+    <!-- Sync server picker in the event form -->
+    <string name="seccion_sync_evento">SYNC</string>
+    <string name="sync_local">Local</string>
+    <string name="sync_defecto">Default</string>
+    <string name="sync_otro">Other</string>
+    <string name="sync_local_desc">This event stays on the device. Share it by QR or file.</string>
+    <string name="sync_defecto_desc">Uses your default server (Settings). Travels with the event, so others connect automatically.</string>
+    <string name="sync_otro_desc">This group\'s own server. It travels with the event; attendees who import it connect automatically.</string>
     <string name="seccion_notificaciones">NOTIFICATIONS</string>
     <string name="notif_evento">Reminder on the event day</string>
     <string name="notif_cierre">Alert when a tab is closed</string>
