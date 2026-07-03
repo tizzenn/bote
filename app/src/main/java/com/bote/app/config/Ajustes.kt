@@ -138,6 +138,17 @@ object Ajustes {
         prefs(context).edit().putString(CLAVE_COBRO_PLANTILLA, valor).apply()
     }
 
+    // ── Detector de pagos (desactivado por defecto) ──────────────
+
+    private const val CLAVE_DETECTOR = "detector_pagos"
+
+    fun detectorActivo(context: Context): Boolean =
+        prefs(context).getBoolean(CLAVE_DETECTOR, false)
+
+    fun guardarDetectorActivo(context: Context, valor: Boolean) {
+        prefs(context).edit().putBoolean(CLAVE_DETECTOR, valor).apply()
+    }
+
     // ── Sincronización en la nube (desactivada por defecto) ──────
 
     private const val CLAVE_SYNC_ACTIVO = "sync_activo"

@@ -67,6 +67,19 @@ class SettingsActivity : BaseActivity() {
             }
         })
 
+        // Detector de pagos (desactivado por defecto)
+        val detectorActivo = Ajustes.detectorActivo(this)
+        binding.switchDetector.isChecked = detectorActivo
+        binding.btnAccesoNotif.visibility = if (detectorActivo) View.VISIBLE else View.GONE
+        binding.switchDetector.setOnCheckedChangeListener { _, valor ->
+            Ajustes.guardarDetectorActivo(this, valor)
+            binding.btnAccesoNotif.visibility = if (valor) View.VISIBLE else View.GONE
+            if (valor && !accesoNotificacionesConcedido()) {
+                abrirAjustesAccesoNotificaciones()
+            }
+        }
+        binding.btnAccesoNotif.setOnClickListener { abrirAjustesAccesoNotificaciones() }
+
         // Sincronización en la nube (desactivada por defecto)
         val syncActivo = Ajustes.syncActivo(this)
         binding.switchSync.isChecked = syncActivo
@@ -96,6 +109,23 @@ class SettingsActivity : BaseActivity() {
         binding.switchPagos.isChecked = Ajustes.notifPagos(this)
         binding.switchPagos.setOnCheckedChangeListener { _, valor ->
             Ajustes.guardarNotifPagos(this, valor)
+        }
+    }
+
+    private fun accesoNotificacionesConcedido(): Boolean =
+        android.provider.Settings.Secure.getString(
+            contentResolver, "enabled_notification_listeners"
+        )?.contains(packageName) == true
+
+    private fun abrirAjustesAccesoNotificaciones() {
+        try {
+            startActivity(
+                android.content.Intent(
+                    android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS
+                )
+            )
+        } catch (e: Exception) {
+            // Algún fabricante raro sin esa pantalla: no rompemos los ajustes
         }
     }
 

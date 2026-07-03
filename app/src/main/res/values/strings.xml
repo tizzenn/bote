@@ -168,6 +168,12 @@
     <string name="ajuste_cobro_plantilla">Message template</string>
     <string name="cobro_ayuda">You can use {nombre}, {importe}, {evento} and {telefono} (yours, for Bizum).</string>
     <string name="cobro_plantilla_defecto">Silver or lead, {nombre}: you owe me {importe} for {evento}. Bizum to {telefono}. Your call.</string>
+    <string name="seccion_detector">PAYMENT DETECTOR</string>
+    <string name="ajuste_detector">Detect payments in notifications</string>
+    <string name="detector_ayuda">When a bank notification looks like a purchase, Bote offers to add it as an entry with the amount and merchant pre-filled. Needs notification access; everything stays on this device.</string>
+    <string name="btn_acceso_notif">Grant notification access</string>
+    <string name="notif_pago_titulo">Add this payment to Bote?</string>
+    <string name="elegir_evento">Which event should it go to?</string>
     <string name="seccion_sync_nube">CLOUD SYNC</string>
     <string name="ajuste_sync">Automatic sync (Supabase)</string>
     <string name="campo_sync_url">Project URL</string>

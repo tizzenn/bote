@@ -28,9 +28,18 @@ import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity() {
 
+    companion object {
+        const val EXTRA_PAGO_CENTS = "pago_cents"
+        const val EXTRA_PAGO_CONCEPTO = "pago_concepto"
+    }
+
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: EventoAdapter
     private var eventos: List<EventoCompleto> = emptyList()
+
+    /** Pago detectado en notificaciones, pendiente de elegir evento. */
+    private var pagoPendienteCents: Long = 0
+    private var pagoPendienteConcepto: String = ""
 
     private val pedirNotificaciones =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
@@ -73,12 +82,48 @@ class MainActivity : BaseActivity() {
             pedirNotificaciones.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
 
+        pagoPendienteCents = intent.getLongExtra(EXTRA_PAGO_CENTS, 0)
+        pagoPendienteConcepto = intent.getStringExtra(EXTRA_PAGO_CONCEPTO).orEmpty()
+
         lifecycleScope.launch {
             AppDatabase.get(this@MainActivity).dao().observarEventos().collect {
                 eventos = it
                 refiltrar()
+                ofrecerPagoDetectado()
             }
         }
+    }
+
+    /** Con un pago detectado pendiente, pregunta en qué evento apuntarlo. */
+    private fun ofrecerPagoDetectado() {
+        if (pagoPendienteCents <= 0) return
+        val cents = pagoPendienteCents
+        val concepto = pagoPendienteConcepto
+        pagoPendienteCents = 0
+
+        val candidatos = eventos.filter { datos ->
+            !datos.evento.cerrado &&
+                (datos.evento.soyCreador || !datos.evento.esRestringido)
+        }
+        if (candidatos.isEmpty()) return
+        val nombres = candidatos.map { datos ->
+            datos.evento.titulo.ifBlank {
+                java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM)
+                    .format(java.util.Date(datos.evento.fechaMillis))
+            }
+        }.toTypedArray()
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.elegir_evento)
+            .setItems(nombres) { _, indice ->
+                startActivity(
+                    Intent(this, ApunteActivity::class.java)
+                        .putExtra(ApunteActivity.EXTRA_EVENTO_ID, candidatos[indice].evento.id)
+                        .putExtra(ApunteActivity.EXTRA_GASTADO_PREVIO, cents)
+                        .putExtra(ApunteActivity.EXTRA_CONCEPTO_PREVIO, concepto)
+                )
+            }
+            .setNegativeButton(R.string.accion_cancelar, null)
+            .show()
     }
 
     /**

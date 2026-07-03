@@ -43,6 +43,8 @@ class ApunteActivity : BaseActivity() {
     companion object {
         const val EXTRA_EVENTO_ID = "evento_id"
         const val EXTRA_APUNTE_ID = "apunte_id"
+        const val EXTRA_GASTADO_PREVIO = "gastado_previo"
+        const val EXTRA_CONCEPTO_PREVIO = "concepto_previo"
     }
 
     /** Estado de la fila de reparto de un asistente (fader + pin). */
@@ -202,6 +204,16 @@ class ApunteActivity : BaseActivity() {
                 pagadorId = completo.evento.miAsistenteId.takeIf { id ->
                     completo.asistentes.any { it.id == id }
                 } ?: completo.asistentes.firstOrNull()?.id ?: 0
+
+                // Datos precargados por el detector de pagos
+                val gastadoPrevio = intent.getLongExtra(EXTRA_GASTADO_PREVIO, 0)
+                if (gastadoPrevio > 0) {
+                    binding.campoGastado.setText(Dinero.aTexto(gastadoPrevio))
+                }
+                val conceptoPrevio = intent.getStringExtra(EXTRA_CONCEPTO_PREVIO).orEmpty()
+                if (conceptoPrevio.isNotBlank()) {
+                    binding.campoConcepto.setText(conceptoPrevio)
+                }
             }
 
             marcarCategoria()
