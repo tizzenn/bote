@@ -1,0 +1,21 @@
+Bote manages the shared accounts of a group of people: create one card per
+event, note who paid for what and how it is split, and get the final report
+with the minimum set of transfers needed to settle up.
+
+Features:
+
+* Event cards with avatar, date, location, title and description.
+* Attendees added from your contacts or by hand, each with a colored initials
+  avatar.
+* Entries (a good or service paid by one person) with an icon category and
+  budgeted, spent and paid amounts.
+* Split by faders: equal parts or custom percentages, with pins to lock a
+  share so moving one fader redistributes only the open ones.
+* Final report with who pays whom, category breakdown and per-user payment
+  marks.
+* Serverless sharing: an event travels as a JSON file or a QR code and merges
+  entry by entry (last edit wins, payment marks never lost, deletions stick).
+
+Optional automatic cloud sync against a user-provided Supabase / PostgREST
+server is available but disabled by default; every event defaults to
+local-only sharing. The app is fully usable offline.

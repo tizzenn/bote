@@ -1,0 +1,22 @@
+Bote administra las cuentas compartidas de un grupo de gente: crea una ficha
+por evento, apunta quién paga cada cosa y en qué porcentaje se reparte, y
+genera el informe final con las transferencias mínimas para quedar en paz.
+
+Funcionalidad:
+
+* Fichas de evento con avatar, fecha, ubicación, título y descripción.
+* Asistentes añadidos desde los contactos o a mano, con avatar de iniciales de
+  color.
+* Apuntes (un bien o servicio pagado por una persona) con categoría de icono e
+  importes presupuestado, gastado y pagado.
+* Reparto por faders: partes iguales o porcentajes, con pines para fijar una
+  parte de modo que mover un fader redistribuye solo los abiertos.
+* Informe final con quién paga a quién, desglose por categorías y marcas de
+  pago por usuario.
+* Compartir sin servidor: el evento viaja como archivo JSON o código QR y se
+  fusiona apunte a apunte (gana la edición más reciente, las marcas de pago no
+  se pierden y los borrados no resucitan).
+
+La sincronización automática opcional en la nube contra un servidor Supabase /
+PostgREST propio está disponible pero desactivada por defecto; cada evento es
+local salvo que se indique. La app es totalmente usable sin conexión.
