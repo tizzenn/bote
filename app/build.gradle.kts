@@ -16,19 +16,8 @@ android {
         applicationId = "com.bote.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 8
-        versionName = "1.7"
-
-        // Valores por defecto de la sincronización en la nube, inyectados
-        // en CI desde los secrets del repo (vacíos en compilaciones locales).
-        buildConfigField(
-            "String", "SYNC_URL_DEFECTO",
-            "\"${System.getenv("BOTE_SYNC_URL") ?: ""}\""
-        )
-        buildConfigField(
-            "String", "SYNC_KEY_DEFECTO",
-            "\"${System.getenv("BOTE_SYNC_KEY") ?: ""}\""
-        )
+        versionCode = 9
+        versionName = "1.8"
     }
 
     // La clave de firma llega por variables de entorno (en CI, desde los secrets del repo).
@@ -67,7 +56,6 @@ android {
 
     buildFeatures {
         viewBinding = true
-        buildConfig = true
     }
 
     compileOptions {

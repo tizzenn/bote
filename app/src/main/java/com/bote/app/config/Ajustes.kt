@@ -163,16 +163,14 @@ object Ajustes {
     }
 
     fun syncUrl(context: Context): String =
-        prefs(context).getString(CLAVE_SYNC_URL, null)
-            ?: com.bote.app.BuildConfig.SYNC_URL_DEFECTO
+        prefs(context).getString(CLAVE_SYNC_URL, "").orEmpty()
 
     fun guardarSyncUrl(context: Context, valor: String) {
         prefs(context).edit().putString(CLAVE_SYNC_URL, valor.trim()).apply()
     }
 
     fun syncKey(context: Context): String =
-        prefs(context).getString(CLAVE_SYNC_KEY, null)
-            ?: com.bote.app.BuildConfig.SYNC_KEY_DEFECTO
+        prefs(context).getString(CLAVE_SYNC_KEY, "").orEmpty()
 
     fun guardarSyncKey(context: Context, valor: String) {
         prefs(context).edit().putString(CLAVE_SYNC_KEY, valor.trim()).apply()

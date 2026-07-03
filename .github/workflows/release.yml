@@ -38,8 +38,6 @@ jobs:
         env:
           BOTE_KEYSTORE: ${{ runner.temp }}/bote-app.p12
           BOTE_KEYSTORE_PASS: ${{ secrets.BOTE_KEYSTORE_PASS }}
-          BOTE_SYNC_URL: ${{ secrets.BOTE_SYNC_URL }}
-          BOTE_SYNC_KEY: ${{ secrets.BOTE_SYNC_KEY }}
         run: gradle assembleRelease --no-daemon
 
       - name: Descargar repositorio fdroid
