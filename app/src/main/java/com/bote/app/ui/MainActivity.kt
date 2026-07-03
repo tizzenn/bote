@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bote.app.BaseActivity
 import com.bote.app.R
+import com.bote.app.config.Ajustes
 import com.bote.app.data.AppDatabase
 import com.bote.app.data.EventoCompleto
 import com.bote.app.data.Registro
@@ -31,6 +32,24 @@ class MainActivity : BaseActivity() {
     companion object {
         const val EXTRA_PAGO_CENTS = "pago_cents"
         const val EXTRA_PAGO_CONCEPTO = "pago_concepto"
+
+        /** Clave persistida → etiqueta; el orden de la lista es el del menú. */
+        val ORDENES = listOf(
+            "FECHA" to R.string.orden_fecha,
+            "CREACION" to R.string.orden_creacion,
+            "ASISTENTES" to R.string.orden_asistentes,
+            "CAROS" to R.string.orden_caros
+        )
+
+        /** Aplica el criterio de orden a una lista ya filtrada. */
+        fun ordenar(
+            lista: List<EventoCompleto>, clave: String
+        ): List<EventoCompleto> = when (clave) {
+            "CREACION" -> lista.sortedByDescending { it.evento.creadoMillis }
+            "ASISTENTES" -> lista.sortedByDescending { it.asistentes.size }
+            "CAROS" -> lista.sortedByDescending { it.totalGastadoCents }
+            else -> lista.sortedByDescending { it.evento.fechaMillis }
+        }
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -140,8 +159,9 @@ class MainActivity : BaseActivity() {
                     (datos.evento.soyCreador || datos.miAsistente()?.liquidado != true)
             }
         }
-        adapter.actualizar(filtrados)
-        binding.vacio.visibility = if (filtrados.isEmpty()) android.view.View.VISIBLE
+        val ordenados = ordenar(filtrados, Ajustes.ordenEventos(this))
+        adapter.actualizar(ordenados)
+        binding.vacio.visibility = if (ordenados.isEmpty()) android.view.View.VISIBLE
         else android.view.View.GONE
     }
 
@@ -216,6 +236,10 @@ class MainActivity : BaseActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
+        R.id.accionOrdenar -> {
+            elegirOrden()
+            true
+        }
         R.id.accionImportar -> {
             elegirOrigenImportacion()
             true
@@ -225,5 +249,20 @@ class MainActivity : BaseActivity() {
             true
         }
         else -> super.onOptionsItemSelected(item)
+    }
+
+    private fun elegirOrden() {
+        val etiquetas = ORDENES.map { getString(it.second) }.toTypedArray()
+        val actual = ORDENES.indexOfFirst { it.first == Ajustes.ordenEventos(this) }
+            .coerceAtLeast(0)
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.orden_titulo)
+            .setSingleChoiceItems(etiquetas, actual) { dialogo, indice ->
+                Ajustes.guardarOrdenEventos(this, ORDENES[indice].first)
+                refiltrar()
+                dialogo.dismiss()
+            }
+            .setNegativeButton(R.string.accion_cancelar, null)
+            .show()
     }
 }

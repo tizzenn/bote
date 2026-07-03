@@ -9,6 +9,12 @@
     <string name="filtro_todos">Todos</string>
     <string name="accion_ajustes">Ajustes</string>
     <string name="accion_importar">Importar evento</string>
+    <string name="accion_ordenar">Ordenar</string>
+    <string name="orden_titulo">Ordenar eventos por</string>
+    <string name="orden_fecha">Fecha</string>
+    <string name="orden_creacion">Creación reciente</string>
+    <string name="orden_asistentes">Número de asistentes</string>
+    <string name="orden_caros">Más caros</string>
     <string name="nuevo_evento">Nuevo evento</string>
     <string name="num_asistentes">%1$d asistentes</string>
     <string name="pendiente_liquidar">Pendiente de liquidar</string>
@@ -64,7 +70,9 @@
     <string name="confirmar_cerrar_cuenta">¿Poner el candado y generar el informe definitivo? Ya no se podrán añadir apuntes.</string>
     <string name="error_cerrar_apuntes_abiertos">Para cerrar la cuenta, todos los apuntes deben tener su importe pagado.</string>
     <string name="solo_admin">Solo el administrador puede hacerlo (modo restringido).</string>
-    <string name="compartir_evento">Compartir / sincronizar</string>
+    <string name="compartir_evento">Enviar por QR o archivo</string>
+    <string name="compartir_titulo">Pasar el evento a otra persona</string>
+    <string name="compartir_ayuda">Entrega el evento a otro móvil aquí mismo, sin ningún servidor de por medio. Lo reciben escaneando el QR en persona o abriendo el archivo (WhatsApp, email, etc.). Si en su lugar quieres que todos se mantengan sincronizados solos, configura un servidor al crear el evento.</string>
     <string name="paga_fmt">Paga %1$s</string>
     <string name="presupuestado_fmt">Presupuestado: %1$s</string>
     <string name="gastado_fmt">Gastado: %1$s</string>
@@ -135,8 +143,8 @@
     <string name="sub_pendiente">Pendiente de liquidar: %1$s</string>
 
     <!-- Importar / sincronizar -->
-    <string name="compartir_archivo">Archivo</string>
-    <string name="compartir_qr">Código QR</string>
+    <string name="compartir_archivo">Enviar archivo</string>
+    <string name="compartir_qr">Mostrar QR</string>
     <string name="escanear_qr">Escanear QR</string>
     <string name="qr_demasiado_grande">El evento es demasiado grande para un QR; compártelo como archivo.</string>
     <string name="qr_ayuda">Escanea este código desde Bote en el otro móvil (Importar evento → Escanear QR).</string>

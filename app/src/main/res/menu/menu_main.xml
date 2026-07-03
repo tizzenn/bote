@@ -3,6 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/accionOrdenar"
+        android:icon="@drawable/ic_ordenar"
+        android:title="@string/accion_ordenar"
+        app:iconTint="@android:color/white"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/accionImportar"
         android:icon="@drawable/ic_importar"
         android:title="@string/accion_importar"

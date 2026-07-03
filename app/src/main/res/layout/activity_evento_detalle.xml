@@ -88,34 +88,67 @@
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnCalendario"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="52dp"
                         android:layout_weight="1"
-                        android:layout_marginEnd="4dp"
-                        android:text="@string/anadir_calendario"
-                        app:icon="@drawable/ic_calendario_add" />
+                        android:layout_marginEnd="6dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:minWidth="0dp"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="0dp"
+                        android:text=""
+                        android:tooltipText="@string/anadir_calendario"
+                        android:contentDescription="@string/anadir_calendario"
+                        app:icon="@drawable/ic_calendario_add"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconTint="?attr/colorAccent"
+                        app:cornerRadius="14dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnInforme"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="52dp"
                         android:layout_weight="1"
-                        android:layout_marginStart="4dp"
-                        android:layout_marginEnd="4dp"
-                        android:text="@string/ver_informe"
-                        app:icon="@drawable/ic_informe" />
+                        android:layout_marginStart="6dp"
+                        android:layout_marginEnd="6dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:minWidth="0dp"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="0dp"
+                        android:text=""
+                        android:tooltipText="@string/ver_informe"
+                        android:contentDescription="@string/ver_informe"
+                        app:icon="@drawable/ic_informe"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconTint="?attr/colorAccent"
+                        app:cornerRadius="14dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnCompartir"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="52dp"
                         android:layout_weight="1"
-                        android:layout_marginStart="4dp"
-                        android:text="@string/compartir_evento"
-                        app:icon="@drawable/ic_compartir" />
+                        android:layout_marginStart="6dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
+                        android:minWidth="0dp"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="0dp"
+                        android:text=""
+                        android:tooltipText="@string/compartir_evento"
+                        android:contentDescription="@string/compartir_evento"
+                        app:icon="@drawable/ic_compartir"
+                        app:iconGravity="textStart"
+                        app:iconPadding="0dp"
+                        app:iconTint="?attr/colorAccent"
+                        app:cornerRadius="14dp" />
                 </LinearLayout>
 
                 <com.google.android.material.button.MaterialButton

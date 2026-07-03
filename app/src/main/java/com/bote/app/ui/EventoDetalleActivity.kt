@@ -360,15 +360,12 @@ class EventoDetalleActivity : BaseActivity() {
     }
 
     private fun compartirEvento() {
-        val opciones = arrayOf(
-            getString(R.string.compartir_archivo),
-            getString(R.string.compartir_qr)
-        )
         MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.compartir_evento)
-            .setItems(opciones) { _, indice ->
-                if (indice == 0) compartirArchivo() else mostrarQr()
-            }
+            .setTitle(R.string.compartir_titulo)
+            .setMessage(R.string.compartir_ayuda)
+            .setNeutralButton(R.string.accion_cancelar, null)
+            .setNegativeButton(R.string.compartir_archivo) { _, _ -> compartirArchivo() }
+            .setPositiveButton(R.string.compartir_qr) { _, _ -> mostrarQr() }
             .show()
     }
 

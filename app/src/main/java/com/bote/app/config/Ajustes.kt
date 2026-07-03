@@ -138,6 +138,18 @@ object Ajustes {
         prefs(context).edit().putString(CLAVE_COBRO_PLANTILLA, valor).apply()
     }
 
+    // ── Orden de la lista de eventos ─────────────────────────────
+
+    private const val CLAVE_ORDEN_EVENTOS = "orden_eventos"
+
+    /** Devuelve la clave de orden guardada (FECHA por defecto). */
+    fun ordenEventos(context: Context): String =
+        prefs(context).getString(CLAVE_ORDEN_EVENTOS, "FECHA") ?: "FECHA"
+
+    fun guardarOrdenEventos(context: Context, clave: String) {
+        prefs(context).edit().putString(CLAVE_ORDEN_EVENTOS, clave).apply()
+    }
+
     // ── Detector de pagos (desactivado por defecto) ──────────────
 
     private const val CLAVE_DETECTOR = "detector_pagos"

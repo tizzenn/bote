@@ -9,6 +9,12 @@
     <string name="filtro_todos">All</string>
     <string name="accion_ajustes">Settings</string>
     <string name="accion_importar">Import event</string>
+    <string name="accion_ordenar">Sort</string>
+    <string name="orden_titulo">Sort events by</string>
+    <string name="orden_fecha">Date</string>
+    <string name="orden_creacion">Recently created</string>
+    <string name="orden_asistentes">Number of attendees</string>
+    <string name="orden_caros">Most expensive</string>
     <string name="nuevo_evento">New event</string>
     <string name="num_asistentes">%1$d attendees</string>
     <string name="pendiente_liquidar">Pending settlement</string>
@@ -64,7 +70,9 @@
     <string name="confirmar_cerrar_cuenta">Lock the event and generate the final report? No more entries can be added.</string>
     <string name="error_cerrar_apuntes_abiertos">To close the tab, every entry needs its paid amount.</string>
     <string name="solo_admin">Only the admin can do this (restricted mode).</string>
-    <string name="compartir_evento">Share / sync</string>
+    <string name="compartir_evento">Send by QR or file</string>
+    <string name="compartir_titulo">Send the event to someone</string>
+    <string name="compartir_ayuda">Hands the event to another phone right here — no server involved. They get everything by scanning the QR in person or opening the file (WhatsApp, email, etc.). To keep everyone in sync automatically instead, set a sync server when creating the event.</string>
     <string name="paga_fmt">%1$s pays</string>
     <string name="presupuestado_fmt">Budgeted: %1$s</string>
     <string name="gastado_fmt">Spent: %1$s</string>
@@ -135,8 +143,8 @@
     <string name="sub_pendiente">Pending settlement: %1$s</string>
 
     <!-- Import / sync -->
-    <string name="compartir_archivo">File</string>
-    <string name="compartir_qr">QR code</string>
+    <string name="compartir_archivo">Send file</string>
+    <string name="compartir_qr">Show QR</string>
     <string name="escanear_qr">Scan QR</string>
     <string name="qr_demasiado_grande">The event is too big for a QR; share it as a file.</string>
     <string name="qr_ayuda">Scan this code from Bote on the other phone (Import event → Scan QR).</string>
