@@ -54,9 +54,6 @@ class AddEditEventoActivity : BaseActivity() {
     private val asistentes = mutableListOf<Asistente>()
     private val eliminados = mutableListOf<Asistente>()
 
-    /** UUID de asistentes nuevos que asumen los gastos ya apuntados. */
-    private val solidarios = mutableSetOf<String>()
-
     private val elegirFoto = registerForActivityResult(
         ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
@@ -250,7 +247,6 @@ class AddEditEventoActivity : BaseActivity() {
             } else {
                 fila.btnQuitar.setOnClickListener {
                     asistentes.remove(asistente)
-                    solidarios.remove(asistente.uuid)
                     if (asistente.id != 0L) eliminados.add(asistente)
                     pintarAsistentes()
                 }
@@ -295,24 +291,12 @@ class AddEditEventoActivity : BaseActivity() {
     }
 
     /**
-     * Si el evento ya tiene apuntes, se pregunta si el nuevo asistente asume
-     * los costes desde el principio (solidario) o empieza limpio.
+     * El asistente nuevo entra en los apuntes ya existentes con porcentaje 0
+     * (visible pero sin asumir costes) y como uno más a partir de su inclusión.
      */
     private fun agregarAsistente(asistente: Asistente) {
         asistentes.add(asistente)
         pintarAsistentes()
-        val hayApuntes = datos?.apuntes?.isNotEmpty() == true
-        if (hayApuntes) {
-            val nombre = asistente.nombre.ifBlank { getString(R.string.asistente_sin_nombre) }
-            MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.dialog_gastos_titulo)
-                .setMessage(getString(R.string.dialog_gastos_msg, nombre))
-                .setPositiveButton(R.string.gastos_solidario) { _, _ ->
-                    solidarios.add(asistente.uuid)
-                }
-                .setNegativeButton(R.string.gastos_limpio, null)
-                .show()
-        }
     }
 
     private fun leerContacto(uri: Uri) {
@@ -446,11 +430,12 @@ class AddEditEventoActivity : BaseActivity() {
             }
 
             var miAsistenteId = datos?.evento?.miAsistenteId ?: 0L
-            val idsSolidarios = mutableListOf<Long>()
+            val idsNuevos = mutableListOf<Long>()
             for (asistente in asistentes) {
                 if (asistente.id == 0L) {
                     val id = dao.insertarAsistente(asistente.copy(eventoId = guardadoId))
                     if (asistente.esCreador) miAsistenteId = id
+                    idsNuevos.add(id)
                     val nombre = asistente.nombre.ifBlank {
                         getString(R.string.asistente_sin_nombre)
                     }
@@ -461,16 +446,6 @@ class AddEditEventoActivity : BaseActivity() {
                             texto = getString(R.string.reg_asistente_nuevo, nombre)
                         )
                     )
-                    if (solidarios.contains(asistente.uuid)) {
-                        idsSolidarios.add(id)
-                        dao.insertarRegistro(
-                            Registro(
-                                eventoId = guardadoId,
-                                tipo = TipoRegistro.ASISTENTE,
-                                texto = getString(R.string.reg_asistente_solidario, nombre)
-                            )
-                        )
-                    }
                 } else {
                     dao.actualizarAsistente(asistente)
                 }
@@ -480,20 +455,16 @@ class AddEditEventoActivity : BaseActivity() {
                 dao.actualizarEvento(evento.copy(miAsistenteId = miAsistenteId))
             }
 
-            // Los solidarios entran a partes iguales en los apuntes igualitarios previos.
-            if (idsSolidarios.isNotEmpty()) {
-                val completo = dao.eventoCompleto(guardadoId)
-                if (completo != null) {
-                    for (ac in completo.apuntes) {
-                        if (!ac.apunte.repartoIgualitario) continue
-                        val participantes =
-                            (ac.repartos.map { it.asistenteId } + idsSolidarios).distinct()
-                        val puntos = Calculadora.puntosIguales(participantes.size)
-                        dao.guardarRepartos(
-                            ac.apunte.id,
-                            participantes.mapIndexed { i, asistenteId ->
-                                Reparto(ac.apunte.id, asistenteId, puntos[i])
-                            }
+            // Los asistentes nuevos entran con 0% en los apuntes ya existentes:
+            // aparecen en el reparto pero solo asumen costes desde su inclusión.
+            if (idsNuevos.isNotEmpty()) {
+                val apuntesPrevios = datos?.apuntes.orEmpty()
+                for (ac in apuntesPrevios) {
+                    val yaEnReparto = ac.repartos.map { it.asistenteId }.toSet()
+                    val faltantes = idsNuevos.filter { !yaEnReparto.contains(it) }
+                    if (faltantes.isNotEmpty()) {
+                        dao.insertarRepartos(
+                            faltantes.map { Reparto(ac.apunte.id, it, 0) }
                         )
                     }
                 }

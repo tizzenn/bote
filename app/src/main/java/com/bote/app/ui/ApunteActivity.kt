@@ -272,7 +272,9 @@ class ApunteActivity : BaseActivity() {
             val fila = FilaReparto(
                 asistente = asistente,
                 vista = vista,
-                participa = if (repartosPrevios == null) true else previo != null,
+                // Los incorporados tarde figuran con 0%: visibles pero sin carga
+                participa = if (repartosPrevios == null) true
+                else previo != null && previo.puntosBasicos > 0,
                 pct = (previo?.puntosBasicos ?: 0) / 100.0
             )
 
@@ -345,7 +347,9 @@ class ApunteActivity : BaseActivity() {
             vista.fader.visibility = if (modoIgual) View.GONE else View.VISIBLE
             vista.btnFijar.visibility = if (modoIgual) View.GONE else View.VISIBLE
             vista.fader.isEnabled = fila.participa && !fila.fijado
-            vista.fader.value = pctMostrar.coerceIn(0.0, 100.0).roundToInt().toFloat()
+            // El fader va en saltos de 5; la etiqueta conserva el valor exacto
+            val pctFader = ((pctMostrar / 5.0).roundToInt() * 5).coerceIn(0, 100)
+            vista.fader.value = pctFader.toFloat()
             vista.btnFijar.setImageResource(
                 if (fila.fijado) R.drawable.ic_pin else R.drawable.ic_pin_off
             )

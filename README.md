@@ -68,4 +68,5 @@ Secrets necesarios para publicar: `BOTE_KEYSTORE_B64`, `BOTE_KEYSTORE_PASS`,
 
 ## Licencia
 
-CC0 1.0 Universal (dominio público). Ver [LICENSE](LICENSE).
+GNU GPL v3: cualquier redistribución o derivado debe publicar su código
+fuente bajo la misma licencia. Ver [LICENSE](LICENSE).
