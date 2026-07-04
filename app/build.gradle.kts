@@ -16,8 +16,15 @@ android {
         applicationId = "com.bote.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 15
-        versionName = "2.4"
+        versionCode = 16
+        versionName = "2.5"
+    }
+
+    // F-Droid: no incluir el bloque de metadatos de dependencias (cifrado con
+    // la clave de Google) en el APK; rompe la reproducibilidad y F-Droid lo rechaza.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
     }
 
     // La clave de firma llega por variables de entorno (en CI, desde los secrets del repo).
