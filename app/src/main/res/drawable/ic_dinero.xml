@@ -2,10 +2,15 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24"
+    android:viewportWidth="960"
+    android:viewportHeight="960"
     android:tint="?attr/colorControlNormal">
-    <path
-        android:fillColor="@android:color/white"
-        android:pathData="M11.8,10.9c-2.27,-0.59 -3,-1.2 -3,-2.15 0,-1.09 1.01,-1.85 2.7,-1.85 1.78,0 2.44,0.85 2.5,2.1h2.21c-0.07,-1.72 -1.12,-3.3 -3.21,-3.81V3h-3v2.16c-1.94,0.42 -3.5,1.68 -3.5,3.61 0,2.31 1.91,3.46 4.7,4.13 2.5,0.6 3,1.48 3,2.41 0,0.69 -0.49,1.79 -2.7,1.79 -2.06,0 -2.87,-0.92 -2.98,-2.1h-2.2c0.12,2.19 1.76,3.42 3.68,3.83V21h3v-2.15c1.95,-0.37 3.5,-1.5 3.5,-3.55 -0.01,-2.84 -2.44,-3.81 -4.7,-4.4z"/>
+
+    <!-- Money bag (Material Symbols, relleno). El símbolo va en coordenadas
+         de -960 a 0 en Y; el grupo lo sube al rango 0..960 del viewport. -->
+    <group android:translateY="960">
+        <path
+            android:fillColor="@android:color/white"
+            android:pathData="M480,-320q-33,0 -56.5,-23.5T400,-400q0,-33 23.5,-56.5T480,-480q33,0 56.5,23.5T560,-400q0,33 -23.5,56.5T480,-320ZM295,-680h370l80,-160H215l80,160Zm41,560h288q90,0 153,-62.5T840,-336q0,-38 -13,-74t-37,-65L686,-600H274L170,-475q-24,29 -37,65t-13,74q0,91 62.5,153.5T336,-120Z"/>
+    </group>
 </vector>
