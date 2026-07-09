@@ -79,6 +79,15 @@
     <string name="gastado_fmt">Spent: %1$s</string>
     <string name="saldado_fmt">Settled: %1$s</string>
     <string name="ver_mapa">View on map</string>
+    <string name="seccion_adjuntos">ATTACHMENTS</string>
+    <string name="anadir_adjunto">Add file</string>
+    <string name="sin_adjuntos">No attachments yet.</string>
+    <string name="cd_adjunto">Attachment</string>
+    <string name="adjunto_grande_titulo">Large file</string>
+    <string name="adjunto_grande">This file is large (%1$s). Attach it anyway?</string>
+    <string name="adjunto_error">Couldn\'t attach that file.</string>
+    <string name="adjunto_sin_visor">No app to open this file.</string>
+    <string name="confirmar_quitar_adjunto">Remove this attachment?</string>
 
     <!-- Entry form -->
     <string name="titulo_nuevo_apunte">New entry</string>

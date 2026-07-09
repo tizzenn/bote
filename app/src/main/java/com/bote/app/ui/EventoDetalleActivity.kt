@@ -6,6 +6,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
@@ -20,6 +21,7 @@ import com.bote.app.data.EventoCompleto
 import com.bote.app.data.Registro
 import com.bote.app.data.TipoRegistro
 import com.bote.app.databinding.ActivityEventoDetalleBinding
+import com.bote.app.databinding.ItemAdjuntoBinding
 import com.bote.app.databinding.ItemApunteBinding
 import com.bote.app.databinding.ItemAsistenteMiniBinding
 import com.bote.app.databinding.DialogQrBinding
@@ -50,6 +52,10 @@ class EventoDetalleActivity : BaseActivity() {
     private var identidadPreguntada = false
     private var sincronizando = false
 
+    private val elegirAdjunto = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri -> if (uri != null) adjuntar(uri) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityEventoDetalleBinding.inflate(layoutInflater)
@@ -76,6 +82,9 @@ class EventoDetalleActivity : BaseActivity() {
         }
         binding.btnCompartir.setOnClickListener { compartirEvento() }
         binding.btnCandado.setOnClickListener { alternarCandado() }
+        binding.btnAnadirAdjunto.setOnClickListener {
+            elegirAdjunto.launch(arrayOf("image/*", "application/pdf"))
+        }
         binding.fabApunte.setOnClickListener {
             startActivity(
                 Intent(this, ApunteActivity::class.java)
@@ -183,6 +192,8 @@ class EventoDetalleActivity : BaseActivity() {
         binding.fabApunte.visibility =
             if (puedeEditar(completo) && !evento.cerrado) View.VISIBLE else View.GONE
 
+        pintarAdjuntos(completo)
+
         // Asistentes
         binding.listaAsistentes.removeAllViews()
         for (asistente in completo.asistentes) {
@@ -242,6 +253,72 @@ class EventoDetalleActivity : BaseActivity() {
                 }
             }
             binding.listaApuntes.addView(fila.root)
+        }
+    }
+
+    // ── Adjuntos (fotos y PDFs, solo local; no se sincronizan) ────
+
+    private fun pintarAdjuntos(completo: EventoCompleto) {
+        val uuid = completo.evento.uuid
+        val editable = puedeEditar(completo)
+        binding.btnAnadirAdjunto.visibility = if (editable) View.VISIBLE else View.GONE
+
+        val archivos = AdjuntoUtil.listar(this, uuid)
+        binding.sinAdjuntos.visibility = if (archivos.isEmpty()) View.VISIBLE else View.GONE
+        binding.listaAdjuntos.removeAllViews()
+        for (archivo in archivos) {
+            val fila = ItemAdjuntoBinding.inflate(layoutInflater, binding.listaAdjuntos, false)
+            fila.icono.setImageResource(
+                if (AdjuntoUtil.esImagen(archivo)) R.drawable.ic_foto else R.drawable.ic_adjunto
+            )
+            fila.nombre.text = archivo.name
+            fila.detalle.text = AdjuntoUtil.formatearTamano(archivo.length())
+            fila.root.setOnClickListener {
+                if (!AdjuntoUtil.abrir(this, archivo)) {
+                    Toast.makeText(this, R.string.adjunto_sin_visor, Toast.LENGTH_LONG).show()
+                }
+            }
+            fila.btnQuitar.visibility = if (editable) View.VISIBLE else View.GONE
+            fila.btnQuitar.setOnClickListener {
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.confirmar_quitar_adjunto)
+                    .setNegativeButton(R.string.accion_cancelar, null)
+                    .setPositiveButton(R.string.accion_eliminar) { _, _ ->
+                        AdjuntoUtil.eliminar(archivo)
+                        pintarAdjuntos(completo)
+                    }
+                    .show()
+            }
+            binding.listaAdjuntos.addView(fila.root)
+        }
+    }
+
+    private fun adjuntar(uri: android.net.Uri) {
+        val completo = datos ?: return
+        val tam = AdjuntoUtil.tamano(this, uri)
+        if (tam > AdjuntoUtil.MAX_BYTES) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.adjunto_grande_titulo)
+                .setMessage(getString(R.string.adjunto_grande, AdjuntoUtil.formatearTamano(tam)))
+                .setNegativeButton(R.string.accion_cancelar, null)
+                .setPositiveButton(R.string.accion_guardar) { _, _ -> copiarAdjunto(completo, uri) }
+                .show()
+        } else {
+            copiarAdjunto(completo, uri)
+        }
+    }
+
+    private fun copiarAdjunto(completo: EventoCompleto, uri: android.net.Uri) {
+        lifecycleScope.launch {
+            val archivo = withContext(Dispatchers.IO) {
+                AdjuntoUtil.copiar(this@EventoDetalleActivity, uri, completo.evento.uuid)
+            }
+            if (archivo == null) {
+                Toast.makeText(this@EventoDetalleActivity, R.string.adjunto_error, Toast.LENGTH_LONG)
+                    .show()
+            } else {
+                datos?.let { pintarAdjuntos(it) }
+            }
         }
     }
 
@@ -453,6 +530,7 @@ class EventoDetalleActivity : BaseActivity() {
                     lifecycleScope.launch {
                         datos?.evento?.let {
                             NotificationScheduler.cancelar(this@EventoDetalleActivity, it)
+                            AdjuntoUtil.eliminarTodos(this@EventoDetalleActivity, it.uuid)
                         }
                         AppDatabase.get(this@EventoDetalleActivity).dao()
                             .eliminarEvento(eventoId)

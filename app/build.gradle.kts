@@ -16,8 +16,8 @@ android {
         applicationId = "com.bote.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 18
-        versionName = "2.7"
+        versionCode = 19
+        versionName = "2.8"
     }
 
     // F-Droid: no incluir el bloque de metadatos de dependencias (cifrado con

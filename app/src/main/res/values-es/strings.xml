@@ -79,6 +79,15 @@
     <string name="gastado_fmt">Gastado: %1$s</string>
     <string name="saldado_fmt">Saldado: %1$s</string>
     <string name="ver_mapa">Ver en el mapa</string>
+    <string name="seccion_adjuntos">ADJUNTOS</string>
+    <string name="anadir_adjunto">Añadir archivo</string>
+    <string name="sin_adjuntos">Aún no hay adjuntos.</string>
+    <string name="cd_adjunto">Adjunto</string>
+    <string name="adjunto_grande_titulo">Archivo grande</string>
+    <string name="adjunto_grande">El archivo es grande (%1$s). ¿Adjuntarlo igualmente?</string>
+    <string name="adjunto_error">No se pudo adjuntar ese archivo.</string>
+    <string name="adjunto_sin_visor">No hay ninguna app para abrir este archivo.</string>
+    <string name="confirmar_quitar_adjunto">¿Quitar este adjunto?</string>
 
     <!-- Formulario de apunte -->
     <string name="titulo_nuevo_apunte">Nuevo apunte</string>
