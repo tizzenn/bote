@@ -217,6 +217,10 @@
     <string name="sync_local_desc">Este evento se queda en el dispositivo. Compártelo por QR o archivo.</string>
     <string name="sync_defecto_desc">Usa tu servidor por defecto (Ajustes). Viaja con el evento, así los demás se conectan solos.</string>
     <string name="sync_otro_desc">Servidor propio de este grupo. Viaja con el evento; quien lo importe se conecta automáticamente.</string>
+    <string name="seccion_auto_sync">SINCRONIZACIÓN EN SEGUNDO PLANO</string>
+    <string name="auto_sync">Sincronizar cada hora en segundo plano</string>
+    <string name="auto_sync_wifi">Solo con WiFi</string>
+    <string name="auto_sync_ayuda">Mantiene al día los eventos sincronizados por su cuenta, más o menos cada hora. Los eventos ya saldados se saltan.</string>
     <string name="seccion_notificaciones">NOTIFICACIONES</string>
     <string name="notif_evento">Recordatorio el día del evento</string>
     <string name="notif_cierre">Aviso al cerrar una cuenta</string>

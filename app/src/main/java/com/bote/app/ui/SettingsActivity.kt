@@ -103,6 +103,20 @@ class SettingsActivity : BaseActivity() {
             Ajustes.guardarSyncKey(this, texto)
         })
 
+        // Sincronización en segundo plano (cada hora)
+        binding.switchAutoSync.isChecked = Ajustes.autoSyncActivo(this)
+        binding.switchAutoSyncWifi.isChecked = Ajustes.autoSyncSoloWifi(this)
+        binding.switchAutoSyncWifi.isEnabled = Ajustes.autoSyncActivo(this)
+        binding.switchAutoSync.setOnCheckedChangeListener { _, valor ->
+            Ajustes.guardarAutoSyncActivo(this, valor)
+            binding.switchAutoSyncWifi.isEnabled = valor
+            com.bote.app.sync.SyncScheduler.configurar(this)
+        }
+        binding.switchAutoSyncWifi.setOnCheckedChangeListener { _, valor ->
+            Ajustes.guardarAutoSyncSoloWifi(this, valor)
+            com.bote.app.sync.SyncScheduler.configurar(this)
+        }
+
         // Notificaciones
         binding.switchEvento.isChecked = Ajustes.notifEvento(this)
         binding.switchEvento.setOnCheckedChangeListener { _, valor ->

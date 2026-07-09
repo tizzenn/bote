@@ -16,8 +16,8 @@ android {
         applicationId = "com.bote.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 20
-        versionName = "2.9"
+        versionCode = 21
+        versionName = "2.10"
     }
 
     // F-Droid: no incluir el bloque de metadatos de dependencias (cifrado con
@@ -92,6 +92,9 @@ dependencies {
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+
+    // WorkManager (sincronización periódica en segundo plano)
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
 
     // Códigos QR para sincronizar eventos (ZXing, Apache 2.0)
     implementation("com.google.zxing:core:3.5.3")

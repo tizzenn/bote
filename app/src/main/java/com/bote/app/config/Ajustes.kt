@@ -200,6 +200,27 @@ object Ajustes {
         prefs(context).edit().putString(CLAVE_SYNC_KEY, valor.trim()).apply()
     }
 
+    // ── Sincronización en segundo plano ──────────────────────────
+
+    private const val CLAVE_AUTO_SYNC = "auto_sync"
+    private const val CLAVE_AUTO_SYNC_WIFI = "auto_sync_wifi"
+
+    /** Sincronizar en segundo plano cada hora (activado por defecto). */
+    fun autoSyncActivo(context: Context): Boolean =
+        prefs(context).getBoolean(CLAVE_AUTO_SYNC, true)
+
+    fun guardarAutoSyncActivo(context: Context, valor: Boolean) {
+        prefs(context).edit().putBoolean(CLAVE_AUTO_SYNC, valor).apply()
+    }
+
+    /** Limitar la sync en segundo plano a WiFi/red no medida (por defecto sí). */
+    fun autoSyncSoloWifi(context: Context): Boolean =
+        prefs(context).getBoolean(CLAVE_AUTO_SYNC_WIFI, true)
+
+    fun guardarAutoSyncSoloWifi(context: Context, valor: Boolean) {
+        prefs(context).edit().putBoolean(CLAVE_AUTO_SYNC_WIFI, valor).apply()
+    }
+
     // ── Última sincronización correcta por evento (local) ─────────
 
     /** Millis de la última sincronización correcta de un evento (0 si nunca). */

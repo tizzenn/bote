@@ -217,6 +217,10 @@
     <string name="sync_local_desc">This event stays on the device. Share it by QR or file.</string>
     <string name="sync_defecto_desc">Uses your default server (Settings). Travels with the event, so others connect automatically.</string>
     <string name="sync_otro_desc">This group\'s own server. It travels with the event; attendees who import it connect automatically.</string>
+    <string name="seccion_auto_sync">BACKGROUND SYNC</string>
+    <string name="auto_sync">Sync every hour in the background</string>
+    <string name="auto_sync_wifi">Only on Wi-Fi</string>
+    <string name="auto_sync_ayuda">Keeps synced events up to date on their own, about once an hour. Settled events are skipped.</string>
     <string name="seccion_notificaciones">NOTIFICATIONS</string>
     <string name="notif_evento">Reminder on the event day</string>
     <string name="notif_cierre">Alert when a tab is closed</string>
