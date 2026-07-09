@@ -43,6 +43,8 @@
     <string name="campo_email">Email (optional)</string>
     <string name="asistente_yo">Me</string>
     <string name="asistente_admin">Admin</string>
+    <string name="pedir_nombre_titulo">What\'s your name?</string>
+    <string name="pedir_nombre_msg">It will be your name in the events you create.</string>
     <string name="asistente_sin_nombre">Unnamed</string>
     <string name="error_fecha">Pick a date</string>
     <string name="error_sin_asistentes">Add at least one attendee</string>
@@ -68,7 +70,6 @@
     <string name="evento_cerrado">Tab closed</string>
     <string name="reabrir_cuenta">Reopen the tab</string>
     <string name="confirmar_cerrar_cuenta">Lock the event and generate the final report? No more entries can be added.</string>
-    <string name="error_cerrar_apuntes_abiertos">To close the tab, every entry needs its paid amount.</string>
     <string name="solo_admin">Only the admin can do this (restricted mode).</string>
     <string name="compartir_evento">Send by QR or file</string>
     <string name="compartir_titulo">Send the event to someone</string>
@@ -76,11 +77,8 @@
     <string name="paga_fmt">%1$s pays</string>
     <string name="presupuestado_fmt">Budgeted: %1$s</string>
     <string name="gastado_fmt">Spent: %1$s</string>
-    <string name="pagado_fmt">Paid: %1$s</string>
     <string name="saldado_fmt">Settled: %1$s</string>
     <string name="ver_mapa">View on map</string>
-    <string name="apunte_abierto">Open</string>
-    <string name="apunte_cerrado">Closed</string>
 
     <!-- Entry form -->
     <string name="titulo_nuevo_apunte">New entry</string>
@@ -89,7 +87,6 @@
     <string name="campo_pagador">Who pays</string>
     <string name="campo_presupuestado">Budgeted (optional)</string>
     <string name="campo_gastado">Spent</string>
-    <string name="campo_pagado">Paid (needed to close the entry)</string>
     <string name="seccion_categoria">CATEGORY</string>
     <string name="cat_restaurante">Restaurant</string>
     <string name="cat_copas">Drinks</string>
@@ -138,7 +135,6 @@
     <string name="fila_total">TOTAL</string>
     <string name="sub_presupuestado">Total budgeted: %1$s</string>
     <string name="sub_gastado">Total spent: %1$s</string>
-    <string name="sub_pagado">Total paid (entries): %1$s</string>
     <string name="sub_saldado">Total settled: %1$s</string>
     <string name="sub_pendiente">Pending settlement: %1$s</string>
 
@@ -157,6 +153,9 @@
 
     <!-- Settings -->
     <string name="ajustes_titulo">Settings</string>
+    <string name="seccion_identidad">YOUR NAME</string>
+    <string name="campo_nombre_usuario">Your name</string>
+    <string name="nombre_usuario_ayuda">Used as your name when you create an event. You can still change it in each event.</string>
     <string name="seccion_tema">THEME</string>
     <string name="tema_blanco">White</string>
     <string name="tema_negro">Black</string>
@@ -210,6 +209,11 @@
     <string name="notif_cierre_texto">Check the report to settle up.</string>
     <string name="notif_pagos_titulo">Pending payments: %1$s</string>
     <string name="notif_pagos_texto">Someone has not settled their share yet.</string>
+    <string name="notif_liquidacion_titulo">Payment sent: %1$s</string>
+    <string name="notif_liquidacion_varios">%1$d events could match. Tap to pick.</string>
+    <string name="liquidacion_confirmar_titulo">Mark your payment as done?</string>
+    <string name="liquidacion_label_fmt">To %1$s · %2$s</string>
+    <string name="liquidacion_elegir">Which payment did you make?</string>
 
     <!-- Activity log -->
     <string name="registro_titulo">Activity log</string>

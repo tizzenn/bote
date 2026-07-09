@@ -85,4 +85,44 @@ object NotificationHelper {
             .build()
         NotificationManagerCompat.from(context).notify(notifId, notificacion)
     }
+
+    /**
+     * Ofrece marcar como hecha tu liquidación de un evento cerrado cuando una
+     * notificación de Bizum/transferencia saliente cuadra con lo que debías.
+     */
+    fun notificarLiquidacion(
+        context: Context,
+        cents: Long,
+        eventoIds: LongArray,
+        etiquetas: Array<String>
+    ) {
+        if (eventoIds.isEmpty()) return
+        if (androidx.core.content.ContextCompat.checkSelfPermission(
+                context, android.Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED &&
+            android.os.Build.VERSION.SDK_INT >= 33
+        ) {
+            return
+        }
+        val intent = Intent(context, MainActivity::class.java).apply {
+            putExtra(MainActivity.EXTRA_LIQUIDA_EVENTOS, eventoIds)
+            putExtra(MainActivity.EXTRA_LIQUIDA_ETIQUETAS, etiquetas)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val notifId = (System.currentTimeMillis() % 100000).toInt() + 60000
+        val pendiente = PendingIntent.getActivity(
+            context, notifId, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val texto = if (eventoIds.size == 1) etiquetas.first()
+        else context.getString(R.string.notif_liquidacion_varios, eventoIds.size)
+        val notificacion = NotificationCompat.Builder(context, CANAL_RECORDATORIOS)
+            .setSmallIcon(R.drawable.ic_dinero)
+            .setContentTitle(context.getString(R.string.notif_liquidacion_titulo, Dinero.formatear(cents)))
+            .setContentText(texto)
+            .setContentIntent(pendiente)
+            .setAutoCancel(true)
+            .build()
+        NotificationManagerCompat.from(context).notify(notifId, notificacion)
+    }
 }

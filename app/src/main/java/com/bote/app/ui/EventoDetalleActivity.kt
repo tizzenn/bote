@@ -219,10 +219,6 @@ class EventoDetalleActivity : BaseActivity() {
             fila.pagador.text = getString(R.string.paga_fmt, pagador)
             fila.importes.text = buildString {
                 append(getString(R.string.gastado_fmt, Dinero.formatear(apunte.gastadoCents)))
-                if (apunte.pagadoCents != null) {
-                    append(" · ")
-                    append(getString(R.string.pagado_fmt, Dinero.formatear(apunte.pagadoCents)))
-                }
                 if (apunte.presupuestadoCents != null) {
                     append(" · ")
                     append(
@@ -233,15 +229,7 @@ class EventoDetalleActivity : BaseActivity() {
                     )
                 }
             }
-            fila.estado.setText(
-                if (apunte.estaCerrado) R.string.apunte_cerrado else R.string.apunte_abierto
-            )
-            fila.estado.setTextColor(
-                ContextCompat.getColor(
-                    this,
-                    if (apunte.estaCerrado) R.color.saldo_positivo else R.color.text_secondary
-                )
-            )
+            fila.estado.visibility = View.GONE
             fila.indicadorRecibo.visibility =
                 if (apunte.fotoPath.isNotBlank()) View.VISIBLE else View.GONE
             if (puedeEditar(completo) && !evento.cerrado) {
@@ -283,11 +271,6 @@ class EventoDetalleActivity : BaseActivity() {
     private fun alternarCandado() {
         val completo = datos ?: return
         if (!completo.evento.cerrado) {
-            if (completo.apuntes.any { !it.apunte.estaCerrado }) {
-                Toast.makeText(this, R.string.error_cerrar_apuntes_abiertos, Toast.LENGTH_LONG)
-                    .show()
-                return
-            }
             MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.cerrar_cuenta)
                 .setMessage(R.string.confirmar_cerrar_cuenta)

@@ -74,7 +74,6 @@ object EventoJson {
             j.put("pagadorUuid", porId[a.pagadorId]?.uuid ?: "")
             if (a.presupuestadoCents != null) j.put("presupuestadoCents", a.presupuestadoCents)
             j.put("gastadoCents", a.gastadoCents)
-            if (a.pagadoCents != null) j.put("pagadoCents", a.pagadoCents)
             j.put("repartoIgualitario", a.repartoIgualitario)
             j.put("categoria", a.categoria)
             j.put("fechaMillis", a.fechaMillis)
@@ -259,8 +258,10 @@ object EventoJson {
                             ?: existente.apunte.pagadorId,
                         presupuestadoCents = if (j.has("presupuestadoCents"))
                             j.getLong("presupuestadoCents") else null,
-                        gastadoCents = j.optLong("gastadoCents"),
-                        pagadoCents = if (j.has("pagadoCents")) j.getLong("pagadoCents") else null,
+                        // Compat: de versiones con "pagado" por apunte, el gastado
+                        // hereda ese importe efectivo.
+                        gastadoCents = if (j.has("pagadoCents")) j.getLong("pagadoCents")
+                            else j.optLong("gastadoCents"),
                         repartoIgualitario = j.optBoolean("repartoIgualitario", true),
                         categoria = j.optString("categoria", "OTROS"),
                         modificadoMillis = j.optLong("modificadoMillis")
@@ -327,8 +328,8 @@ object EventoJson {
                 pagadorId = idPorUuid[j.optString("pagadorUuid")] ?: 0L,
                 presupuestadoCents = if (j.has("presupuestadoCents"))
                     j.getLong("presupuestadoCents") else null,
-                gastadoCents = j.optLong("gastadoCents"),
-                pagadoCents = if (j.has("pagadoCents")) j.getLong("pagadoCents") else null,
+                gastadoCents = if (j.has("pagadoCents")) j.getLong("pagadoCents")
+                    else j.optLong("gastadoCents"),
                 repartoIgualitario = j.optBoolean("repartoIgualitario", true),
                 categoria = j.optString("categoria", "OTROS"),
                 fechaMillis = j.optLong("fechaMillis", System.currentTimeMillis()),

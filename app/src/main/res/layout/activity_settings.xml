@@ -28,6 +28,27 @@
                 style="@style/Bote.TextoSeccion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="@string/seccion_identidad" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:hint="@string/campo_nombre_usuario"
+                app:helperText="@string/nombre_usuario_ayuda">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/campoNombreUsuario"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName|textCapWords" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                style="@style/Bote.TextoSeccion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
                 android:text="@string/seccion_tema" />
 
             <RadioGroup

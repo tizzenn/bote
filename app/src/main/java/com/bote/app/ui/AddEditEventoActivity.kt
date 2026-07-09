@@ -153,12 +153,13 @@ class AddEditEventoActivity : BaseActivity() {
             binding.toggleSync.check(R.id.btnSyncLocal)
             fechaMillis = hoy()
             binding.campoFecha.setText(formatoFecha.format(Date(fechaMillis)))
-            // El creador del evento entra automáticamente como asistente.
-            asistentes.add(
-                Asistente(nombre = getString(R.string.asistente_yo), esCreador = true)
-            )
+            // El creador del evento entra automáticamente como asistente, con el
+            // nombre configurado en Ajustes; si no hay, se pide y se guarda.
+            val nombreUsuario = Ajustes.nombreUsuario(this)
+            asistentes.add(Asistente(nombre = nombreUsuario, esCreador = true))
             pintarAsistentes()
             pintarAvatarEvento()
+            if (nombreUsuario.isBlank()) pedirNombreUsuario()
         } else {
             cargar()
         }
@@ -303,6 +304,37 @@ class AddEditEventoActivity : BaseActivity() {
         }
     }
 
+    /** Pide el nombre del usuario la primera vez, lo guarda en Ajustes y en el creador. */
+    private fun pedirNombreUsuario() {
+        val input = com.google.android.material.textfield.TextInputEditText(this).apply {
+            setHint(R.string.campo_nombre_usuario)
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS
+        }
+        val margen = (16 * resources.displayMetrics.density).toInt()
+        val contenedor = android.widget.FrameLayout(this).apply {
+            setPadding(margen, margen / 2, margen, 0)
+            addView(input)
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.pedir_nombre_titulo)
+            .setMessage(R.string.pedir_nombre_msg)
+            .setView(contenedor)
+            .setNegativeButton(R.string.accion_cancelar, null)
+            .setPositiveButton(R.string.accion_guardar) { _, _ ->
+                val nombre = input.text?.toString().orEmpty().trim()
+                if (nombre.isNotBlank()) {
+                    Ajustes.guardarNombreUsuario(this, nombre)
+                    val indice = asistentes.indexOfFirst { it.esCreador }
+                    if (indice >= 0) {
+                        asistentes[indice] = asistentes[indice].copy(nombre = nombre)
+                        pintarAsistentes()
+                    }
+                }
+            }
+            .show()
+    }
+
     /** Alta de asistente o, si se pasa uno existente, edición de sus datos. */
     private fun dialogoAsistente(existente: Asistente? = null) {
         val vista = DialogAsistenteBinding.inflate(layoutInflater)
@@ -399,6 +431,11 @@ class AddEditEventoActivity : BaseActivity() {
         val titulo = binding.campoTitulo.text?.toString().orEmpty().trim()
         val descripcion = binding.campoDescripcion.text?.toString().orEmpty().trim()
         val ubicacion = binding.campoUbicacion.text?.toString().orEmpty().trim()
+
+        // Mantener el nombre del usuario en Ajustes al ritmo del asistente creador
+        asistentes.firstOrNull { it.esCreador }?.nombre?.trim()
+            ?.takeIf { it.isNotBlank() }
+            ?.let { Ajustes.guardarNombreUsuario(this, it) }
 
         lifecycleScope.launch {
             val dao = AppDatabase.get(this@AddEditEventoActivity).dao()

@@ -20,6 +20,7 @@ import com.bote.app.data.EventoCompleto
 import com.bote.app.data.Registro
 import com.bote.app.data.TipoRegistro
 import com.bote.app.databinding.ActivityMainBinding
+import com.bote.app.notification.NotificationScheduler
 import com.bote.app.sync.EventoJson
 import com.bote.app.sync.SyncCodec
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -32,6 +33,8 @@ class MainActivity : BaseActivity() {
     companion object {
         const val EXTRA_PAGO_CENTS = "pago_cents"
         const val EXTRA_PAGO_CONCEPTO = "pago_concepto"
+        const val EXTRA_LIQUIDA_EVENTOS = "liquida_eventos"
+        const val EXTRA_LIQUIDA_ETIQUETAS = "liquida_etiquetas"
 
         /** Clave persistida → etiqueta; el orden de la lista es el del menú. */
         val ORDENES = listOf(
@@ -59,6 +62,10 @@ class MainActivity : BaseActivity() {
     /** Pago detectado en notificaciones, pendiente de elegir evento. */
     private var pagoPendienteCents: Long = 0
     private var pagoPendienteConcepto: String = ""
+
+    /** Liquidación detectada (Bizum saliente) pendiente de confirmar. */
+    private var liquidaEventos: LongArray = LongArray(0)
+    private var liquidaEtiquetas: Array<String> = emptyArray()
 
     private val pedirNotificaciones =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
@@ -103,13 +110,85 @@ class MainActivity : BaseActivity() {
 
         pagoPendienteCents = intent.getLongExtra(EXTRA_PAGO_CENTS, 0)
         pagoPendienteConcepto = intent.getStringExtra(EXTRA_PAGO_CONCEPTO).orEmpty()
+        liquidaEventos = intent.getLongArrayExtra(EXTRA_LIQUIDA_EVENTOS) ?: LongArray(0)
+        liquidaEtiquetas = intent.getStringArrayExtra(EXTRA_LIQUIDA_ETIQUETAS) ?: emptyArray()
 
         lifecycleScope.launch {
+            migrarNombreCreador()
             AppDatabase.get(this@MainActivity).dao().observarEventos().collect {
                 eventos = it
                 refiltrar()
                 ofrecerPagoDetectado()
+                ofrecerLiquidacion()
             }
+        }
+    }
+
+    /**
+     * Migración suave del nombre del creador: los eventos antiguos guardaban el
+     * literal "Yo"/"Me"; si ya hay un nombre configurado, se renombra el creador.
+     */
+    private suspend fun migrarNombreCreador() {
+        val nombre = Ajustes.nombreUsuario(this)
+        if (nombre.isBlank()) return
+        val dao = AppDatabase.get(this).dao()
+        val literales = setOf("Yo", "Me", getString(R.string.asistente_yo))
+        for (evento in dao.todosEventos()) {
+            if (!evento.soyCreador) continue
+            val completo = dao.eventoCompleto(evento.id) ?: continue
+            val creador = completo.asistentes.firstOrNull { it.esCreador } ?: continue
+            if (creador.nombre in literales && creador.nombre != nombre) {
+                dao.actualizarAsistente(creador.copy(nombre = nombre))
+            }
+        }
+    }
+
+    /** Con una liquidación detectada, confirma marcarla (o elige entre varias). */
+    private fun ofrecerLiquidacion() {
+        if (liquidaEventos.isEmpty()) return
+        val ids = liquidaEventos
+        val etiquetas = liquidaEtiquetas
+        liquidaEventos = LongArray(0)
+        liquidaEtiquetas = emptyArray()
+
+        if (ids.size == 1) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.liquidacion_confirmar_titulo)
+                .setMessage(etiquetas.firstOrNull().orEmpty())
+                .setNegativeButton(R.string.accion_cancelar, null)
+                .setPositiveButton(R.string.accion_guardar) { _, _ -> marcarLiquidacion(ids[0]) }
+                .show()
+        } else {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.liquidacion_elegir)
+                .setItems(etiquetas) { _, indice -> marcarLiquidacion(ids[indice]) }
+                .setNegativeButton(R.string.accion_cancelar, null)
+                .show()
+        }
+    }
+
+    private fun marcarLiquidacion(eventoId: Long) {
+        lifecycleScope.launch {
+            val dao = AppDatabase.get(this@MainActivity).dao()
+            val completo = dao.eventoCompleto(eventoId) ?: return@launch
+            val mi = completo.miAsistente() ?: return@launch
+            if (mi.liquidado) return@launch
+            dao.actualizarAsistente(
+                mi.copy(liquidado = true, liquidadoMillis = System.currentTimeMillis())
+            )
+            val nombre = mi.nombre.ifBlank { getString(R.string.asistente_sin_nombre) }
+            dao.insertarRegistro(
+                Registro(
+                    eventoId = eventoId,
+                    tipo = TipoRegistro.PAGO,
+                    texto = getString(R.string.reg_pago_marcado, nombre)
+                )
+            )
+            val actualizado = dao.eventoCompleto(eventoId) ?: return@launch
+            NotificationScheduler.reprogramar(
+                this@MainActivity, actualizado.evento,
+                pagosPendientes = actualizado.evento.cerrado && !actualizado.todosLiquidados
+            )
         }
     }
 

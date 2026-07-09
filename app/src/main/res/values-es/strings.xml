@@ -43,6 +43,8 @@
     <string name="campo_email">Email (opcional)</string>
     <string name="asistente_yo">Yo</string>
     <string name="asistente_admin">Admin</string>
+    <string name="pedir_nombre_titulo">¿Cómo te llamas?</string>
+    <string name="pedir_nombre_msg">Será tu nombre en los eventos que crees.</string>
     <string name="asistente_sin_nombre">Sin nombre</string>
     <string name="error_fecha">Elige una fecha</string>
     <string name="error_sin_asistentes">Añade al menos un asistente</string>
@@ -68,7 +70,6 @@
     <string name="evento_cerrado">Cuenta cerrada</string>
     <string name="reabrir_cuenta">Reabrir la cuenta</string>
     <string name="confirmar_cerrar_cuenta">¿Poner el candado y generar el informe definitivo? Ya no se podrán añadir apuntes.</string>
-    <string name="error_cerrar_apuntes_abiertos">Para cerrar la cuenta, todos los apuntes deben tener su importe pagado.</string>
     <string name="solo_admin">Solo el administrador puede hacerlo (modo restringido).</string>
     <string name="compartir_evento">Enviar por QR o archivo</string>
     <string name="compartir_titulo">Pasar el evento a otra persona</string>
@@ -76,11 +77,8 @@
     <string name="paga_fmt">Paga %1$s</string>
     <string name="presupuestado_fmt">Presupuestado: %1$s</string>
     <string name="gastado_fmt">Gastado: %1$s</string>
-    <string name="pagado_fmt">Pagado: %1$s</string>
     <string name="saldado_fmt">Saldado: %1$s</string>
     <string name="ver_mapa">Ver en el mapa</string>
-    <string name="apunte_abierto">Abierto</string>
-    <string name="apunte_cerrado">Cerrado</string>
 
     <!-- Formulario de apunte -->
     <string name="titulo_nuevo_apunte">Nuevo apunte</string>
@@ -89,7 +87,6 @@
     <string name="campo_pagador">Quién paga</string>
     <string name="campo_presupuestado">Presupuestado (opcional)</string>
     <string name="campo_gastado">Gastado</string>
-    <string name="campo_pagado">Pagado (necesario para cerrar el apunte)</string>
     <string name="seccion_categoria">CATEGORÍA</string>
     <string name="cat_restaurante">Restaurante</string>
     <string name="cat_copas">Copas</string>
@@ -138,7 +135,6 @@
     <string name="fila_total">TOTAL</string>
     <string name="sub_presupuestado">Total presupuestado: %1$s</string>
     <string name="sub_gastado">Total gastado: %1$s</string>
-    <string name="sub_pagado">Total pagado (apuntes): %1$s</string>
     <string name="sub_saldado">Total saldado: %1$s</string>
     <string name="sub_pendiente">Pendiente de liquidar: %1$s</string>
 
@@ -157,6 +153,9 @@
 
     <!-- Ajustes -->
     <string name="ajustes_titulo">Ajustes</string>
+    <string name="seccion_identidad">TU NOMBRE</string>
+    <string name="campo_nombre_usuario">Tu nombre</string>
+    <string name="nombre_usuario_ayuda">Se usa como tu nombre al crear un evento. Puedes cambiarlo en cada evento.</string>
     <string name="seccion_tema">TEMA</string>
     <string name="tema_blanco">Blanco</string>
     <string name="tema_negro">Negro</string>
@@ -210,6 +209,11 @@
     <string name="notif_cierre_texto">Consulta el informe para liquidar.</string>
     <string name="notif_pagos_titulo">Pagos pendientes: %1$s</string>
     <string name="notif_pagos_texto">Aún hay gente sin liquidar su parte.</string>
+    <string name="notif_liquidacion_titulo">Pago enviado: %1$s</string>
+    <string name="notif_liquidacion_varios">%1$d eventos podrían cuadrar. Toca para elegir.</string>
+    <string name="liquidacion_confirmar_titulo">¿Marcar tu pago como hecho?</string>
+    <string name="liquidacion_label_fmt">A %1$s · %2$s</string>
+    <string name="liquidacion_elegir">¿Qué pago has hecho?</string>
 
     <!-- Registro de actividad -->
     <string name="registro_titulo">Registro</string>

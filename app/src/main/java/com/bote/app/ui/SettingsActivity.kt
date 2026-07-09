@@ -24,6 +24,12 @@ class SettingsActivity : BaseActivity() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        // Tu nombre (asistente creador al crear eventos)
+        binding.campoNombreUsuario.setText(Ajustes.nombreUsuario(this))
+        binding.campoNombreUsuario.addTextChangedListener(GuardarTexto { texto ->
+            Ajustes.guardarNombreUsuario(this, texto)
+        })
+
         // Tema
         when (Ajustes.tema(this)) {
             Tema.CLARO -> binding.radioBlanco.isChecked = true

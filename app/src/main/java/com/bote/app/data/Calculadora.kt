@@ -30,7 +30,7 @@ object Calculadora {
      * del resto mayor, de forma que las partes suman exactamente el importe.
      */
     fun partesDeApunte(apunte: ApunteConRepartos): Map<Long, Long> {
-        val importe = apunte.apunte.importeEfectivo
+        val importe = apunte.apunte.gastadoCents
         val repartos = apunte.repartos.filter { it.puntosBasicos > 0 }
         if (importe == 0L || repartos.isEmpty()) return emptyMap()
 
@@ -57,7 +57,7 @@ object Calculadora {
         val pagado = mutableMapOf<Long, Long>()
         val corresponde = mutableMapOf<Long, Long>()
         for (apunte in datos.apuntes) {
-            val importe = apunte.apunte.importeEfectivo
+            val importe = apunte.apunte.gastadoCents
             pagado[apunte.apunte.pagadorId] =
                 (pagado[apunte.apunte.pagadorId] ?: 0L) + importe
             for ((asistenteId, parte) in partesDeApunte(apunte)) {

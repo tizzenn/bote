@@ -97,6 +97,18 @@ object Ajustes {
     fun firmaColores(context: Context): String =
         "${colorPrimario(context).name}/${colorAcento(context).name}"
 
+    // ── Identidad del usuario ─────────────────────────────────────
+
+    private const val CLAVE_NOMBRE_USUARIO = "nombre_usuario"
+
+    /** Tu nombre; se usa como asistente creador al crear un evento. */
+    fun nombreUsuario(context: Context): String =
+        prefs(context).getString(CLAVE_NOMBRE_USUARIO, "").orEmpty()
+
+    fun guardarNombreUsuario(context: Context, valor: String) {
+        prefs(context).edit().putString(CLAVE_NOMBRE_USUARIO, valor.trim()).apply()
+    }
+
     // ── Notificaciones ────────────────────────────────────────────
 
     fun notifEvento(context: Context): Boolean =
