@@ -199,4 +199,14 @@ object Ajustes {
     fun guardarSyncKey(context: Context, valor: String) {
         prefs(context).edit().putString(CLAVE_SYNC_KEY, valor.trim()).apply()
     }
+
+    // ── Última sincronización correcta por evento (local) ─────────
+
+    /** Millis de la última sincronización correcta de un evento (0 si nunca). */
+    fun ultimaSync(context: Context, uuid: String): Long =
+        prefs(context).getLong("ultima_sync_$uuid", 0L)
+
+    fun guardarUltimaSync(context: Context, uuid: String, millis: Long) {
+        prefs(context).edit().putLong("ultima_sync_$uuid", millis).apply()
+    }
 }

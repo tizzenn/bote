@@ -18,32 +18,69 @@ import java.net.URL
  */
 object SyncRemoto {
 
+    /** Resultado de un ciclo de sincronización, para poder avisar al usuario. */
+    sealed class Resultado {
+        /** Sincronizó bien; [huboCambios] indica si llegaron datos remotos nuevos. */
+        data class Ok(val huboCambios: Boolean) : Resultado()
+        /** El evento no tiene servidor configurado (nada que sincronizar). */
+        object SinServidor : Resultado()
+        /** Sin conexión o el servidor no respondió (timeout, red caída). */
+        object SinRed : Resultado()
+        /** Clave/API key rechazada (401/403). */
+        object ErrorAuth : Resultado()
+        /** El servidor respondió con error (URL mala, falta el SQL, 5xx…). */
+        object ErrorServidor : Resultado()
+
+        val correcto: Boolean get() = this is Ok
+    }
+
     /**
      * Ciclo completo para un evento: baja la copia remota (si existe) y la
-     * fusiona, y después sube el resultado. Devuelve true si había datos
-     * remotos (por si la interfaz quiere repintarse).
+     * fusiona, y después sube el resultado. Devuelve un [Resultado] tipado
+     * para que la interfaz pueda repintarse y avisar de los fallos.
      */
-    suspend fun sincronizar(dao: BoteDao, eventoId: Long): Boolean =
+    suspend fun sincronizar(dao: BoteDao, eventoId: Long): Resultado =
         withContext(Dispatchers.IO) {
-            val evento = dao.evento(eventoId) ?: return@withContext false
-            if (!evento.sincronizable) return@withContext false
+            val evento = dao.evento(eventoId) ?: return@withContext Resultado.SinServidor
+            if (!evento.sincronizable) return@withContext Resultado.SinServidor
             val url = evento.syncUrl.trim().trimEnd('/')
             val key = evento.syncKey.trim()
             val uuid = evento.uuid
 
-            val remoto = descargar(url, key, uuid)
-            if (remoto != null) {
-                EventoJson.importar(dao, remoto)
+            val huboCambios = when (val bajada = descargar(url, key, uuid)) {
+                is Descarga.Datos -> {
+                    EventoJson.importar(dao, bajada.json)
+                    true
+                }
+                Descarga.Vacio -> false
+                Descarga.Auth -> return@withContext Resultado.ErrorAuth
+                Descarga.Servidor -> return@withContext Resultado.ErrorServidor
+                Descarga.Red -> return@withContext Resultado.SinRed
             }
 
-            val fusionado = dao.eventoCompleto(eventoId) ?: return@withContext false
+            val fusionado = dao.eventoCompleto(eventoId)
+                ?: return@withContext Resultado.ErrorServidor
             val borrados = dao.borradosDeEvento(eventoId)
             val registro = dao.registroDeEvento(eventoId)
-            subir(url, key, uuid, EventoJson.exportar(fusionado, borrados, registro))
-            remoto != null
+            when (subir(url, key, uuid, EventoJson.exportar(fusionado, borrados, registro))) {
+                Subida.Ok -> Resultado.Ok(huboCambios)
+                Subida.Auth -> Resultado.ErrorAuth
+                Subida.Servidor -> Resultado.ErrorServidor
+                Subida.Red -> Resultado.SinRed
+            }
         }
 
     // ── REST contra PostgREST/Supabase ────────────────────────────
+
+    private sealed class Descarga {
+        data class Datos(val json: String) : Descarga()
+        object Vacio : Descarga()
+        object Auth : Descarga()
+        object Servidor : Descarga()
+        object Red : Descarga()
+    }
+
+    private enum class Subida { Ok, Auth, Servidor, Red }
 
     private fun abrir(url: String, key: String, ruta: String, metodo: String): HttpURLConnection {
         val conexion = URL(url + ruta).openConnection() as HttpURLConnection
@@ -56,38 +93,47 @@ object SyncRemoto {
         return conexion
     }
 
-    private fun descargar(url: String, key: String, uuid: String): String? {
+    private fun descargar(url: String, key: String, uuid: String): Descarga {
         val conexion = abrir(
             url, key, "/rest/v1/eventos_sync?uuid=eq.$uuid&select=datos", "GET"
         )
         return try {
-            if (conexion.responseCode != 200) return null
-            val cuerpo = conexion.inputStream.use {
-                it.readBytes().toString(Charsets.UTF_8)
+            when (conexion.responseCode) {
+                200 -> {
+                    val cuerpo = conexion.inputStream.use {
+                        it.readBytes().toString(Charsets.UTF_8)
+                    }
+                    val lista = JSONArray(cuerpo)
+                    if (lista.length() == 0) Descarga.Vacio
+                    else Descarga.Datos(lista.getJSONObject(0).getJSONObject("datos").toString())
+                }
+                401, 403 -> Descarga.Auth
+                else -> Descarga.Servidor
             }
-            val lista = JSONArray(cuerpo)
-            if (lista.length() == 0) null
-            else lista.getJSONObject(0).getJSONObject("datos").toString()
         } catch (e: Exception) {
-            null
+            Descarga.Red
         } finally {
             conexion.disconnect()
         }
     }
 
-    private fun subir(url: String, key: String, uuid: String, json: String) {
+    private fun subir(url: String, key: String, uuid: String, json: String): Subida {
         val conexion = abrir(url, key, "/rest/v1/eventos_sync?on_conflict=uuid", "POST")
         conexion.setRequestProperty("Prefer", "resolution=merge-duplicates")
         conexion.doOutput = true
-        try {
+        return try {
             val fila = JSONObject()
             fila.put("uuid", uuid)
             fila.put("datos", JSONObject(json))
             val cuerpo = JSONArray().put(fila).toString()
             conexion.outputStream.use { it.write(cuerpo.toByteArray(Charsets.UTF_8)) }
-            conexion.responseCode // fuerza el envío; los errores se ignoran (reintento en la próxima apertura)
+            when (conexion.responseCode) {
+                in 200..299 -> Subida.Ok
+                401, 403 -> Subida.Auth
+                else -> Subida.Servidor
+            }
         } catch (e: Exception) {
-            // sin red o servidor caído: la app sigue siendo local-first
+            Subida.Red
         } finally {
             conexion.disconnect()
         }

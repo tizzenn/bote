@@ -99,21 +99,71 @@ class EventoDetalleActivity : BaseActivity() {
         sincronizarNube()
     }
 
-    /** Sincronización automática con la nube, si este evento tiene servidor. */
-    private fun sincronizarNube() {
+    /**
+     * Sincroniza con la nube si el evento tiene servidor. En modo [manual]
+     * (botón "sincronizar ahora") avisa del resultado; en automático (al
+     * abrir la ficha) es silenciosa y solo actualiza el indicador.
+     */
+    private fun sincronizarNube(manual: Boolean = false) {
+        if (manual && datos?.evento?.sincronizable != true) {
+            Toast.makeText(this, R.string.sync_sin_servidor, Toast.LENGTH_SHORT).show()
+            return
+        }
         if (sincronizando) return
         sincronizando = true
+        if (manual) Toast.makeText(this, R.string.sync_en_curso, Toast.LENGTH_SHORT).show()
         lifecycleScope.launch {
-            try {
-                val dao = AppDatabase.get(this@EventoDetalleActivity).dao()
-                val habiaRemoto = SyncRemoto.sincronizar(dao, eventoId)
-                if (habiaRemoto) cargar()
+            val dao = AppDatabase.get(this@EventoDetalleActivity).dao()
+            val res = try {
+                SyncRemoto.sincronizar(dao, eventoId)
             } catch (e: Exception) {
-                // sin red o servidor caído: la app sigue en local
-            } finally {
-                sincronizando = false
+                SyncRemoto.Resultado.SinRed
             }
+            if (res is SyncRemoto.Resultado.Ok) {
+                datos?.evento?.uuid?.let {
+                    Ajustes.guardarUltimaSync(
+                        this@EventoDetalleActivity, it, System.currentTimeMillis()
+                    )
+                }
+                if (res.huboCambios) cargar() else actualizarIndicadorSync()
+            } else {
+                actualizarIndicadorSync()
+            }
+            if (manual) {
+                Toast.makeText(
+                    this@EventoDetalleActivity, mensajeResultado(res), Toast.LENGTH_LONG
+                ).show()
+            }
+            sincronizando = false
         }
+    }
+
+    private fun mensajeResultado(res: SyncRemoto.Resultado): String = getString(
+        when (res) {
+            is SyncRemoto.Resultado.Ok ->
+                if (res.huboCambios) R.string.sync_ok_cambios else R.string.sync_ok
+            SyncRemoto.Resultado.SinServidor -> R.string.sync_sin_servidor
+            SyncRemoto.Resultado.SinRed -> R.string.sync_sin_red
+            SyncRemoto.Resultado.ErrorAuth -> R.string.sync_error_auth
+            SyncRemoto.Resultado.ErrorServidor -> R.string.sync_error_servidor
+        }
+    )
+
+    /** Muestra "Última sincronización: hace X" si el evento es sincronizable. */
+    private fun actualizarIndicadorSync() {
+        val evento = datos?.evento
+        if (evento?.sincronizable != true) {
+            binding.ultimaSync.visibility = View.GONE
+            return
+        }
+        val millis = Ajustes.ultimaSync(this, evento.uuid)
+        val cuando = if (millis <= 0L) getString(R.string.ultima_sync_nunca)
+        else android.text.format.DateUtils.getRelativeTimeSpanString(
+            millis, System.currentTimeMillis(),
+            android.text.format.DateUtils.MINUTE_IN_MILLIS
+        ).toString()
+        binding.ultimaSync.text = getString(R.string.ultima_sync_fmt, cuando)
+        binding.ultimaSync.visibility = View.VISIBLE
     }
 
     private fun puedeEditar(datos: EventoCompleto): Boolean =
@@ -193,6 +243,7 @@ class EventoDetalleActivity : BaseActivity() {
             if (puedeEditar(completo) && !evento.cerrado) View.VISIBLE else View.GONE
 
         pintarAdjuntos(completo)
+        actualizarIndicadorSync()
 
         // Asistentes
         binding.listaAsistentes.removeAllViews()
@@ -503,10 +554,16 @@ class EventoDetalleActivity : BaseActivity() {
             completo != null && puedeEditar(completo) && !completo.evento.cerrado
         menu.findItem(R.id.accionEliminar)?.isVisible =
             completo?.evento?.soyCreador == true
+        menu.findItem(R.id.accionSincronizar)?.isVisible =
+            completo?.evento?.sincronizable == true
         return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
+        R.id.accionSincronizar -> {
+            sincronizarNube(manual = true)
+            true
+        }
         R.id.accionEditar -> {
             startActivity(
                 Intent(this, AddEditEventoActivity::class.java)

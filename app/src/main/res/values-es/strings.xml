@@ -159,6 +159,19 @@
     <string name="importar_quien">¿Quién eres tú en este evento?</string>
     <string name="sync_asunto">Evento de Bote: %1$s</string>
     <string name="sync_explicacion">Comparte el archivo del evento con los demás asistentes; al importarlo en su Bote todos quedan sincronizados.</string>
+    <!-- Sincronización manual -->
+    <string name="sync_ahora">Sincronizar ahora</string>
+    <string name="sync_en_curso">Sincronizando…</string>
+    <string name="sync_ok">Sincronizado.</string>
+    <string name="sync_ok_cambios">Sincronizado: llegaron cambios nuevos.</string>
+    <string name="sync_sin_servidor">Este evento no tiene servidor de sincronización.</string>
+    <string name="sync_sin_red">Sin conexión. Inténtalo más tarde.</string>
+    <string name="sync_error_auth">La clave del servidor de este evento es incorrecta.</string>
+    <string name="sync_error_servidor">El servidor de sincronización no respondió bien. Revisa la URL y que hayas ejecutado el SQL.</string>
+    <string name="sync_nada">No hay eventos con servidor de sincronización.</string>
+    <string name="sync_resumen">%1$d sincronizados · %2$d con fallo</string>
+    <string name="ultima_sync_fmt">Última sincronización: %1$s</string>
+    <string name="ultima_sync_nunca">Sin sincronizar aún</string>
 
     <!-- Ajustes -->
     <string name="ajustes_titulo">Ajustes</string>

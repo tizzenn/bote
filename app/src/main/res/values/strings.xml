@@ -159,6 +159,19 @@
     <string name="importar_quien">Who are you in this event?</string>
     <string name="sync_asunto">Bote event: %1$s</string>
     <string name="sync_explicacion">Share the event file with the other attendees; importing it in their Bote keeps everyone in sync.</string>
+    <!-- Manual sync -->
+    <string name="sync_ahora">Sync now</string>
+    <string name="sync_en_curso">Syncing…</string>
+    <string name="sync_ok">Synced.</string>
+    <string name="sync_ok_cambios">Synced — new changes received.</string>
+    <string name="sync_sin_servidor">This event has no sync server.</string>
+    <string name="sync_sin_red">No connection. Try again later.</string>
+    <string name="sync_error_auth">The API key for this event\'s server is wrong.</string>
+    <string name="sync_error_servidor">The sync server didn\'t respond correctly. Check the URL and that the SQL setup ran.</string>
+    <string name="sync_nada">No events with a sync server.</string>
+    <string name="sync_resumen">%1$d synced · %2$d failed</string>
+    <string name="ultima_sync_fmt">Last sync: %1$s</string>
+    <string name="ultima_sync_nunca">Not synced yet</string>
 
     <!-- Settings -->
     <string name="ajustes_titulo">Settings</string>

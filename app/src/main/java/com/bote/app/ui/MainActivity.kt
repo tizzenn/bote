@@ -23,6 +23,7 @@ import com.bote.app.databinding.ActivityMainBinding
 import com.bote.app.notification.NotificationScheduler
 import com.bote.app.sync.EventoJson
 import com.bote.app.sync.SyncCodec
+import com.bote.app.sync.SyncRemoto
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
@@ -67,6 +68,8 @@ class MainActivity : BaseActivity() {
     private var liquidaEventos: LongArray = LongArray(0)
     private var liquidaEtiquetas: Array<String> = emptyArray()
 
+    private var sincronizandoTodos = false
+
     private val pedirNotificaciones =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
@@ -100,6 +103,8 @@ class MainActivity : BaseActivity() {
         }
 
         binding.grupoFiltros.setOnCheckedStateChangeListener { _, _ -> refiltrar() }
+
+        binding.refrescar.setOnRefreshListener { sincronizarTodos(desdeGesto = true) }
 
         if (Build.VERSION.SDK_INT >= 33 &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -244,6 +249,51 @@ class MainActivity : BaseActivity() {
         else android.view.View.GONE
     }
 
+    /**
+     * Sincroniza todos los eventos con servidor y avisa del resumen. Se lanza
+     * desde el botón del menú o al deslizar para refrescar. La lista se repinta
+     * sola por el Flow al fusionar los cambios.
+     */
+    private fun sincronizarTodos(desdeGesto: Boolean) {
+        if (sincronizandoTodos) {
+            if (desdeGesto) binding.refrescar.isRefreshing = false
+            return
+        }
+        val sincronizables = eventos.filter { it.evento.sincronizable }
+        if (sincronizables.isEmpty()) {
+            binding.refrescar.isRefreshing = false
+            Toast.makeText(this, R.string.sync_nada, Toast.LENGTH_SHORT).show()
+            return
+        }
+        sincronizandoTodos = true
+        if (!desdeGesto) binding.refrescar.isRefreshing = true
+        lifecycleScope.launch {
+            val dao = AppDatabase.get(this@MainActivity).dao()
+            var ok = 0
+            var fallo = 0
+            for (ec in sincronizables) {
+                val res = try {
+                    SyncRemoto.sincronizar(dao, ec.evento.id)
+                } catch (e: Exception) {
+                    SyncRemoto.Resultado.SinRed
+                }
+                if (res is SyncRemoto.Resultado.Ok) {
+                    ok++
+                    Ajustes.guardarUltimaSync(
+                        this@MainActivity, ec.evento.uuid, System.currentTimeMillis()
+                    )
+                } else {
+                    fallo++
+                }
+            }
+            binding.refrescar.isRefreshing = false
+            sincronizandoTodos = false
+            val mensaje = if (fallo == 0) getString(R.string.sync_ok)
+            else getString(R.string.sync_resumen, ok, fallo)
+            Toast.makeText(this@MainActivity, mensaje, Toast.LENGTH_LONG).show()
+        }
+    }
+
     private fun elegirOrigenImportacion() {
         val opciones = arrayOf(
             getString(R.string.compartir_archivo),
@@ -317,6 +367,10 @@ class MainActivity : BaseActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
         R.id.accionOrdenar -> {
             elegirOrden()
+            true
+        }
+        R.id.accionSincronizar -> {
+            sincronizarTodos(desdeGesto = false)
             true
         }
         R.id.accionImportar -> {
