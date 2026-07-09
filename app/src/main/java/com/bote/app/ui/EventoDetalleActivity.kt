@@ -115,7 +115,7 @@ class EventoDetalleActivity : BaseActivity() {
         lifecycleScope.launch {
             val dao = AppDatabase.get(this@EventoDetalleActivity).dao()
             val res = try {
-                SyncRemoto.sincronizar(dao, eventoId)
+                SyncRemoto.sincronizar(applicationContext, dao, eventoId)
             } catch (e: Exception) {
                 SyncRemoto.Resultado.SinRed
             }

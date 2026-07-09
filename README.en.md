@@ -230,7 +230,23 @@ create policy "acceso anon" on eventos_sync
   for all using (true) with check (true);
 ```
 
-3. Copy the **Project URL** and the **`anon` key** (Settings → API).
+3. *(Optional)* To also sync the **event avatar** (low resolution, 256×256 ≈
+   20 KB), create a public `avatares` bucket and let the anon key upload:
+
+```sql
+insert into storage.buckets (id, name, public)
+values ('avatares', 'avatares', true)
+on conflict (id) do nothing;
+
+create policy "avatares anon insert" on storage.objects
+  for insert to anon with check (bucket_id = 'avatares');
+create policy "avatares anon update" on storage.objects
+  for update to anon using (bucket_id = 'avatares');
+```
+
+   If you skip the bucket, everything still works; the avatar simply won't sync.
+
+4. Copy the **Project URL** and the **`anon` key** (Settings → API).
 
 **The server is per event**, not per app: each group can have its own, so the same
 user can be in several groups on different servers. When you create an event you
@@ -247,7 +263,9 @@ downloads the remote copy, merges it and uploads the result.
 
 Honest warning: anyone with the anon key can read the whole table, so only share
 it with your group (the event's uuid acts as the secret, but the key is the key to
-the mailbox). Photos are not uploaded.
+the mailbox). Only the low-resolution **event avatar** is uploaded (if you created
+the `avatares` bucket); receipts and PDF attachments stay local and never leave
+the device.
 
 ## Building
 

@@ -273,7 +273,7 @@ class MainActivity : BaseActivity() {
             var fallo = 0
             for (ec in sincronizables) {
                 val res = try {
-                    SyncRemoto.sincronizar(dao, ec.evento.id)
+                    SyncRemoto.sincronizar(applicationContext, dao, ec.evento.id)
                 } catch (e: Exception) {
                     SyncRemoto.Resultado.SinRed
                 }

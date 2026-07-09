@@ -12,7 +12,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         Evento::class, Asistente::class, Apunte::class, Reparto::class,
         ApunteBorrado::class, Registro::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -115,14 +115,22 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** v2.9 → v2.10: marca del avatar del evento (la imagen viaja por Storage). */
+        private val MIGRACION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE eventos ADD COLUMN avatarMillis INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         fun get(context: Context): AppDatabase =
             instancia ?: synchronized(this) {
                 instancia ?: Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "bote.db"
-                ).addMigrations(MIGRACION_1_2, MIGRACION_2_3, MIGRACION_3_4, MIGRACION_4_5)
-                    .build().also { instancia = it }
+                ).addMigrations(
+                    MIGRACION_1_2, MIGRACION_2_3, MIGRACION_3_4, MIGRACION_4_5, MIGRACION_5_6
+                ).build().also { instancia = it }
             }
     }
 }

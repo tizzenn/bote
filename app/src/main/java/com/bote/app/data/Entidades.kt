@@ -28,6 +28,9 @@ data class Evento(
     val fechaMillis: Long = 0,
     val ubicacion: String = "",
     val fotoPath: String = "",
+    /** Marca de cuándo se puso/cambió el avatar; 0 = sin avatar. Solo esta
+     *  marca viaja en el JSON (la imagen va aparte por Storage). */
+    val avatarMillis: Long = 0,
     val modo: String = Modo.COLABORATIVO,
     /** True si el evento se creó en este dispositivo (yo soy el admin). */
     val soyCreador: Boolean = true,

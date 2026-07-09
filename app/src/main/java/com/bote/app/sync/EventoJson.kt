@@ -40,6 +40,7 @@ object EventoJson {
         jEvento.put("descripcion", evento.descripcion)
         jEvento.put("fechaMillis", evento.fechaMillis)
         jEvento.put("ubicacion", evento.ubicacion)
+        jEvento.put("avatarMillis", evento.avatarMillis)
         jEvento.put("modo", evento.modo)
         jEvento.put("cerrado", evento.cerrado)
         jEvento.put("creadoMillis", evento.creadoMillis)
@@ -144,6 +145,7 @@ object EventoJson {
                 descripcion = jEvento.optString("descripcion"),
                 fechaMillis = jEvento.optLong("fechaMillis"),
                 ubicacion = jEvento.optString("ubicacion"),
+                avatarMillis = jEvento.optLong("avatarMillis"),
                 modo = jEvento.optString("modo", Modo.COLABORATIVO),
                 soyCreador = false,
                 miAsistenteId = 0,
@@ -189,6 +191,7 @@ object EventoJson {
                     descripcion = jEvento.optString("descripcion"),
                     fechaMillis = jEvento.optLong("fechaMillis"),
                     ubicacion = jEvento.optString("ubicacion"),
+                    avatarMillis = jEvento.optLong("avatarMillis", local.evento.avatarMillis),
                     modo = jEvento.optString("modo", Modo.COLABORATIVO),
                     cerrado = jEvento.optBoolean("cerrado"),
                     modificadoMillis = modImportado,

@@ -230,4 +230,22 @@ object Ajustes {
     fun guardarUltimaSync(context: Context, uuid: String, millis: Long) {
         prefs(context).edit().putLong("ultima_sync_$uuid", millis).apply()
     }
+
+    // ── Avatar del evento sincronizado (local) ────────────────────
+
+    /** avatarMillis de la imagen que tenemos físicamente en este dispositivo. */
+    fun avatarImagenMillis(context: Context, uuid: String): Long =
+        prefs(context).getLong("avatar_img_$uuid", 0L)
+
+    fun guardarAvatarImagenMillis(context: Context, uuid: String, millis: Long) {
+        prefs(context).edit().putLong("avatar_img_$uuid", millis).apply()
+    }
+
+    /** avatarMillis de la imagen que ya hemos subido a Storage. */
+    fun avatarSubidoMillis(context: Context, uuid: String): Long =
+        prefs(context).getLong("avatar_sub_$uuid", 0L)
+
+    fun guardarAvatarSubidoMillis(context: Context, uuid: String, millis: Long) {
+        prefs(context).edit().putLong("avatar_sub_$uuid", millis).apply()
+    }
 }

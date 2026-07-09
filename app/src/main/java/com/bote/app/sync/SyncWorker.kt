@@ -26,7 +26,7 @@ class SyncWorker(
             val completo = dao.eventoCompleto(evento.id)
             if (completo != null && completo.saldado) continue
             val res = try {
-                SyncRemoto.sincronizar(dao, evento.id)
+                SyncRemoto.sincronizar(applicationContext, dao, evento.id)
             } catch (e: Exception) {
                 SyncRemoto.Resultado.SinRed
             }

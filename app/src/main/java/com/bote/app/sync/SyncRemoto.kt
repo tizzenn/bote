@@ -1,5 +1,6 @@
 package com.bote.app.sync
 
+import android.content.Context
 import com.bote.app.data.BoteDao
 import com.bote.app.data.Evento
 import kotlinx.coroutines.Dispatchers
@@ -39,7 +40,7 @@ object SyncRemoto {
      * fusiona, y después sube el resultado. Devuelve un [Resultado] tipado
      * para que la interfaz pueda repintarse y avisar de los fallos.
      */
-    suspend fun sincronizar(dao: BoteDao, eventoId: Long): Resultado =
+    suspend fun sincronizar(context: Context, dao: BoteDao, eventoId: Long): Resultado =
         withContext(Dispatchers.IO) {
             val evento = dao.evento(eventoId) ?: return@withContext Resultado.SinServidor
             if (!evento.sincronizable) return@withContext Resultado.SinServidor
@@ -47,7 +48,7 @@ object SyncRemoto {
             val key = evento.syncKey.trim()
             val uuid = evento.uuid
 
-            val huboCambios = when (val bajada = descargar(url, key, uuid)) {
+            var huboCambios = when (val bajada = descargar(url, key, uuid)) {
                 is Descarga.Datos -> {
                     EventoJson.importar(dao, bajada.json)
                     true
@@ -62,7 +63,19 @@ object SyncRemoto {
                 ?: return@withContext Resultado.ErrorServidor
             val borrados = dao.borradosDeEvento(eventoId)
             val registro = dao.registroDeEvento(eventoId)
-            when (subir(url, key, uuid, EventoJson.exportar(fusionado, borrados, registro))) {
+            val subida = subir(url, key, uuid, EventoJson.exportar(fusionado, borrados, registro))
+
+            // Avatar (imagen a baja resolución) por Storage, aparte del JSON.
+            // Best-effort: si el bucket no está o falla, se ignora.
+            try {
+                dao.evento(eventoId)?.let { actual ->
+                    if (AvatarSync.sincronizar(context, dao, actual, url, key)) huboCambios = true
+                }
+            } catch (e: Exception) {
+                // sin bucket/red: el evento sigue sincronizándose sin avatar
+            }
+
+            when (subida) {
                 Subida.Ok -> Resultado.Ok(huboCambios)
                 Subida.Auth -> Resultado.ErrorAuth
                 Subida.Servidor -> Resultado.ErrorServidor

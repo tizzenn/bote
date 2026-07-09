@@ -232,7 +232,25 @@ create policy "acceso anon" on eventos_sync
   for all using (true) with check (true);
 ```
 
-3. Copia la **URL del proyecto** y la **clave `anon`** (Settings → API).
+3. *(Opcional)* Para sincronizar también el **avatar del evento** (a baja
+   resolución, 256×256 ≈ 20 KB), crea un bucket público `avatares` y deja que
+   la clave anon pueda subir:
+
+```sql
+insert into storage.buckets (id, name, public)
+values ('avatares', 'avatares', true)
+on conflict (id) do nothing;
+
+create policy "avatares anon sube" on storage.objects
+  for insert to anon with check (bucket_id = 'avatares');
+create policy "avatares anon actualiza" on storage.objects
+  for update to anon using (bucket_id = 'avatares');
+```
+
+   Si no creas el bucket, todo sigue funcionando; simplemente no se sincroniza
+   el avatar.
+
+4. Copia la **URL del proyecto** y la **clave `anon`** (Settings → API).
 
 **El servidor es por evento**, no de la app: cada grupo puede tener el suyo, así
 que un mismo usuario puede estar en varios grupos en servidores distintos. Al
@@ -251,7 +269,9 @@ resultado.
 
 Aviso honesto: cualquiera que tenga la clave anon puede leer la tabla entera, así
 que compártela solo con tu grupo (el uuid del evento hace de secreto, pero la
-clave es la llave del buzón). Las fotos no se suben.
+clave es la llave del buzón). Solo se sube el **avatar del evento** a baja
+resolución (si creaste el bucket `avatares`); los recibos y los PDF adjuntos
+siguen siendo locales y nunca salen del dispositivo.
 
 ## Compilación
 

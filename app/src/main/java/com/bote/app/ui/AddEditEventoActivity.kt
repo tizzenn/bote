@@ -437,6 +437,20 @@ class AddEditEventoActivity : BaseActivity() {
             ?.takeIf { it.isNotBlank() }
             ?.let { Ajustes.guardarNombreUsuario(this, it) }
 
+        // Marca del avatar: si la foto ha cambiado, se sella ahora para que viaje
+        // por Storage a los demás dispositivos.
+        val ahora = System.currentTimeMillis()
+        val fotoAnterior = datos?.evento?.fotoPath ?: ""
+        val fotoCambiada = fotoPath != fotoAnterior
+        val avatarMillis = when {
+            fotoPath.isBlank() -> 0L
+            fotoCambiada -> ahora
+            else -> datos?.evento?.avatarMillis ?: ahora
+        }
+        if (fotoPath.isNotBlank() && fotoCambiada) {
+            Ajustes.guardarAvatarImagenMillis(this, eventoUuid, avatarMillis)
+        }
+
         lifecycleScope.launch {
             val dao = AppDatabase.get(this@AddEditEventoActivity).dao()
 
@@ -463,6 +477,7 @@ class AddEditEventoActivity : BaseActivity() {
                         fechaMillis = fechaMillis,
                         ubicacion = ubicacion,
                         fotoPath = fotoPath,
+                        avatarMillis = avatarMillis,
                         modo = modo,
                         soyCreador = true,
                         syncActivo = syncActivo,
@@ -480,8 +495,9 @@ class AddEditEventoActivity : BaseActivity() {
                         fechaMillis = fechaMillis,
                         ubicacion = ubicacion,
                         fotoPath = fotoPath,
+                        avatarMillis = avatarMillis,
                         modo = modo,
-                        modificadoMillis = System.currentTimeMillis(),
+                        modificadoMillis = ahora,
                         syncActivo = syncActivo,
                         syncUrl = syncUrl,
                         syncKey = syncKey
