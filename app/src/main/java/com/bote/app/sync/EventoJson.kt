@@ -75,6 +75,9 @@ object EventoJson {
             j.put("pagadorUuid", porId[a.pagadorId]?.uuid ?: "")
             if (a.presupuestadoCents != null) j.put("presupuestadoCents", a.presupuestadoCents)
             j.put("gastadoCents", a.gastadoCents)
+            // Compat v2.5: las versiones antiguas exigen "pagado" por apunte para
+            // cerrar la cuenta; se emite igual al gastado (el importe efectivo).
+            j.put("pagadoCents", a.gastadoCents)
             j.put("repartoIgualitario", a.repartoIgualitario)
             j.put("categoria", a.categoria)
             j.put("fechaMillis", a.fechaMillis)
@@ -191,7 +194,11 @@ object EventoJson {
                     descripcion = jEvento.optString("descripcion"),
                     fechaMillis = jEvento.optLong("fechaMillis"),
                     ubicacion = jEvento.optString("ubicacion"),
-                    avatarMillis = jEvento.optLong("avatarMillis", local.evento.avatarMillis),
+                    // El avatar más nuevo nunca retrocede (como la liquidación):
+                    // si no, un avatar recién puesto dejaría de subirse.
+                    avatarMillis = max(
+                        local.evento.avatarMillis, jEvento.optLong("avatarMillis")
+                    ),
                     modo = jEvento.optString("modo", Modo.COLABORATIVO),
                     cerrado = jEvento.optBoolean("cerrado"),
                     modificadoMillis = modImportado,

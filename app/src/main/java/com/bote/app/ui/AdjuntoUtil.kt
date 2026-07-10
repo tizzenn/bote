@@ -92,10 +92,11 @@ object AdjuntoUtil {
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
-            if (intento.resolveActivity(context.packageManager) != null) {
-                context.startActivity(intento)
-                true
-            } else false
+            // Sin pre-check con resolveActivity: desde Android 11 la visibilidad
+            // de paquetes lo devuelve null aunque haya visor. Se lanza y, si de
+            // verdad no hay app, ActivityNotFoundException cae en el catch.
+            context.startActivity(intento)
+            true
         } catch (e: Exception) {
             false
         }

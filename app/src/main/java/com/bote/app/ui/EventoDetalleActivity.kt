@@ -113,28 +113,33 @@ class EventoDetalleActivity : BaseActivity() {
         sincronizando = true
         if (manual) Toast.makeText(this, R.string.sync_en_curso, Toast.LENGTH_SHORT).show()
         lifecycleScope.launch {
-            val dao = AppDatabase.get(this@EventoDetalleActivity).dao()
-            val res = try {
-                SyncRemoto.sincronizar(applicationContext, dao, eventoId)
-            } catch (e: Exception) {
-                SyncRemoto.Resultado.SinRed
-            }
-            if (res is SyncRemoto.Resultado.Ok) {
-                datos?.evento?.uuid?.let {
-                    Ajustes.guardarUltimaSync(
-                        this@EventoDetalleActivity, it, System.currentTimeMillis()
-                    )
+            try {
+                val dao = AppDatabase.get(this@EventoDetalleActivity).dao()
+                val res = try {
+                    SyncRemoto.sincronizar(applicationContext, dao, eventoId)
+                } catch (e: Exception) {
+                    SyncRemoto.Resultado.SinRed
                 }
-                if (res.huboCambios) cargar() else actualizarIndicadorSync()
-            } else {
-                actualizarIndicadorSync()
+                if (res is SyncRemoto.Resultado.Ok) {
+                    datos?.evento?.uuid?.let {
+                        Ajustes.guardarUltimaSync(
+                            this@EventoDetalleActivity, it, System.currentTimeMillis()
+                        )
+                    }
+                    if (res.huboCambios) cargar() else actualizarIndicadorSync()
+                } else {
+                    actualizarIndicadorSync()
+                }
+                if (manual) {
+                    Toast.makeText(
+                        this@EventoDetalleActivity, mensajeResultado(res), Toast.LENGTH_LONG
+                    ).show()
+                }
+            } finally {
+                // En finally: si algo del repintado fallara, el flag no puede
+                // quedarse a true y bloquear todas las syncs siguientes.
+                sincronizando = false
             }
-            if (manual) {
-                Toast.makeText(
-                    this@EventoDetalleActivity, mensajeResultado(res), Toast.LENGTH_LONG
-                ).show()
-            }
-            sincronizando = false
         }
     }
 
@@ -147,6 +152,7 @@ class EventoDetalleActivity : BaseActivity() {
             SyncRemoto.Resultado.ErrorAuth -> R.string.sync_error_auth
             SyncRemoto.Resultado.ErrorServidor -> R.string.sync_error_servidor
             SyncRemoto.Resultado.Bloqueada -> R.string.sync_bloqueada
+            SyncRemoto.Resultado.ErrorCifrado -> R.string.sync_error_cifrado
         }
     )
 
@@ -589,6 +595,7 @@ class EventoDetalleActivity : BaseActivity() {
                         datos?.evento?.let {
                             NotificationScheduler.cancelar(this@EventoDetalleActivity, it)
                             AdjuntoUtil.eliminarTodos(this@EventoDetalleActivity, it.uuid)
+                            Ajustes.limpiarEstadoSync(this@EventoDetalleActivity, it.uuid)
                         }
                         AppDatabase.get(this@EventoDetalleActivity).dao()
                             .eliminarEvento(eventoId)

@@ -173,6 +173,7 @@
     <string name="ultima_sync_fmt">Last sync: %1$s</string>
     <string name="ultima_sync_nunca">Not synced yet</string>
     <string name="sync_bloqueada">Cloud sync needs an active subscription.</string>
+    <string name="sync_error_cifrado">The remote copy is encrypted and your passphrase is missing or doesn\'t match the group\'s. Check Settings; nothing was uploaded.</string>
     <!-- Subscription (Play) -->
     <string name="seccion_suscripcion">CLOUD SYNC</string>
     <string name="suscripcion_activa_desc">Subscription active. Cloud sync is unlocked. Thank you!</string>
@@ -183,7 +184,7 @@
     <!-- End-to-end encryption -->
     <string name="seccion_e2e">END-TO-END ENCRYPTION</string>
     <string name="e2e_frase">Encryption passphrase</string>
-    <string name="e2e_ayuda">If you set a passphrase, synced data is encrypted on your device before upload — the server only sees opaque blobs. Everyone in the group must use the SAME passphrase. If you forget it, the remote copy can\'t be read (your local data stays intact).</string>
+    <string name="e2e_ayuda">If you set a passphrase, synced data is encrypted on your device before upload — the server only sees opaque blobs. Everyone in the group must use the SAME passphrase. If you forget it, the remote copy can\'t be read (your local data stays intact). With a passphrase set, the event avatar image is not uploaded either.</string>
 
     <!-- Settings -->
     <string name="ajustes_titulo">Settings</string>

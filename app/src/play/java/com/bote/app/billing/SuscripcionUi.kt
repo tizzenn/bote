@@ -9,6 +9,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import com.bote.app.R
 import com.bote.app.config.Ajustes
 import com.google.android.material.button.MaterialButton
@@ -54,6 +56,13 @@ object SuscripcionUi {
         val manager = BillingManager(activity.applicationContext) { activa ->
             activity.runOnUiThread { refrescar(activa) }
         }
+        // La conexión con Play Billing se cierra con la pantalla: sin esto,
+        // cada apertura de Ajustes dejaría viva una conexión (y la Activity).
+        activity.lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onDestroy(owner: LifecycleOwner) {
+                manager.cerrar()
+            }
+        })
         refrescar(Ajustes.suscripcionActiva(activity))
         boton.setOnClickListener {
             if (Ajustes.suscripcionActiva(activity)) {

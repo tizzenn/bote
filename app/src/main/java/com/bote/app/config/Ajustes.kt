@@ -280,4 +280,18 @@ object Ajustes {
     fun guardarFirmaSubida(context: Context, uuid: String, firma: String) {
         prefs(context).edit().putString("firma_sub_$uuid", firma).apply()
     }
+
+    /**
+     * Borra el estado local de sincronización de un evento (al eliminarlo).
+     * Evita que las prefs crezcan sin límite y que una reimportación del
+     * mismo evento herede firmas o marcas de avatar rancias.
+     */
+    fun limpiarEstadoSync(context: Context, uuid: String) {
+        prefs(context).edit()
+            .remove("ultima_sync_$uuid")
+            .remove("avatar_img_$uuid")
+            .remove("avatar_sub_$uuid")
+            .remove("firma_sub_$uuid")
+            .apply()
+    }
 }

@@ -142,7 +142,10 @@ class MainActivity : BaseActivity() {
             if (!evento.soyCreador) continue
             val completo = dao.eventoCompleto(evento.id) ?: continue
             val creador = completo.asistentes.firstOrNull { it.esCreador } ?: continue
-            if (creador.nombre in literales && creador.nombre != nombre) {
+            // También los creadores sin nombre (se canceló el diálogo al crear)
+            if ((creador.nombre in literales || creador.nombre.isBlank()) &&
+                creador.nombre != nombre
+            ) {
                 dao.actualizarAsistente(creador.copy(nombre = nombre))
             }
         }

@@ -59,6 +59,16 @@ object AvatarSync {
 
         // El avatar actual es más nuevo que la imagen que tenemos → bajar
         if (avatarMillis > imagenLocal) {
+            // Marcas perdidas (p. ej. backup que restaura la BD pero no las
+            // prefs): si ya hay una foto local, NO se degrada a la copia de
+            // 256px; se sella la marca y los cambios futuros fluyen normal.
+            if (imagenLocal == 0L && evento.fotoPath.isNotBlank() &&
+                File(evento.fotoPath).exists()
+            ) {
+                Ajustes.guardarAvatarImagenMillis(context, uuid, avatarMillis)
+                Ajustes.guardarAvatarSubidoMillis(context, uuid, max(subido, avatarMillis))
+                return@withContext false
+            }
             val bytes = descargar(base, clave, uuid) ?: return@withContext false
             val destino = File(
                 File(context.filesDir, "fotos").apply { mkdirs() }, "$uuid.jpg"
