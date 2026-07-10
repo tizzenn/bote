@@ -16,8 +16,8 @@ android {
         applicationId = "com.bote.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 22
-        versionName = "2.11"
+        versionCode = 23
+        versionName = "3.0"
     }
 
     // F-Droid: no incluir el bloque de metadatos de dependencias (cifrado con
@@ -61,6 +61,20 @@ android {
         }
     }
 
+    // Dos sabores del mismo código:
+    //  - foss  → F-Droid: todo gratis, sin librerías de Google.
+    //  - play  → Google Play: la sync se desbloquea por suscripción (BillingClient).
+    // Solo cambia la implementación de EntitlementProvider (src/foss vs src/play).
+    flavorDimensions += "distribucion"
+    productFlavors {
+        create("foss") {
+            dimension = "distribucion"
+        }
+        create("play") {
+            dimension = "distribucion"
+        }
+    }
+
     buildFeatures {
         viewBinding = true
     }
@@ -95,6 +109,9 @@ dependencies {
 
     // WorkManager (sincronización periódica en segundo plano)
     implementation("androidx.work:work-runtime-ktx:2.9.1")
+
+    // Google Play Billing SOLO en el sabor play (no entra en F-Droid).
+    "playImplementation"("com.android.billingclient:billing-ktx:6.2.1")
 
     // Códigos QR para sincronizar eventos (ZXing, Apache 2.0)
     implementation("com.google.zxing:core:3.5.3")

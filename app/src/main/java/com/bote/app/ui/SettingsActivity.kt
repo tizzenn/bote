@@ -117,6 +117,15 @@ class SettingsActivity : BaseActivity() {
             com.bote.app.sync.SyncScheduler.configurar(this)
         }
 
+        // Cifrado extremo a extremo (frase; nunca sale del dispositivo)
+        binding.campoFraseE2e.setText(Ajustes.fraseCifrado(this))
+        binding.campoFraseE2e.addTextChangedListener(GuardarTexto { texto ->
+            Ajustes.guardarFraseCifrado(this, texto)
+        })
+
+        // Suscripción: solo el sabor play rellena el panel; foss lo deja oculto.
+        com.bote.app.billing.SuscripcionUi.montar(this, binding.panelSuscripcion)
+
         // Notificaciones
         binding.switchEvento.isChecked = Ajustes.notifEvento(this)
         binding.switchEvento.setOnCheckedChangeListener { _, valor ->

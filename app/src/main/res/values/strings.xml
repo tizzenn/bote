@@ -172,6 +172,18 @@
     <string name="sync_resumen">%1$d synced · %2$d failed</string>
     <string name="ultima_sync_fmt">Last sync: %1$s</string>
     <string name="ultima_sync_nunca">Not synced yet</string>
+    <string name="sync_bloqueada">Cloud sync needs an active subscription.</string>
+    <!-- Subscription (Play) -->
+    <string name="seccion_suscripcion">CLOUD SYNC</string>
+    <string name="suscripcion_activa_desc">Subscription active. Cloud sync is unlocked. Thank you!</string>
+    <string name="suscripcion_oferta">Unlock automatic cloud sync across your devices for a small yearly fee.</string>
+    <string name="suscripcion_boton">Subscribe</string>
+    <string name="suscripcion_gestionar">Manage subscription</string>
+    <string name="suscripcion_no_disponible">Subscriptions aren\'t available right now.</string>
+    <!-- End-to-end encryption -->
+    <string name="seccion_e2e">END-TO-END ENCRYPTION</string>
+    <string name="e2e_frase">Encryption passphrase</string>
+    <string name="e2e_ayuda">If you set a passphrase, synced data is encrypted on your device before upload — the server only sees opaque blobs. Everyone in the group must use the SAME passphrase. If you forget it, the remote copy can\'t be read (your local data stays intact).</string>
 
     <!-- Settings -->
     <string name="ajustes_titulo">Settings</string>

@@ -248,4 +248,36 @@ object Ajustes {
     fun guardarAvatarSubidoMillis(context: Context, uuid: String, millis: Long) {
         prefs(context).edit().putLong("avatar_sub_$uuid", millis).apply()
     }
+
+    // ── Suscripción (sabor play) ──────────────────────────────────
+
+    private const val CLAVE_SUSCRIPCION = "suscripcion_activa"
+
+    fun suscripcionActiva(context: Context): Boolean =
+        prefs(context).getBoolean(CLAVE_SUSCRIPCION, false)
+
+    fun guardarSuscripcionActiva(context: Context, valor: Boolean) {
+        prefs(context).edit().putBoolean(CLAVE_SUSCRIPCION, valor).apply()
+    }
+
+    // ── Cifrado extremo a extremo (frase, nunca sale del dispositivo) ──
+
+    private const val CLAVE_FRASE_CIFRADO = "frase_cifrado"
+
+    /** Frase para derivar la clave de cifrado E2E; vacía = sync en claro. */
+    fun fraseCifrado(context: Context): String =
+        prefs(context).getString(CLAVE_FRASE_CIFRADO, "").orEmpty()
+
+    fun guardarFraseCifrado(context: Context, valor: String) {
+        prefs(context).edit().putString(CLAVE_FRASE_CIFRADO, valor).apply()
+    }
+
+    // ── Sync diferencial: firma del último blob subido por evento ──
+
+    fun firmaSubida(context: Context, uuid: String): String =
+        prefs(context).getString("firma_sub_$uuid", "").orEmpty()
+
+    fun guardarFirmaSubida(context: Context, uuid: String, firma: String) {
+        prefs(context).edit().putString("firma_sub_$uuid", firma).apply()
+    }
 }

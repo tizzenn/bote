@@ -146,6 +146,7 @@ class EventoDetalleActivity : BaseActivity() {
             SyncRemoto.Resultado.SinRed -> R.string.sync_sin_red
             SyncRemoto.Resultado.ErrorAuth -> R.string.sync_error_auth
             SyncRemoto.Resultado.ErrorServidor -> R.string.sync_error_servidor
+            SyncRemoto.Resultado.Bloqueada -> R.string.sync_bloqueada
         }
     )
 

@@ -26,11 +26,11 @@ jobs:
         with:
           gradle-version: 8.7
 
-      - name: Compilar APK de depuración
-        run: gradle assembleDebug --no-daemon
+      - name: Compilar APK de depuración (sabor foss)
+        run: gradle assembleFossDebug --no-daemon
 
       - name: Subir APK como artefacto
         uses: actions/upload-artifact@v7
         with:
           name: bote-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: app/build/outputs/apk/foss/debug/*.apk

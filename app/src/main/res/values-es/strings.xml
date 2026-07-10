@@ -172,6 +172,18 @@
     <string name="sync_resumen">%1$d sincronizados · %2$d con fallo</string>
     <string name="ultima_sync_fmt">Última sincronización: %1$s</string>
     <string name="ultima_sync_nunca">Sin sincronizar aún</string>
+    <string name="sync_bloqueada">La sincronización en la nube necesita una suscripción activa.</string>
+    <!-- Suscripción (Play) -->
+    <string name="seccion_suscripcion">SINCRONIZACIÓN EN LA NUBE</string>
+    <string name="suscripcion_activa_desc">Suscripción activa. La sincronización está desbloqueada. ¡Gracias!</string>
+    <string name="suscripcion_oferta">Desbloquea la sincronización automática entre tus dispositivos por una pequeña cuota anual.</string>
+    <string name="suscripcion_boton">Suscribirme</string>
+    <string name="suscripcion_gestionar">Gestionar suscripción</string>
+    <string name="suscripcion_no_disponible">Las suscripciones no están disponibles ahora mismo.</string>
+    <!-- Cifrado extremo a extremo -->
+    <string name="seccion_e2e">CIFRADO EXTREMO A EXTREMO</string>
+    <string name="e2e_frase">Frase de cifrado</string>
+    <string name="e2e_ayuda">Si pones una frase, los datos sincronizados se cifran en tu dispositivo antes de subirlos: el servidor solo ve bloques opacos. Todos en el grupo deben usar la MISMA frase. Si la olvidas, la copia remota no se puede leer (tus datos locales siguen intactos).</string>
 
     <!-- Ajustes -->
     <string name="ajustes_titulo">Ajustes</string>

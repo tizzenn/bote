@@ -24,6 +24,15 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Panel de suscripción (solo lo rellena el sabor play) -->
+            <LinearLayout
+                android:id="@+id/panelSuscripcion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone" />
+
             <TextView
                 style="@style/Bote.TextoSeccion"
                 android:layout_width="match_parent"
@@ -247,6 +256,28 @@
                 android:text="@string/auto_sync_ayuda"
                 android:textColor="@color/text_secondary"
                 android:textSize="13sp" />
+
+            <TextView
+                style="@style/Bote.TextoSeccion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/seccion_e2e" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:hint="@string/e2e_frase"
+                app:endIconMode="password_toggle"
+                app:helperText="@string/e2e_ayuda">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/campoFraseE2e"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword" />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
                 style="@style/Bote.TextoSeccion"

@@ -276,11 +276,19 @@ siguen siendo locales y nunca salen del dispositivo.
 ## Compilación
 
 Proyecto Android estándar (Kotlin, Material Components, Room). Requiere
-JDK 17 y el SDK de Android (compileSdk 34):
+JDK 17 y el SDK de Android (compileSdk 34).
+
+Hay **dos sabores** (mismo código): `foss` (F-Droid, todo gratis, sin
+librerías de Google) y `play` (freemium, la sync se desbloquea por
+suscripción vía Play Billing). El APK que va a F-Droid es el `foss`:
 
 ```
-gradle assembleDebug
+gradle assembleFossDebug      # depuración
+gradle assembleFossRelease    # firmado (el de F-Droid)
+gradle assemblePlayRelease    # variante de Google Play
 ```
+
+El cifrado extremo a extremo (frase en Ajustes) es común a ambos sabores.
 
 En GitHub Actions hay dos flujos: `build.yml` compila el APK de depuración en
 cada push a `main`, y `release.yml` compila el APK firmado al etiquetar
