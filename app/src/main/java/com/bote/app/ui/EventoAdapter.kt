@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bote.app.R
 import com.bote.app.data.Dinero
@@ -19,9 +20,19 @@ class EventoAdapter(
     private var datos: List<EventoCompleto> = emptyList()
     private val formatoFecha: DateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM)
 
+    /** Actualiza con DiffUtil: sin parpadeo ni repintado completo de la lista. */
     fun actualizar(nuevos: List<EventoCompleto>) {
+        val previos = datos
+        val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+            override fun getOldListSize() = previos.size
+            override fun getNewListSize() = nuevos.size
+            override fun areItemsTheSame(vieja: Int, nueva: Int) =
+                previos[vieja].evento.id == nuevos[nueva].evento.id
+            override fun areContentsTheSame(vieja: Int, nueva: Int) =
+                previos[vieja] == nuevos[nueva]
+        })
         datos = nuevos
-        notifyDataSetChanged()
+        diff.dispatchUpdatesTo(this)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder =
@@ -58,6 +69,8 @@ class EventoAdapter(
                 AvatarUtil.aplicar(binding.avatarEvento, evento.titulo.ifBlank { fecha })
             }
 
+            binding.iconoNube.visibility =
+                if (evento.sincronizable) View.VISIBLE else View.GONE
             binding.iconoCandado.visibility =
                 if (evento.cerrado) View.VISIBLE else View.GONE
             when {

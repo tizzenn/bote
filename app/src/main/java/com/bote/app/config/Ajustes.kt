@@ -97,6 +97,28 @@ object Ajustes {
     fun firmaColores(context: Context): String =
         "${colorPrimario(context).name}/${colorAcento(context).name}"
 
+    // ── Identidad del usuario ─────────────────────────────────────
+
+    private const val CLAVE_NOMBRE_USUARIO = "nombre_usuario"
+
+    /** Tu nombre; se usa como asistente creador al crear un evento. */
+    fun nombreUsuario(context: Context): String =
+        prefs(context).getString(CLAVE_NOMBRE_USUARIO, "").orEmpty()
+
+    fun guardarNombreUsuario(context: Context, valor: String) {
+        prefs(context).edit().putString(CLAVE_NOMBRE_USUARIO, valor.trim()).apply()
+    }
+
+    private const val CLAVE_MIGRACION_NOMBRE = "migracion_nombre_hecha"
+
+    /** True si ya se renombraron los creadores antiguos ("Yo"/vacíos). */
+    fun migracionNombreHecha(context: Context): Boolean =
+        prefs(context).getBoolean(CLAVE_MIGRACION_NOMBRE, false)
+
+    fun marcarMigracionNombreHecha(context: Context) {
+        prefs(context).edit().putBoolean(CLAVE_MIGRACION_NOMBRE, true).apply()
+    }
+
     // ── Notificaciones ────────────────────────────────────────────
 
     fun notifEvento(context: Context): Boolean =
@@ -186,5 +208,100 @@ object Ajustes {
 
     fun guardarSyncKey(context: Context, valor: String) {
         prefs(context).edit().putString(CLAVE_SYNC_KEY, valor.trim()).apply()
+    }
+
+    // ── Sincronización en segundo plano ──────────────────────────
+
+    private const val CLAVE_AUTO_SYNC = "auto_sync"
+    private const val CLAVE_AUTO_SYNC_WIFI = "auto_sync_wifi"
+
+    /** Sincronizar en segundo plano cada hora (activado por defecto). */
+    fun autoSyncActivo(context: Context): Boolean =
+        prefs(context).getBoolean(CLAVE_AUTO_SYNC, true)
+
+    fun guardarAutoSyncActivo(context: Context, valor: Boolean) {
+        prefs(context).edit().putBoolean(CLAVE_AUTO_SYNC, valor).apply()
+    }
+
+    /** Limitar la sync en segundo plano a WiFi/red no medida (por defecto sí). */
+    fun autoSyncSoloWifi(context: Context): Boolean =
+        prefs(context).getBoolean(CLAVE_AUTO_SYNC_WIFI, true)
+
+    fun guardarAutoSyncSoloWifi(context: Context, valor: Boolean) {
+        prefs(context).edit().putBoolean(CLAVE_AUTO_SYNC_WIFI, valor).apply()
+    }
+
+    // ── Última sincronización correcta por evento (local) ─────────
+
+    /** Millis de la última sincronización correcta de un evento (0 si nunca). */
+    fun ultimaSync(context: Context, uuid: String): Long =
+        prefs(context).getLong("ultima_sync_$uuid", 0L)
+
+    fun guardarUltimaSync(context: Context, uuid: String, millis: Long) {
+        prefs(context).edit().putLong("ultima_sync_$uuid", millis).apply()
+    }
+
+    // ── Avatar del evento sincronizado (local) ────────────────────
+
+    /** avatarMillis de la imagen que tenemos físicamente en este dispositivo. */
+    fun avatarImagenMillis(context: Context, uuid: String): Long =
+        prefs(context).getLong("avatar_img_$uuid", 0L)
+
+    fun guardarAvatarImagenMillis(context: Context, uuid: String, millis: Long) {
+        prefs(context).edit().putLong("avatar_img_$uuid", millis).apply()
+    }
+
+    /** avatarMillis de la imagen que ya hemos subido a Storage. */
+    fun avatarSubidoMillis(context: Context, uuid: String): Long =
+        prefs(context).getLong("avatar_sub_$uuid", 0L)
+
+    fun guardarAvatarSubidoMillis(context: Context, uuid: String, millis: Long) {
+        prefs(context).edit().putLong("avatar_sub_$uuid", millis).apply()
+    }
+
+    // ── Suscripción (sabor play) ──────────────────────────────────
+
+    private const val CLAVE_SUSCRIPCION = "suscripcion_activa"
+
+    fun suscripcionActiva(context: Context): Boolean =
+        prefs(context).getBoolean(CLAVE_SUSCRIPCION, false)
+
+    fun guardarSuscripcionActiva(context: Context, valor: Boolean) {
+        prefs(context).edit().putBoolean(CLAVE_SUSCRIPCION, valor).apply()
+    }
+
+    // ── Cifrado extremo a extremo (frase, nunca sale del dispositivo) ──
+
+    private const val CLAVE_FRASE_CIFRADO = "frase_cifrado"
+
+    /** Frase para derivar la clave de cifrado E2E; vacía = sync en claro. */
+    fun fraseCifrado(context: Context): String =
+        prefs(context).getString(CLAVE_FRASE_CIFRADO, "").orEmpty()
+
+    fun guardarFraseCifrado(context: Context, valor: String) {
+        prefs(context).edit().putString(CLAVE_FRASE_CIFRADO, valor).apply()
+    }
+
+    // ── Sync diferencial: firma del último blob subido por evento ──
+
+    fun firmaSubida(context: Context, uuid: String): String =
+        prefs(context).getString("firma_sub_$uuid", "").orEmpty()
+
+    fun guardarFirmaSubida(context: Context, uuid: String, firma: String) {
+        prefs(context).edit().putString("firma_sub_$uuid", firma).apply()
+    }
+
+    /**
+     * Borra el estado local de sincronización de un evento (al eliminarlo).
+     * Evita que las prefs crezcan sin límite y que una reimportación del
+     * mismo evento herede firmas o marcas de avatar rancias.
+     */
+    fun limpiarEstadoSync(context: Context, uuid: String) {
+        prefs(context).edit()
+            .remove("ultima_sync_$uuid")
+            .remove("avatar_img_$uuid")
+            .remove("avatar_sub_$uuid")
+            .remove("firma_sub_$uuid")
+            .apply()
     }
 }

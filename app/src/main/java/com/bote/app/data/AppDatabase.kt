@@ -12,7 +12,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         Evento::class, Asistente::class, Apunte::class, Reparto::class,
         ApunteBorrado::class, Registro::class
     ],
-    version = 4,
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -78,13 +78,62 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v2.5 → v2.6: se elimina el "pagado" por apunte (adiós pagos parciales).
+         * SQLite de minSdk 26 no soporta DROP COLUMN, así que se recrea la tabla:
+         * el gastado pasa a ser el importe efectivo (el pagado si lo hubiera).
+         */
+        private val MIGRACION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE `apuntes_nuevo` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`eventoId` INTEGER NOT NULL, `uuid` TEXT NOT NULL, " +
+                        "`concepto` TEXT NOT NULL, `pagadorId` INTEGER NOT NULL, " +
+                        "`presupuestadoCents` INTEGER, `gastadoCents` INTEGER NOT NULL, " +
+                        "`repartoIgualitario` INTEGER NOT NULL, `categoria` TEXT NOT NULL, " +
+                        "`fotoPath` TEXT NOT NULL, `fechaMillis` INTEGER NOT NULL, " +
+                        "`modificadoMillis` INTEGER NOT NULL, " +
+                        "FOREIGN KEY(`eventoId`) REFERENCES `eventos`(`id`) " +
+                        "ON UPDATE NO ACTION ON DELETE CASCADE)"
+                )
+                db.execSQL(
+                    "INSERT INTO `apuntes_nuevo` (`id`, `eventoId`, `uuid`, `concepto`, " +
+                        "`pagadorId`, `presupuestadoCents`, `gastadoCents`, `repartoIgualitario`, " +
+                        "`categoria`, `fotoPath`, `fechaMillis`, `modificadoMillis`) " +
+                        "SELECT `id`, `eventoId`, `uuid`, `concepto`, `pagadorId`, " +
+                        "`presupuestadoCents`, COALESCE(`pagadoCents`, `gastadoCents`), " +
+                        "`repartoIgualitario`, `categoria`, `fotoPath`, `fechaMillis`, " +
+                        "`modificadoMillis` FROM `apuntes`"
+                )
+                db.execSQL("DROP TABLE `apuntes`")
+                db.execSQL("ALTER TABLE `apuntes_nuevo` RENAME TO `apuntes`")
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_apuntes_eventoId` " +
+                        "ON `apuntes` (`eventoId`)"
+                )
+            }
+        }
+
+        /** v2.9 → v2.10: marca del avatar del evento (la imagen viaja por Storage). */
+        private val MIGRACION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE eventos ADD COLUMN avatarMillis INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        /** Todas las migraciones, expuestas también para el test instrumentado. */
+        internal val MIGRACIONES = arrayOf(
+            MIGRACION_1_2, MIGRACION_2_3, MIGRACION_3_4, MIGRACION_4_5, MIGRACION_5_6
+        )
+
         fun get(context: Context): AppDatabase =
             instancia ?: synchronized(this) {
                 instancia ?: Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "bote.db"
-                ).addMigrations(MIGRACION_1_2, MIGRACION_2_3, MIGRACION_3_4)
+                ).addMigrations(*MIGRACIONES)
                     .build().also { instancia = it }
             }
     }

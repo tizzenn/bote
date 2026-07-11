@@ -40,6 +40,7 @@ object EventoJson {
         jEvento.put("descripcion", evento.descripcion)
         jEvento.put("fechaMillis", evento.fechaMillis)
         jEvento.put("ubicacion", evento.ubicacion)
+        jEvento.put("avatarMillis", evento.avatarMillis)
         jEvento.put("modo", evento.modo)
         jEvento.put("cerrado", evento.cerrado)
         jEvento.put("creadoMillis", evento.creadoMillis)
@@ -74,7 +75,9 @@ object EventoJson {
             j.put("pagadorUuid", porId[a.pagadorId]?.uuid ?: "")
             if (a.presupuestadoCents != null) j.put("presupuestadoCents", a.presupuestadoCents)
             j.put("gastadoCents", a.gastadoCents)
-            if (a.pagadoCents != null) j.put("pagadoCents", a.pagadoCents)
+            // Compat v2.5: las versiones antiguas exigen "pagado" por apunte para
+            // cerrar la cuenta; se emite igual al gastado (el importe efectivo).
+            j.put("pagadoCents", a.gastadoCents)
             j.put("repartoIgualitario", a.repartoIgualitario)
             j.put("categoria", a.categoria)
             j.put("fechaMillis", a.fechaMillis)
@@ -115,6 +118,97 @@ object EventoJson {
     }
 
     /**
+     * Copia de seguridad completa: todos los eventos en un único archivo.
+     * Cada elemento es exactamente lo que produce [exportar], así que la
+     * restauración reutiliza la misma fusión por UUID (sin duplicados).
+     */
+    fun exportarTodo(eventos: List<String>): String {
+        val raiz = JSONObject()
+        raiz.put("app", "bote")
+        raiz.put("backup", 1)
+        val lista = JSONArray()
+        for (e in eventos) lista.put(JSONObject(e))
+        raiz.put("eventos", lista)
+        return raiz.toString()
+    }
+
+    /** True si el texto es una copia de seguridad de [exportarTodo]. */
+    fun esBackup(texto: String): Boolean = try {
+        val j = JSONObject(texto)
+        j.optString("app") == "bote" && j.has("backup")
+    } catch (e: Exception) {
+        false
+    }
+
+    /** Restaura una copia de seguridad; devuelve cuántos eventos se importaron. */
+    suspend fun importarTodo(dao: BoteDao, texto: String): Int {
+        val raiz = JSONObject(texto)
+        require(raiz.optString("app") == "bote" && raiz.has("backup")) {
+            "No es una copia de seguridad de Bote"
+        }
+        val lista = raiz.getJSONArray("eventos")
+        for (i in 0 until lista.length()) {
+            importar(dao, lista.getJSONObject(i).toString())
+        }
+        return lista.length()
+    }
+
+    /**
+     * Invitación a un evento sincronizado: en vez del evento entero, el QR
+     * lleva solo las credenciales (uuid + servidor). Siempre cabe en un QR
+     * pequeño y legible; el contenido llega en la primera sincronización.
+     */
+    fun exportarInvitacion(evento: Evento): String {
+        val j = JSONObject()
+        j.put("app", "bote")
+        j.put("invitacion", 1)
+        j.put("uuid", evento.uuid)
+        j.put("titulo", evento.titulo)
+        j.put("syncUrl", evento.syncUrl)
+        j.put("syncKey", evento.syncKey)
+        return j.toString()
+    }
+
+    /** True si el texto (ya decodificado) es una invitación de [exportarInvitacion]. */
+    fun esInvitacion(texto: String): Boolean = try {
+        val j = JSONObject(texto)
+        j.optString("app") == "bote" && j.has("invitacion")
+    } catch (e: Exception) {
+        false
+    }
+
+    /**
+     * Acepta una invitación: crea el evento conectado a su servidor (vacío
+     * hasta la primera sync) o devuelve el existente si ya lo teníamos.
+     */
+    suspend fun importarInvitacion(dao: BoteDao, texto: String): Long {
+        val j = JSONObject(texto)
+        require(j.optString("app") == "bote" && j.has("invitacion")) {
+            "No es una invitación de Bote"
+        }
+        val uuid = j.getString("uuid")
+        val url = j.optString("syncUrl")
+        val key = j.optString("syncKey")
+        require(url.isNotBlank() && key.isNotBlank()) { "Invitación sin servidor" }
+        val previo = dao.eventoPorUuid(uuid)
+        if (previo != null) return previo.id
+        return dao.insertarEvento(
+            Evento(
+                uuid = uuid,
+                titulo = j.optString("titulo"),
+                fechaMillis = System.currentTimeMillis(),
+                soyCreador = false,
+                miAsistenteId = 0,
+                // Que la primera sync gane siempre el merge del evento.
+                modificadoMillis = 0,
+                syncActivo = true,
+                syncUrl = url,
+                syncKey = key
+            )
+        )
+    }
+
+    /**
      * Importa un evento. Si no existía se crea; si ya existía se fusiona:
      * los datos del evento y de cada apunte los gana la versión con la
      * modificación más reciente, los asistentes se unen por UUID (la marca
@@ -145,6 +239,7 @@ object EventoJson {
                 descripcion = jEvento.optString("descripcion"),
                 fechaMillis = jEvento.optLong("fechaMillis"),
                 ubicacion = jEvento.optString("ubicacion"),
+                avatarMillis = jEvento.optLong("avatarMillis"),
                 modo = jEvento.optString("modo", Modo.COLABORATIVO),
                 soyCreador = false,
                 miAsistenteId = 0,
@@ -190,6 +285,11 @@ object EventoJson {
                     descripcion = jEvento.optString("descripcion"),
                     fechaMillis = jEvento.optLong("fechaMillis"),
                     ubicacion = jEvento.optString("ubicacion"),
+                    // El avatar más nuevo nunca retrocede (como la liquidación):
+                    // si no, un avatar recién puesto dejaría de subirse.
+                    avatarMillis = max(
+                        local.evento.avatarMillis, jEvento.optLong("avatarMillis")
+                    ),
                     modo = jEvento.optString("modo", Modo.COLABORATIVO),
                     cerrado = jEvento.optBoolean("cerrado"),
                     modificadoMillis = modImportado,
@@ -259,8 +359,10 @@ object EventoJson {
                             ?: existente.apunte.pagadorId,
                         presupuestadoCents = if (j.has("presupuestadoCents"))
                             j.getLong("presupuestadoCents") else null,
-                        gastadoCents = j.optLong("gastadoCents"),
-                        pagadoCents = if (j.has("pagadoCents")) j.getLong("pagadoCents") else null,
+                        // Compat: de versiones con "pagado" por apunte, el gastado
+                        // hereda ese importe efectivo.
+                        gastadoCents = if (j.has("pagadoCents")) j.getLong("pagadoCents")
+                            else j.optLong("gastadoCents"),
                         repartoIgualitario = j.optBoolean("repartoIgualitario", true),
                         categoria = j.optString("categoria", "OTROS"),
                         modificadoMillis = j.optLong("modificadoMillis")
@@ -327,8 +429,8 @@ object EventoJson {
                 pagadorId = idPorUuid[j.optString("pagadorUuid")] ?: 0L,
                 presupuestadoCents = if (j.has("presupuestadoCents"))
                     j.getLong("presupuestadoCents") else null,
-                gastadoCents = j.optLong("gastadoCents"),
-                pagadoCents = if (j.has("pagadoCents")) j.getLong("pagadoCents") else null,
+                gastadoCents = if (j.has("pagadoCents")) j.getLong("pagadoCents")
+                    else j.optLong("gastadoCents"),
                 repartoIgualitario = j.optBoolean("repartoIgualitario", true),
                 categoria = j.optString("categoria", "OTROS"),
                 fechaMillis = j.optLong("fechaMillis", System.currentTimeMillis()),

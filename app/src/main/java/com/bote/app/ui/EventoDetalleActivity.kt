@@ -6,6 +6,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
@@ -20,6 +21,7 @@ import com.bote.app.data.EventoCompleto
 import com.bote.app.data.Registro
 import com.bote.app.data.TipoRegistro
 import com.bote.app.databinding.ActivityEventoDetalleBinding
+import com.bote.app.databinding.ItemAdjuntoBinding
 import com.bote.app.databinding.ItemApunteBinding
 import com.bote.app.databinding.ItemAsistenteMiniBinding
 import com.bote.app.databinding.DialogQrBinding
@@ -50,6 +52,10 @@ class EventoDetalleActivity : BaseActivity() {
     private var identidadPreguntada = false
     private var sincronizando = false
 
+    private val elegirAdjunto = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri -> if (uri != null) adjuntar(uri) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityEventoDetalleBinding.inflate(layoutInflater)
@@ -76,6 +82,9 @@ class EventoDetalleActivity : BaseActivity() {
         }
         binding.btnCompartir.setOnClickListener { compartirEvento() }
         binding.btnCandado.setOnClickListener { alternarCandado() }
+        binding.btnAnadirAdjunto.setOnClickListener {
+            elegirAdjunto.launch(arrayOf("image/*", "application/pdf"))
+        }
         binding.fabApunte.setOnClickListener {
             startActivity(
                 Intent(this, ApunteActivity::class.java)
@@ -90,21 +99,78 @@ class EventoDetalleActivity : BaseActivity() {
         sincronizarNube()
     }
 
-    /** Sincronización automática con la nube, si este evento tiene servidor. */
-    private fun sincronizarNube() {
+    /**
+     * Sincroniza con la nube si el evento tiene servidor. En modo [manual]
+     * (botón "sincronizar ahora") avisa del resultado; en automático (al
+     * abrir la ficha) es silenciosa y solo actualiza el indicador.
+     */
+    private fun sincronizarNube(manual: Boolean = false) {
+        if (manual && datos?.evento?.sincronizable != true) {
+            Toast.makeText(this, R.string.sync_sin_servidor, Toast.LENGTH_SHORT).show()
+            return
+        }
         if (sincronizando) return
         sincronizando = true
+        if (manual) Toast.makeText(this, R.string.sync_en_curso, Toast.LENGTH_SHORT).show()
         lifecycleScope.launch {
             try {
                 val dao = AppDatabase.get(this@EventoDetalleActivity).dao()
-                val habiaRemoto = SyncRemoto.sincronizar(dao, eventoId)
-                if (habiaRemoto) cargar()
-            } catch (e: Exception) {
-                // sin red o servidor caído: la app sigue en local
+                val res = try {
+                    SyncRemoto.sincronizar(applicationContext, dao, eventoId)
+                } catch (e: Exception) {
+                    SyncRemoto.Resultado.SinRed
+                }
+                if (res is SyncRemoto.Resultado.Ok) {
+                    datos?.evento?.uuid?.let {
+                        Ajustes.guardarUltimaSync(
+                            this@EventoDetalleActivity, it, System.currentTimeMillis()
+                        )
+                    }
+                    if (res.huboCambios) cargar() else actualizarIndicadorSync()
+                } else {
+                    actualizarIndicadorSync()
+                }
+                if (manual) {
+                    Toast.makeText(
+                        this@EventoDetalleActivity, mensajeResultado(res), Toast.LENGTH_LONG
+                    ).show()
+                }
             } finally {
+                // En finally: si algo del repintado fallara, el flag no puede
+                // quedarse a true y bloquear todas las syncs siguientes.
                 sincronizando = false
             }
         }
+    }
+
+    private fun mensajeResultado(res: SyncRemoto.Resultado): String = getString(
+        when (res) {
+            is SyncRemoto.Resultado.Ok ->
+                if (res.huboCambios) R.string.sync_ok_cambios else R.string.sync_ok
+            SyncRemoto.Resultado.SinServidor -> R.string.sync_sin_servidor
+            SyncRemoto.Resultado.SinRed -> R.string.sync_sin_red
+            SyncRemoto.Resultado.ErrorAuth -> R.string.sync_error_auth
+            SyncRemoto.Resultado.ErrorServidor -> R.string.sync_error_servidor
+            SyncRemoto.Resultado.Bloqueada -> R.string.sync_bloqueada
+            SyncRemoto.Resultado.ErrorCifrado -> R.string.sync_error_cifrado
+        }
+    )
+
+    /** Muestra "Última sincronización: hace X" si el evento es sincronizable. */
+    private fun actualizarIndicadorSync() {
+        val evento = datos?.evento
+        if (evento?.sincronizable != true) {
+            binding.ultimaSync.visibility = View.GONE
+            return
+        }
+        val millis = Ajustes.ultimaSync(this, evento.uuid)
+        val cuando = if (millis <= 0L) getString(R.string.ultima_sync_nunca)
+        else android.text.format.DateUtils.getRelativeTimeSpanString(
+            millis, System.currentTimeMillis(),
+            android.text.format.DateUtils.MINUTE_IN_MILLIS
+        ).toString()
+        binding.ultimaSync.text = getString(R.string.ultima_sync_fmt, cuando)
+        binding.ultimaSync.visibility = View.VISIBLE
     }
 
     private fun puedeEditar(datos: EventoCompleto): Boolean =
@@ -183,6 +249,9 @@ class EventoDetalleActivity : BaseActivity() {
         binding.fabApunte.visibility =
             if (puedeEditar(completo) && !evento.cerrado) View.VISIBLE else View.GONE
 
+        pintarAdjuntos(completo)
+        actualizarIndicadorSync()
+
         // Asistentes
         binding.listaAsistentes.removeAllViews()
         for (asistente in completo.asistentes) {
@@ -219,10 +288,6 @@ class EventoDetalleActivity : BaseActivity() {
             fila.pagador.text = getString(R.string.paga_fmt, pagador)
             fila.importes.text = buildString {
                 append(getString(R.string.gastado_fmt, Dinero.formatear(apunte.gastadoCents)))
-                if (apunte.pagadoCents != null) {
-                    append(" · ")
-                    append(getString(R.string.pagado_fmt, Dinero.formatear(apunte.pagadoCents)))
-                }
                 if (apunte.presupuestadoCents != null) {
                     append(" · ")
                     append(
@@ -233,15 +298,7 @@ class EventoDetalleActivity : BaseActivity() {
                     )
                 }
             }
-            fila.estado.setText(
-                if (apunte.estaCerrado) R.string.apunte_cerrado else R.string.apunte_abierto
-            )
-            fila.estado.setTextColor(
-                ContextCompat.getColor(
-                    this,
-                    if (apunte.estaCerrado) R.color.saldo_positivo else R.color.text_secondary
-                )
-            )
+            fila.estado.visibility = View.GONE
             fila.indicadorRecibo.visibility =
                 if (apunte.fotoPath.isNotBlank()) View.VISIBLE else View.GONE
             if (puedeEditar(completo) && !evento.cerrado) {
@@ -254,6 +311,72 @@ class EventoDetalleActivity : BaseActivity() {
                 }
             }
             binding.listaApuntes.addView(fila.root)
+        }
+    }
+
+    // ── Adjuntos (fotos y PDFs, solo local; no se sincronizan) ────
+
+    private fun pintarAdjuntos(completo: EventoCompleto) {
+        val uuid = completo.evento.uuid
+        val editable = puedeEditar(completo)
+        binding.btnAnadirAdjunto.visibility = if (editable) View.VISIBLE else View.GONE
+
+        val archivos = AdjuntoUtil.listar(this, uuid)
+        binding.sinAdjuntos.visibility = if (archivos.isEmpty()) View.VISIBLE else View.GONE
+        binding.listaAdjuntos.removeAllViews()
+        for (archivo in archivos) {
+            val fila = ItemAdjuntoBinding.inflate(layoutInflater, binding.listaAdjuntos, false)
+            fila.icono.setImageResource(
+                if (AdjuntoUtil.esImagen(archivo)) R.drawable.ic_foto else R.drawable.ic_adjunto
+            )
+            fila.nombre.text = archivo.name
+            fila.detalle.text = AdjuntoUtil.formatearTamano(archivo.length())
+            fila.root.setOnClickListener {
+                if (!AdjuntoUtil.abrir(this, archivo)) {
+                    Toast.makeText(this, R.string.adjunto_sin_visor, Toast.LENGTH_LONG).show()
+                }
+            }
+            fila.btnQuitar.visibility = if (editable) View.VISIBLE else View.GONE
+            fila.btnQuitar.setOnClickListener {
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.confirmar_quitar_adjunto)
+                    .setNegativeButton(R.string.accion_cancelar, null)
+                    .setPositiveButton(R.string.accion_eliminar) { _, _ ->
+                        AdjuntoUtil.eliminar(archivo)
+                        pintarAdjuntos(completo)
+                    }
+                    .show()
+            }
+            binding.listaAdjuntos.addView(fila.root)
+        }
+    }
+
+    private fun adjuntar(uri: android.net.Uri) {
+        val completo = datos ?: return
+        val tam = AdjuntoUtil.tamano(this, uri)
+        if (tam > AdjuntoUtil.MAX_BYTES) {
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.adjunto_grande_titulo)
+                .setMessage(getString(R.string.adjunto_grande, AdjuntoUtil.formatearTamano(tam)))
+                .setNegativeButton(R.string.accion_cancelar, null)
+                .setPositiveButton(R.string.accion_guardar) { _, _ -> copiarAdjunto(completo, uri) }
+                .show()
+        } else {
+            copiarAdjunto(completo, uri)
+        }
+    }
+
+    private fun copiarAdjunto(completo: EventoCompleto, uri: android.net.Uri) {
+        lifecycleScope.launch {
+            val archivo = withContext(Dispatchers.IO) {
+                AdjuntoUtil.copiar(this@EventoDetalleActivity, uri, completo.evento.uuid)
+            }
+            if (archivo == null) {
+                Toast.makeText(this@EventoDetalleActivity, R.string.adjunto_error, Toast.LENGTH_LONG)
+                    .show()
+            } else {
+                datos?.let { pintarAdjuntos(it) }
+            }
         }
     }
 
@@ -283,11 +406,6 @@ class EventoDetalleActivity : BaseActivity() {
     private fun alternarCandado() {
         val completo = datos ?: return
         if (!completo.evento.cerrado) {
-            if (completo.apuntes.any { !it.apunte.estaCerrado }) {
-                Toast.makeText(this, R.string.error_cerrar_apuntes_abiertos, Toast.LENGTH_LONG)
-                    .show()
-                return
-            }
             MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.cerrar_cuenta)
                 .setMessage(R.string.confirmar_cerrar_cuenta)
@@ -404,10 +522,21 @@ class EventoDetalleActivity : BaseActivity() {
         }
     }
 
-    /** El evento entero cabe en un QR si no es muy grande; si no, archivo. */
+    /**
+     * QR para pasar el evento. Si tiene servidor, el QR es una INVITACIÓN
+     * (solo credenciales, siempre cabe y se lee bien); si es local, viaja el
+     * evento entero y, si no cabe, se cae a archivo.
+     */
     private fun mostrarQr() {
         val completo = datos ?: return
         lifecycleScope.launch {
+            if (completo.evento.sincronizable) {
+                val carga = withContext(Dispatchers.IO) {
+                    SyncCodec.comprimir(EventoJson.exportarInvitacion(completo.evento))
+                }
+                mostrarDialogoQr(carga)
+                return@launch
+            }
             val dao = AppDatabase.get(this@EventoDetalleActivity).dao()
             val borrados = dao.borradosDeEvento(eventoId)
             val carga = withContext(Dispatchers.IO) {
@@ -421,15 +550,19 @@ class EventoDetalleActivity : BaseActivity() {
                 compartirArchivo()
                 return@launch
             }
-            val bitmap = withContext(Dispatchers.IO) { QrUtil.generar(carga, 800) }
-            val vista = DialogQrBinding.inflate(layoutInflater)
-            vista.imagenQr.setImageBitmap(bitmap)
-            MaterialAlertDialogBuilder(this@EventoDetalleActivity)
-                .setTitle(R.string.compartir_qr)
-                .setView(vista.root)
-                .setPositiveButton(R.string.accion_cancelar, null)
-                .show()
+            mostrarDialogoQr(carga)
         }
+    }
+
+    private suspend fun mostrarDialogoQr(carga: String) {
+        val bitmap = withContext(Dispatchers.IO) { QrUtil.generar(carga, 800) }
+        val vista = DialogQrBinding.inflate(layoutInflater)
+        vista.imagenQr.setImageBitmap(bitmap)
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.compartir_qr)
+            .setView(vista.root)
+            .setPositiveButton(R.string.accion_cancelar, null)
+            .show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -443,10 +576,16 @@ class EventoDetalleActivity : BaseActivity() {
             completo != null && puedeEditar(completo) && !completo.evento.cerrado
         menu.findItem(R.id.accionEliminar)?.isVisible =
             completo?.evento?.soyCreador == true
+        menu.findItem(R.id.accionSincronizar)?.isVisible =
+            completo?.evento?.sincronizable == true
         return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
+        R.id.accionSincronizar -> {
+            sincronizarNube(manual = true)
+            true
+        }
         R.id.accionEditar -> {
             startActivity(
                 Intent(this, AddEditEventoActivity::class.java)
@@ -470,6 +609,8 @@ class EventoDetalleActivity : BaseActivity() {
                     lifecycleScope.launch {
                         datos?.evento?.let {
                             NotificationScheduler.cancelar(this@EventoDetalleActivity, it)
+                            AdjuntoUtil.eliminarTodos(this@EventoDetalleActivity, it.uuid)
+                            Ajustes.limpiarEstadoSync(this@EventoDetalleActivity, it.uuid)
                         }
                         AppDatabase.get(this@EventoDetalleActivity).dao()
                             .eliminarEvento(eventoId)

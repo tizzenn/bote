@@ -28,6 +28,9 @@ data class Evento(
     val fechaMillis: Long = 0,
     val ubicacion: String = "",
     val fotoPath: String = "",
+    /** Marca de cuándo se puso/cambió el avatar; 0 = sin avatar. Solo esta
+     *  marca viaja en el JSON (la imagen va aparte por Storage). */
+    val avatarMillis: Long = 0,
     val modo: String = Modo.COLABORATIVO,
     /** True si el evento se creó en este dispositivo (yo soy el admin). */
     val soyCreador: Boolean = true,
@@ -93,9 +96,8 @@ data class Apunte(
     val concepto: String = "",
     val pagadorId: Long = 0,
     val presupuestadoCents: Long? = null,
+    /** Importe realmente gastado; es lo que cuenta para el reparto. */
     val gastadoCents: Long = 0,
-    /** Obligatorio para cerrar el apunte (y para poder cerrar la cuenta). */
-    val pagadoCents: Long? = null,
     /** True: a partes iguales; false: porcentajes personalizados. */
     val repartoIgualitario: Boolean = true,
     /** Nombre de la CategoriaApunte (restaurante, copas, regalo…). */
@@ -105,11 +107,7 @@ data class Apunte(
     val fechaMillis: Long = System.currentTimeMillis(),
     /** Última modificación; al fusionar dos versiones gana la más reciente. */
     val modificadoMillis: Long = System.currentTimeMillis()
-) {
-    val estaCerrado: Boolean get() = pagadoCents != null
-    /** Importe que cuenta para el reparto: lo pagado si existe, si no lo gastado. */
-    val importeEfectivo: Long get() = pagadoCents ?: gastadoCents
-}
+)
 
 /** Porcentaje (en puntos básicos sobre 10000) que asume cada asistente de un apunte. */
 @Entity(
@@ -205,7 +203,7 @@ data class EventoCompleto(
     /** Saldado: cuenta cerrada y todo el mundo ha pagado su parte. */
     val saldado: Boolean get() = evento.cerrado && todosLiquidados
 
-    val totalGastadoCents: Long get() = apuntes.sumOf { it.apunte.importeEfectivo }
+    val totalGastadoCents: Long get() = apuntes.sumOf { it.apunte.gastadoCents }
 
     fun miAsistente(): Asistente? = asistentes.firstOrNull { it.id == evento.miAsistenteId }
 }

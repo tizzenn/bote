@@ -24,10 +24,40 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Panel de suscripción (solo lo rellena el sabor play) -->
+            <LinearLayout
+                android:id="@+id/panelSuscripcion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone" />
+
             <TextView
                 style="@style/Bote.TextoSeccion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="@string/seccion_identidad" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:hint="@string/campo_nombre_usuario"
+                app:helperText="@string/nombre_usuario_ayuda">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/campoNombreUsuario"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName|textCapWords" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                style="@style/Bote.TextoSeccion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
                 android:text="@string/seccion_tema" />
 
             <RadioGroup
@@ -196,7 +226,91 @@
                         android:layout_height="wrap_content"
                         android:inputType="textPassword" />
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnProbarSync"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/sync_probar"
+                    app:icon="@drawable/ic_sync" />
             </LinearLayout>
+
+            <TextView
+                style="@style/Bote.TextoSeccion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/seccion_auto_sync" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switchAutoSync"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/auto_sync" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/switchAutoSyncWifi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/auto_sync_wifi" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/auto_sync_ayuda"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp" />
+
+            <TextView
+                style="@style/Bote.TextoSeccion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/seccion_e2e" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:hint="@string/e2e_frase"
+                app:endIconMode="password_toggle"
+                app:helperText="@string/e2e_ayuda">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/campoFraseE2e"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                style="@style/Bote.TextoSeccion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/seccion_backup" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnExportarTodo"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/backup_exportar"
+                app:icon="@drawable/ic_compartir" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/backup_ayuda"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp" />
 
             <TextView
                 style="@style/Bote.TextoSeccion"

@@ -65,6 +65,13 @@ class InformeActivity : BaseActivity() {
     private fun nombreDe(asistente: com.bote.app.data.Asistente): String =
         asistente.nombre.ifBlank { getString(R.string.asistente_sin_nombre) }
 
+    /** Nombre para mostrar en pantalla, con el sufijo "· Yo" si soy yo. */
+    private fun nombreEnPantalla(asistente: com.bote.app.data.Asistente): String {
+        val base = nombreDe(asistente)
+        return if (asistente.id == datos?.evento?.miAsistenteId && asistente.id != 0L)
+            "$base · ${getString(R.string.asistente_yo)}" else base
+    }
+
     private fun pintar(completo: EventoCompleto) {
         val evento = completo.evento
         val fecha = DateFormat.getDateInstance(DateFormat.MEDIUM).format(Date(evento.fechaMillis))
@@ -83,7 +90,7 @@ class InformeActivity : BaseActivity() {
             val fila = ItemSaldoBinding.inflate(layoutInflater, binding.listaSaldos, false)
             val nombre = nombreDe(saldo.asistente)
             AvatarUtil.aplicar(fila.avatar, nombre)
-            fila.nombre.text = nombre
+            fila.nombre.text = nombreEnPantalla(saldo.asistente)
             fila.detalle.text =
                 getString(R.string.pago_total_fmt, Dinero.formatear(saldo.pagadoCents)) +
                     " · " +
@@ -175,7 +182,7 @@ class InformeActivity : BaseActivity() {
         for (saldo in saldos) {
             val signo = if (saldo.saldoCents > 0) "+" else ""
             fila(
-                nombreDe(saldo.asistente),
+                nombreEnPantalla(saldo.asistente),
                 Dinero.formatear(saldo.pagadoCents),
                 Dinero.formatear(saldo.correspondeCents),
                 signo + Dinero.formatear(saldo.saldoCents),
@@ -194,13 +201,11 @@ class InformeActivity : BaseActivity() {
         binding.subtotales.removeAllViews()
         val presupuestado = completo.apuntes.sumOf { it.apunte.presupuestadoCents ?: 0L }
         val gastado = completo.apuntes.sumOf { it.apunte.gastadoCents }
-        val pagadoApuntes = completo.apuntes.sumOf { it.apunte.pagadoCents ?: 0L }
         val saldado = saldos.filter { it.asistente.liquidado }.sumOf { it.correspondeCents }
         val pendiente = saldos.filter { !it.asistente.liquidado }.sumOf { it.correspondeCents }
         val lineas = listOf(
             getString(R.string.sub_presupuestado, Dinero.formatear(presupuestado)),
             getString(R.string.sub_gastado, Dinero.formatear(gastado)),
-            getString(R.string.sub_pagado, Dinero.formatear(pagadoApuntes)),
             getString(R.string.sub_saldado, Dinero.formatear(saldado)),
             getString(R.string.sub_pendiente, Dinero.formatear(pendiente))
         )
@@ -216,7 +221,7 @@ class InformeActivity : BaseActivity() {
         if (total <= 0) return
         val porCategoria = completo.apuntes
             .groupBy { CategoriaApunte.fromNombre(it.apunte.categoria) }
-            .mapValues { entrada -> entrada.value.sumOf { it.apunte.importeEfectivo } }
+            .mapValues { entrada -> entrada.value.sumOf { it.apunte.gastadoCents } }
             .toList()
             .sortedByDescending { it.second }
         for ((categoria, importe) in porCategoria) {

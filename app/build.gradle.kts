@@ -16,8 +16,9 @@ android {
         applicationId = "com.bote.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 16
-        versionName = "2.5"
+        versionCode = 23
+        versionName = "3.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     // F-Droid: no incluir el bloque de metadatos de dependencias (cifrado con
@@ -61,6 +62,20 @@ android {
         }
     }
 
+    // Dos sabores del mismo código:
+    //  - foss  → F-Droid: todo gratis, sin librerías de Google.
+    //  - play  → Google Play: la sync se desbloquea por suscripción (BillingClient).
+    // Solo cambia la implementación de EntitlementProvider (src/foss vs src/play).
+    flavorDimensions += "distribucion"
+    productFlavors {
+        create("foss") {
+            dimension = "distribucion"
+        }
+        create("play") {
+            dimension = "distribucion"
+        }
+    }
+
     buildFeatures {
         viewBinding = true
     }
@@ -80,6 +95,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.2")
     implementation("androidx.activity:activity-ktx:1.9.0")
@@ -91,6 +107,20 @@ dependencies {
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+
+    // WorkManager (sincronización periódica en segundo plano)
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
+
+    // Google Play Billing SOLO en el sabor play (no entra en F-Droid).
+    "playImplementation"("com.android.billingclient:billing-ktx:6.2.1")
+
+    // Tests unitarios (JVM): Calculadora, Cifrado, Dinero
+    testImplementation("junit:junit:4.13.2")
+
+    // Tests instrumentados: migraciones de la base de datos
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:core:1.6.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
 
     // Códigos QR para sincronizar eventos (ZXing, Apache 2.0)
     implementation("com.google.zxing:core:3.5.3")

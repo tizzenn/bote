@@ -21,8 +21,7 @@ y al final genera el informe con las transferencias mínimas para quedar en paz.
 - **Apuntes** (un bien o servicio pagado por una única persona) con
   categoría de icono elegible (restaurante, copas, regalo, supermercado,
   alojamiento, combustible, sustancias, efectivo, otros), importes
-  presupuestado (opcional), gastado (obligatorio) y pagado (obligatorio para
-  cerrar el apunte).
+  presupuestado (opcional) y gastado (obligatorio).
 - **Reparto por faders**: columna que alterna entre `=` (partes iguales) y
   `%` (porcentajes); cada asistente tiene un fader deslizable y un pin para
   fijar su porcentaje, de modo que mover un fader redistribuye
@@ -38,7 +37,7 @@ y al final genera el informe con las transferencias mínimas para quedar en paz.
   apunte a apunte** por UUID: gana la versión modificada más recientemente,
   las marcas de pago nunca se pierden y los apuntes borrados no resucitan
   (lápidas de borrado).
-- **Foto del tique** en cada apunte, para poder verificar los importes del
+- **Foto del ticket** en cada apunte, para poder verificar los importes del
   informe (se guarda en local; no viaja en la sincronización).
 - **Desglose por categorías** en el informe, con barras proporcionales.
 - **Modo extorsión** (opcional, desactivado por defecto): botón «plata o
@@ -110,8 +109,7 @@ alojamiento, la gasolina…) y que luego se reparte entre quienes corresponda.
 | **Categoría** | Restaurante, copas, regalo, supermercado, alojamiento, combustible, sustancias, efectivo u otros. Sirve para el icono y el desglose del informe. |
 | **Presupuestado** (opcional) | Lo que pensabais gastar; solo orientativo. |
 | **Gastado** (obligatorio) | Lo que costó de verdad. |
-| **Pagado** | Cuánto se ha abonado ya de ese apunte. Debe estar completo para poder «cerrar» el apunte y, al final, cerrar la cuenta. |
-| **Tique** (foto, opcional) | Una foto del recibo para comprobar importes. Se guarda solo en tu móvil; **no viaja** en la sincronización. |
+| **Ticket** (foto, opcional) | Una foto del recibo para comprobar importes. Se guarda solo en tu móvil; **no viaja** en la sincronización. |
 
 **Reparto**: abajo eliges cómo se divide ese apunte.
 
@@ -130,9 +128,8 @@ alojamiento, la gasolina…) y que luego se reparte entre quienes corresponda.
   desglose **por categoría** con barras, y la sección **quién paga a quién** con
   las transferencias mínimas para saldar todo.
 - **Cerrar la cuenta** (candado): cuando ya no habrá más gastos, pulsa *Cerrar la
-  cuenta*. Se genera el **informe definitivo** y ya no se pueden añadir apuntes
-  (requiere que todos los apuntes tengan su importe pagado). Se puede *Reabrir*
-  si hace falta.
+  cuenta*. Se genera el **informe definitivo** y ya no se pueden añadir apuntes.
+  Se puede *Reabrir* si hace falta.
 - **Ha liquidado**: cada persona marca cuándo hace su pago. Al liquidar tu parte,
   el evento sale de tu lista.
 - **Calendario**: botón para añadir la fecha del evento al calendario de Android.
@@ -168,7 +165,7 @@ teléfono: al juntarlos, no se pierde nada ni se duplica.
 > una *lápida* que recuerda que estaba borrado). El registro de actividad de cada
 > móvil también se une sin repetir líneas. En la práctica: cada uno apunta sus
 > cosas cuando quiera, y cuando os sincronizáis, la cuenta queda completa y
-> coherente sin que nadie tenga que rehacer nada. Las fotos de los tiques son lo
+> coherente sin que nadie tenga que rehacer nada. Las fotos de los tickets son lo
 > único que no viaja (se quedan en cada móvil).
 
 > 🤓 **Dato avanzado — la sincronización automática en la nube (opcional)**
@@ -232,7 +229,25 @@ create policy "acceso anon" on eventos_sync
   for all using (true) with check (true);
 ```
 
-3. Copia la **URL del proyecto** y la **clave `anon`** (Settings → API).
+3. *(Opcional)* Para sincronizar también el **avatar del evento** (a baja
+   resolución, 256×256 ≈ 20 KB), crea un bucket público `avatares` y deja que
+   la clave anon pueda subir:
+
+```sql
+insert into storage.buckets (id, name, public)
+values ('avatares', 'avatares', true)
+on conflict (id) do nothing;
+
+create policy "avatares anon sube" on storage.objects
+  for insert to anon with check (bucket_id = 'avatares');
+create policy "avatares anon actualiza" on storage.objects
+  for update to anon using (bucket_id = 'avatares');
+```
+
+   Si no creas el bucket, todo sigue funcionando; simplemente no se sincroniza
+   el avatar.
+
+4. Copia la **URL del proyecto** y la **clave `anon`** (Settings → API).
 
 **El servidor es por evento**, no de la app: cada grupo puede tener el suyo, así
 que un mismo usuario puede estar en varios grupos en servidores distintos. Al
@@ -251,16 +266,26 @@ resultado.
 
 Aviso honesto: cualquiera que tenga la clave anon puede leer la tabla entera, así
 que compártela solo con tu grupo (el uuid del evento hace de secreto, pero la
-clave es la llave del buzón). Las fotos no se suben.
+clave es la llave del buzón). Solo se sube el **avatar del evento** a baja
+resolución (si creaste el bucket `avatares`); los recibos y los PDF adjuntos
+siguen siendo locales y nunca salen del dispositivo.
 
 ## Compilación
 
 Proyecto Android estándar (Kotlin, Material Components, Room). Requiere
-JDK 17 y el SDK de Android (compileSdk 34):
+JDK 17 y el SDK de Android (compileSdk 34).
+
+Hay **dos sabores** (mismo código): `foss` (F-Droid, todo gratis, sin
+librerías de Google) y `play` (freemium, la sync se desbloquea por
+suscripción vía Play Billing). El APK que va a F-Droid es el `foss`:
 
 ```
-gradle assembleDebug
+gradle assembleFossDebug      # depuración
+gradle assembleFossRelease    # firmado (el de F-Droid)
+gradle assemblePlayRelease    # variante de Google Play
 ```
+
+El cifrado extremo a extremo (frase en Ajustes) es común a ambos sabores.
 
 En GitHub Actions hay dos flujos: `build.yml` compila el APK de depuración en
 cada push a `main`, y `release.yml` compila el APK firmado al etiquetar

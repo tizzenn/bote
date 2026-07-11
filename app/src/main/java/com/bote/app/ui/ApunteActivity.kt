@@ -143,7 +143,7 @@ class ApunteActivity : BaseActivity() {
         lifecycleScope.launch {
             val uri = withContext(Dispatchers.IO) {
                 val directorio = File(cacheDir, "compartir").apply { mkdirs() }
-                val destino = File(directorio, "tique.jpg")
+                val destino = File(directorio, "ticket.jpg")
                 File(fotoRecibo).copyTo(destino, overwrite = true)
                 FileProvider.getUriForFile(
                     this@ApunteActivity, "$packageName.fileprovider", destino
@@ -190,9 +190,6 @@ class ApunteActivity : BaseActivity() {
                 binding.campoGastado.setText(Dinero.aTexto(apunte.gastadoCents))
                 if (apunte.presupuestadoCents != null) {
                     binding.campoPresupuestado.setText(Dinero.aTexto(apunte.presupuestadoCents))
-                }
-                if (apunte.pagadoCents != null) {
-                    binding.campoPagado.setText(Dinero.aTexto(apunte.pagadoCents))
                 }
                 categoria = CategoriaApunte.fromNombre(apunte.categoria)
                 modoIgual = apunte.repartoIgualitario
@@ -383,7 +380,6 @@ class ApunteActivity : BaseActivity() {
             return
         }
         val presupuestado = Dinero.parsear(binding.campoPresupuestado.text?.toString().orEmpty())
-        val pagado = Dinero.parsear(binding.campoPagado.text?.toString().orEmpty())
         val concepto = binding.campoConcepto.text?.toString().orEmpty().trim()
 
         // Puntos básicos que suman exactamente 10000
@@ -416,7 +412,6 @@ class ApunteActivity : BaseActivity() {
                         pagadorId = pagadorId,
                         presupuestadoCents = presupuestado,
                         gastadoCents = gastado,
-                        pagadoCents = pagado,
                         repartoIgualitario = modoIgual,
                         categoria = categoria.name,
                         fotoPath = fotoRecibo,
@@ -432,7 +427,6 @@ class ApunteActivity : BaseActivity() {
                         pagadorId = pagadorId,
                         presupuestadoCents = presupuestado,
                         gastadoCents = gastado,
-                        pagadoCents = pagado,
                         repartoIgualitario = modoIgual,
                         categoria = categoria.name,
                         fotoPath = fotoRecibo,

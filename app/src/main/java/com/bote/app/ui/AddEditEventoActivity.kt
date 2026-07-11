@@ -110,6 +110,12 @@ class AddEditEventoActivity : BaseActivity() {
             )
         }
         binding.btnManual.setOnClickListener { dialogoAsistente() }
+        // El sabor play no lleva READ_CONTACTS (política de Google Play):
+        // se oculta el botón y los asistentes se añaden a mano. El booleano
+        // lo aporta cada sabor en res/values/flavor.xml.
+        if (!resources.getBoolean(R.bool.permite_contactos)) {
+            binding.btnContactos.visibility = View.GONE
+        }
         binding.btnContactos.setOnClickListener {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
                 == PackageManager.PERMISSION_GRANTED
@@ -147,18 +153,32 @@ class AddEditEventoActivity : BaseActivity() {
         }
 
         binding.toggleSync.addOnButtonCheckedListener { _, _, _ -> refrescarSync() }
+        binding.btnProbarSync.setOnClickListener {
+            Toast.makeText(this, R.string.sync_en_curso, Toast.LENGTH_SHORT).show()
+            val url = binding.campoSyncUrl.text?.toString().orEmpty()
+            val key = binding.campoSyncKey.text?.toString().orEmpty()
+            lifecycleScope.launch {
+                val ok = com.bote.app.sync.SyncRemoto.probar(url, key)
+                Toast.makeText(
+                    this@AddEditEventoActivity,
+                    if (ok) R.string.sync_prueba_ok else R.string.sync_prueba_mal,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
 
         if (eventoId == 0L) {
             binding.toggleModo.check(R.id.btnColaborativo)
             binding.toggleSync.check(R.id.btnSyncLocal)
             fechaMillis = hoy()
             binding.campoFecha.setText(formatoFecha.format(Date(fechaMillis)))
-            // El creador del evento entra automáticamente como asistente.
-            asistentes.add(
-                Asistente(nombre = getString(R.string.asistente_yo), esCreador = true)
-            )
+            // El creador del evento entra automáticamente como asistente, con el
+            // nombre configurado en Ajustes; si no hay, se pide y se guarda.
+            val nombreUsuario = Ajustes.nombreUsuario(this)
+            asistentes.add(Asistente(nombre = nombreUsuario, esCreador = true))
             pintarAsistentes()
             pintarAvatarEvento()
+            if (nombreUsuario.isBlank()) pedirNombreUsuario()
         } else {
             cargar()
         }
@@ -303,6 +323,37 @@ class AddEditEventoActivity : BaseActivity() {
         }
     }
 
+    /** Pide el nombre del usuario la primera vez, lo guarda en Ajustes y en el creador. */
+    private fun pedirNombreUsuario() {
+        val input = com.google.android.material.textfield.TextInputEditText(this).apply {
+            setHint(R.string.campo_nombre_usuario)
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS
+        }
+        val margen = (16 * resources.displayMetrics.density).toInt()
+        val contenedor = android.widget.FrameLayout(this).apply {
+            setPadding(margen, margen / 2, margen, 0)
+            addView(input)
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.pedir_nombre_titulo)
+            .setMessage(R.string.pedir_nombre_msg)
+            .setView(contenedor)
+            .setNegativeButton(R.string.accion_cancelar, null)
+            .setPositiveButton(R.string.accion_guardar) { _, _ ->
+                val nombre = input.text?.toString().orEmpty().trim()
+                if (nombre.isNotBlank()) {
+                    Ajustes.guardarNombreUsuario(this, nombre)
+                    val indice = asistentes.indexOfFirst { it.esCreador }
+                    if (indice >= 0) {
+                        asistentes[indice] = asistentes[indice].copy(nombre = nombre)
+                        pintarAsistentes()
+                    }
+                }
+            }
+            .show()
+    }
+
     /** Alta de asistente o, si se pasa uno existente, edición de sus datos. */
     private fun dialogoAsistente(existente: Asistente? = null) {
         val vista = DialogAsistenteBinding.inflate(layoutInflater)
@@ -400,6 +451,25 @@ class AddEditEventoActivity : BaseActivity() {
         val descripcion = binding.campoDescripcion.text?.toString().orEmpty().trim()
         val ubicacion = binding.campoUbicacion.text?.toString().orEmpty().trim()
 
+        // Mantener el nombre del usuario en Ajustes al ritmo del asistente creador
+        asistentes.firstOrNull { it.esCreador }?.nombre?.trim()
+            ?.takeIf { it.isNotBlank() }
+            ?.let { Ajustes.guardarNombreUsuario(this, it) }
+
+        // Marca del avatar: si la foto ha cambiado, se sella ahora para que viaje
+        // por Storage a los demás dispositivos.
+        val ahora = System.currentTimeMillis()
+        val fotoAnterior = datos?.evento?.fotoPath ?: ""
+        val fotoCambiada = fotoPath != fotoAnterior
+        val avatarMillis = when {
+            fotoPath.isBlank() -> 0L
+            fotoCambiada -> ahora
+            else -> datos?.evento?.avatarMillis ?: ahora
+        }
+        if (fotoPath.isNotBlank() && fotoCambiada) {
+            Ajustes.guardarAvatarImagenMillis(this, eventoUuid, avatarMillis)
+        }
+
         lifecycleScope.launch {
             val dao = AppDatabase.get(this@AddEditEventoActivity).dao()
 
@@ -426,6 +496,7 @@ class AddEditEventoActivity : BaseActivity() {
                         fechaMillis = fechaMillis,
                         ubicacion = ubicacion,
                         fotoPath = fotoPath,
+                        avatarMillis = avatarMillis,
                         modo = modo,
                         soyCreador = true,
                         syncActivo = syncActivo,
@@ -443,8 +514,9 @@ class AddEditEventoActivity : BaseActivity() {
                         fechaMillis = fechaMillis,
                         ubicacion = ubicacion,
                         fotoPath = fotoPath,
+                        avatarMillis = avatarMillis,
                         modo = modo,
-                        modificadoMillis = System.currentTimeMillis(),
+                        modificadoMillis = ahora,
                         syncActivo = syncActivo,
                         syncUrl = syncUrl,
                         syncKey = syncKey

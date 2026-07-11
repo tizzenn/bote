@@ -19,6 +19,7 @@
     <string name="num_asistentes">%1$d attendees</string>
     <string name="pendiente_liquidar">Pending settlement</string>
     <string name="evento_saldado">Settled</string>
+    <string name="evento_sincronizado">Cloud-synced event</string>
     <string name="total_fmt">Total: %1$s</string>
 
     <!-- Event form -->
@@ -43,6 +44,8 @@
     <string name="campo_email">Email (optional)</string>
     <string name="asistente_yo">Me</string>
     <string name="asistente_admin">Admin</string>
+    <string name="pedir_nombre_titulo">What\'s your name?</string>
+    <string name="pedir_nombre_msg">It will be your name in the events you create.</string>
     <string name="asistente_sin_nombre">Unnamed</string>
     <string name="error_fecha">Pick a date</string>
     <string name="error_sin_asistentes">Add at least one attendee</string>
@@ -68,7 +71,6 @@
     <string name="evento_cerrado">Tab closed</string>
     <string name="reabrir_cuenta">Reopen the tab</string>
     <string name="confirmar_cerrar_cuenta">Lock the event and generate the final report? No more entries can be added.</string>
-    <string name="error_cerrar_apuntes_abiertos">To close the tab, every entry needs its paid amount.</string>
     <string name="solo_admin">Only the admin can do this (restricted mode).</string>
     <string name="compartir_evento">Send by QR or file</string>
     <string name="compartir_titulo">Send the event to someone</string>
@@ -76,11 +78,17 @@
     <string name="paga_fmt">%1$s pays</string>
     <string name="presupuestado_fmt">Budgeted: %1$s</string>
     <string name="gastado_fmt">Spent: %1$s</string>
-    <string name="pagado_fmt">Paid: %1$s</string>
     <string name="saldado_fmt">Settled: %1$s</string>
     <string name="ver_mapa">View on map</string>
-    <string name="apunte_abierto">Open</string>
-    <string name="apunte_cerrado">Closed</string>
+    <string name="seccion_adjuntos">ATTACHMENTS</string>
+    <string name="anadir_adjunto">Add file</string>
+    <string name="sin_adjuntos">No attachments yet.</string>
+    <string name="cd_adjunto">Attachment</string>
+    <string name="adjunto_grande_titulo">Large file</string>
+    <string name="adjunto_grande">This file is large (%1$s). Attach it anyway?</string>
+    <string name="adjunto_error">Couldn\'t attach that file.</string>
+    <string name="adjunto_sin_visor">No app to open this file.</string>
+    <string name="confirmar_quitar_adjunto">Remove this attachment?</string>
 
     <!-- Entry form -->
     <string name="titulo_nuevo_apunte">New entry</string>
@@ -89,7 +97,6 @@
     <string name="campo_pagador">Who pays</string>
     <string name="campo_presupuestado">Budgeted (optional)</string>
     <string name="campo_gastado">Spent</string>
-    <string name="campo_pagado">Paid (needed to close the entry)</string>
     <string name="seccion_categoria">CATEGORY</string>
     <string name="cat_restaurante">Restaurant</string>
     <string name="cat_copas">Drinks</string>
@@ -138,7 +145,6 @@
     <string name="fila_total">TOTAL</string>
     <string name="sub_presupuestado">Total budgeted: %1$s</string>
     <string name="sub_gastado">Total spent: %1$s</string>
-    <string name="sub_pagado">Total paid (entries): %1$s</string>
     <string name="sub_saldado">Total settled: %1$s</string>
     <string name="sub_pendiente">Pending settlement: %1$s</string>
 
@@ -154,9 +160,38 @@
     <string name="importar_quien">Who are you in this event?</string>
     <string name="sync_asunto">Bote event: %1$s</string>
     <string name="sync_explicacion">Share the event file with the other attendees; importing it in their Bote keeps everyone in sync.</string>
+    <!-- Manual sync -->
+    <string name="sync_ahora">Sync now</string>
+    <string name="sync_en_curso">Syncing…</string>
+    <string name="sync_ok">Synced.</string>
+    <string name="sync_ok_cambios">Synced — new changes received.</string>
+    <string name="sync_sin_servidor">This event has no sync server.</string>
+    <string name="sync_sin_red">No connection. Try again later.</string>
+    <string name="sync_error_auth">The API key for this event\'s server is wrong.</string>
+    <string name="sync_error_servidor">The sync server didn\'t respond correctly. Check the URL and that the SQL setup ran.</string>
+    <string name="sync_nada">No events with a sync server.</string>
+    <string name="sync_resumen">%1$d synced · %2$d failed</string>
+    <string name="ultima_sync_fmt">Last sync: %1$s</string>
+    <string name="ultima_sync_nunca">Not synced yet</string>
+    <string name="sync_bloqueada">Cloud sync needs an active subscription.</string>
+    <string name="sync_error_cifrado">The remote copy is encrypted and your passphrase is missing or doesn\'t match the group\'s. Check Settings; nothing was uploaded.</string>
+    <!-- Subscription (Play) -->
+    <string name="seccion_suscripcion">CLOUD SYNC</string>
+    <string name="suscripcion_activa_desc">Subscription active. Cloud sync is unlocked. Thank you!</string>
+    <string name="suscripcion_oferta">Unlock automatic cloud sync across your devices for a small yearly fee.</string>
+    <string name="suscripcion_boton">Subscribe</string>
+    <string name="suscripcion_gestionar">Manage subscription</string>
+    <string name="suscripcion_no_disponible">Subscriptions aren\'t available right now.</string>
+    <!-- End-to-end encryption -->
+    <string name="seccion_e2e">END-TO-END ENCRYPTION</string>
+    <string name="e2e_frase">Encryption passphrase</string>
+    <string name="e2e_ayuda">If you set a passphrase, synced data is encrypted on your device before upload — the server only sees opaque blobs. Everyone in the group must use the SAME passphrase. If you forget it, the remote copy can\'t be read (your local data stays intact). With a passphrase set, the event avatar image is not uploaded either.</string>
 
     <!-- Settings -->
     <string name="ajustes_titulo">Settings</string>
+    <string name="seccion_identidad">YOUR NAME</string>
+    <string name="campo_nombre_usuario">Your name</string>
+    <string name="nombre_usuario_ayuda">Used as your name when you create an event. You can still change it in each event.</string>
     <string name="seccion_tema">THEME</string>
     <string name="tema_blanco">White</string>
     <string name="tema_negro">Black</string>
@@ -187,7 +222,9 @@
     <string name="campo_sync_url">Project URL</string>
     <string name="campo_sync_key">API key (anon)</string>
     <string name="sync_nube_ayuda">Free at supabase.com: create a project, run the SQL from the README and paste the URL and anon key here. This is offered as the "Default" option when creating an event; each group can still use its own server.</string>
-    <string name="sync_nube_hecho">Synced with the cloud.</string>
+    <string name="sync_probar">Test connection</string>
+    <string name="sync_prueba_ok">Connection OK: server and key are valid.</string>
+    <string name="sync_prueba_mal">Couldn\'t connect: check the URL, the anon key and that the SQL setup ran.</string>
     <!-- Sync server picker in the event form -->
     <string name="seccion_sync_evento">SYNC</string>
     <string name="sync_local">Local</string>
@@ -196,6 +233,17 @@
     <string name="sync_local_desc">This event stays on the device. Share it by QR or file.</string>
     <string name="sync_defecto_desc">Uses your default server (Settings). Travels with the event, so others connect automatically.</string>
     <string name="sync_otro_desc">This group\'s own server. It travels with the event; attendees who import it connect automatically.</string>
+    <string name="seccion_auto_sync">BACKGROUND SYNC</string>
+    <string name="auto_sync">Sync every hour in the background</string>
+    <string name="auto_sync_wifi">Only on Wi-Fi</string>
+    <string name="auto_sync_ayuda">Keeps synced events up to date on their own, about once an hour. Settled events are skipped.</string>
+    <string name="seccion_backup">BACKUP</string>
+    <string name="backup_exportar">Export all events</string>
+    <string name="backup_ayuda">Saves every event (entries, attendees, activity log) into a single file you can keep anywhere. To restore, use "Import event" on the main screen with that file: events merge by identity, nothing gets duplicated. Receipt photos and attachments are not included.</string>
+    <string name="backup_nada">There are no events to export.</string>
+    <string name="backup_ok">Backup saved.</string>
+    <string name="backup_error">Couldn\'t save the backup.</string>
+    <string name="backup_importado_fmt">Backup restored: %1$d events.</string>
     <string name="seccion_notificaciones">NOTIFICATIONS</string>
     <string name="notif_evento">Reminder on the event day</string>
     <string name="notif_cierre">Alert when a tab is closed</string>
@@ -210,6 +258,13 @@
     <string name="notif_cierre_texto">Check the report to settle up.</string>
     <string name="notif_pagos_titulo">Pending payments: %1$s</string>
     <string name="notif_pagos_texto">Someone has not settled their share yet.</string>
+    <string name="accion_ver_informe">View report</string>
+    <string name="accion_he_pagado">I\'ve paid my share</string>
+    <string name="notif_liquidacion_titulo">Payment sent: %1$s</string>
+    <string name="notif_liquidacion_varios">%1$d events could match. Tap to pick.</string>
+    <string name="liquidacion_confirmar_titulo">Mark your payment as done?</string>
+    <string name="liquidacion_label_fmt">To %1$s · %2$s</string>
+    <string name="liquidacion_elegir">Which payment did you make?</string>
 
     <!-- Activity log -->
     <string name="registro_titulo">Activity log</string>

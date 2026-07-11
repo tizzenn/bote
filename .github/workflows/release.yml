@@ -39,11 +39,11 @@ jobs:
       - name: Restaurar clave de firma
         run: echo "${{ secrets.BOTE_KEYSTORE_B64 }}" | base64 -d > "$RUNNER_TEMP/bote-app.p12"
 
-      - name: Compilar APK firmado
+      - name: Compilar APK firmado (sabor foss, el de F-Droid)
         env:
           BOTE_KEYSTORE: ${{ runner.temp }}/bote-app.p12
           BOTE_KEYSTORE_PASS: ${{ secrets.BOTE_KEYSTORE_PASS }}
-        run: gradle assembleRelease --no-daemon
+        run: gradle assembleFossRelease --no-daemon
 
       # Se crea antes de publicar en el repo fdroid: este APK firmado es la
       # referencia que F-Droid oficial usa para los Reproducible Builds, asi
@@ -52,7 +52,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp app/build/outputs/apk/release/app-release.apk "bote-$GITHUB_REF_NAME.apk"
+          cp app/build/outputs/apk/foss/release/app-foss-release.apk "bote-$GITHUB_REF_NAME.apk"
           gh release create "$GITHUB_REF_NAME" "bote-$GITHUB_REF_NAME.apk" \
             --title "Bote $GITHUB_REF_NAME" --generate-notes
 
@@ -93,7 +93,7 @@ jobs:
           keypass: $FDROID_KEYSTORE_PASS
           EOF
           mkdir -p repo
-          cp ../app/build/outputs/apk/release/app-release.apk "repo/bote-$GITHUB_REF_NAME.apk"
+          cp ../app/build/outputs/apk/foss/release/app-foss-release.apk "repo/bote-$GITHUB_REF_NAME.apk"
           fdroid update --create-metadata --pretty
           rm -f config.yml keystore.p12
           git add -A

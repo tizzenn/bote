@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Backup en la nube y transferencia entre dispositivos (API 31+): misma
+     política que backup_rules.xml — BD y preferencias sí; fotos/adjuntos no. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="database" path="." />
+        <include domain="sharedpref" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="database" path="." />
+        <include domain="sharedpref" path="." />
+    </device-transfer>
+</data-extraction-rules>

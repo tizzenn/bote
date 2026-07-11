@@ -3,6 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/accionSincronizar"
+        android:icon="@drawable/ic_sync"
+        android:title="@string/sync_ahora"
+        app:iconTint="@android:color/white"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/accionOrdenar"
         android:icon="@drawable/ic_ordenar"
         android:title="@string/accion_ordenar"

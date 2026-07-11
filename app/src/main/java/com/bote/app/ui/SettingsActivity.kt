@@ -2,20 +2,36 @@ package com.bote.app.ui
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.lifecycle.lifecycleScope
 import com.bote.app.BaseActivity
 import com.bote.app.R
 import com.bote.app.config.Ajustes
 import com.bote.app.config.PaletaColor
 import com.bote.app.config.Tema
+import com.bote.app.data.AppDatabase
 import com.bote.app.databinding.ActivitySettingsBinding
+import com.bote.app.sync.EventoJson
+import com.bote.app.sync.SyncRemoto
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class SettingsActivity : BaseActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
+
+    private val crearArchivoBackup = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri -> if (uri != null) escribirBackup(uri) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,6 +39,12 @@ class SettingsActivity : BaseActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        // Tu nombre (asistente creador al crear eventos)
+        binding.campoNombreUsuario.setText(Ajustes.nombreUsuario(this))
+        binding.campoNombreUsuario.addTextChangedListener(GuardarTexto { texto ->
+            Ajustes.guardarNombreUsuario(this, texto)
+        })
 
         // Tema
         when (Ajustes.tema(this)) {
@@ -96,6 +118,50 @@ class SettingsActivity : BaseActivity() {
         binding.campoSyncKey.addTextChangedListener(GuardarTexto { texto ->
             Ajustes.guardarSyncKey(this, texto)
         })
+        binding.btnProbarSync.setOnClickListener {
+            probarConexion(
+                binding.campoSyncUrl.text?.toString().orEmpty(),
+                binding.campoSyncKey.text?.toString().orEmpty()
+            )
+        }
+
+        // Sincronización en segundo plano (cada hora)
+        binding.switchAutoSync.isChecked = Ajustes.autoSyncActivo(this)
+        binding.switchAutoSyncWifi.isChecked = Ajustes.autoSyncSoloWifi(this)
+        binding.switchAutoSyncWifi.isEnabled = Ajustes.autoSyncActivo(this)
+        binding.switchAutoSync.setOnCheckedChangeListener { _, valor ->
+            Ajustes.guardarAutoSyncActivo(this, valor)
+            binding.switchAutoSyncWifi.isEnabled = valor
+            com.bote.app.sync.SyncScheduler.configurar(this)
+        }
+        binding.switchAutoSyncWifi.setOnCheckedChangeListener { _, valor ->
+            Ajustes.guardarAutoSyncSoloWifi(this, valor)
+            com.bote.app.sync.SyncScheduler.configurar(this)
+        }
+
+        // Cifrado extremo a extremo (frase; nunca sale del dispositivo)
+        binding.campoFraseE2e.setText(Ajustes.fraseCifrado(this))
+        binding.campoFraseE2e.addTextChangedListener(GuardarTexto { texto ->
+            Ajustes.guardarFraseCifrado(this, texto)
+        })
+
+        // Suscripción: solo el sabor play rellena el panel; foss lo deja oculto.
+        com.bote.app.billing.SuscripcionUi.montar(this, binding.panelSuscripcion)
+
+        // Copia de seguridad: todos los eventos en un único archivo JSON
+        binding.btnExportarTodo.setOnClickListener {
+            lifecycleScope.launch {
+                val hay = AppDatabase.get(this@SettingsActivity).dao()
+                    .todosEventos().isNotEmpty()
+                if (!hay) {
+                    Toast.makeText(this@SettingsActivity, R.string.backup_nada, Toast.LENGTH_SHORT)
+                        .show()
+                } else {
+                    val fecha = SimpleDateFormat("yyyyMMdd", Locale.US).format(Date())
+                    crearArchivoBackup.launch("bote-copia-$fecha.json")
+                }
+            }
+        }
 
         // Notificaciones
         binding.switchEvento.isChecked = Ajustes.notifEvento(this)
@@ -109,6 +175,52 @@ class SettingsActivity : BaseActivity() {
         binding.switchPagos.isChecked = Ajustes.notifPagos(this)
         binding.switchPagos.setOnCheckedChangeListener { _, valor ->
             Ajustes.guardarNotifPagos(this, valor)
+        }
+    }
+
+    /** Vuelca todos los eventos al archivo elegido con el selector del sistema. */
+    private fun escribirBackup(uri: android.net.Uri) {
+        lifecycleScope.launch {
+            val ok = try {
+                val dao = AppDatabase.get(this@SettingsActivity).dao()
+                val exportados = mutableListOf<String>()
+                for (evento in dao.todosEventos()) {
+                    val completo = dao.eventoCompleto(evento.id) ?: continue
+                    exportados.add(
+                        EventoJson.exportar(
+                            completo,
+                            dao.borradosDeEvento(evento.id),
+                            dao.registroDeEvento(evento.id)
+                        )
+                    )
+                }
+                val texto = EventoJson.exportarTodo(exportados)
+                withContext(Dispatchers.IO) {
+                    contentResolver.openOutputStream(uri)?.use {
+                        it.write(texto.toByteArray(Charsets.UTF_8))
+                    } != null
+                }
+            } catch (e: Exception) {
+                false
+            }
+            Toast.makeText(
+                this@SettingsActivity,
+                if (ok) R.string.backup_ok else R.string.backup_error,
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    /** Prueba la conexión con el servidor de sincronización y avisa. */
+    private fun probarConexion(url: String, key: String) {
+        Toast.makeText(this, R.string.sync_en_curso, Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            val ok = SyncRemoto.probar(url, key)
+            Toast.makeText(
+                this@SettingsActivity,
+                if (ok) R.string.sync_prueba_ok else R.string.sync_prueba_mal,
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 

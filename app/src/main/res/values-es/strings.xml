@@ -19,6 +19,7 @@
     <string name="num_asistentes">%1$d asistentes</string>
     <string name="pendiente_liquidar">Pendiente de liquidar</string>
     <string name="evento_saldado">Saldado</string>
+    <string name="evento_sincronizado">Evento sincronizado en la nube</string>
     <string name="total_fmt">Total: %1$s</string>
 
     <!-- Formulario de evento -->
@@ -43,6 +44,8 @@
     <string name="campo_email">Email (opcional)</string>
     <string name="asistente_yo">Yo</string>
     <string name="asistente_admin">Admin</string>
+    <string name="pedir_nombre_titulo">¿Cómo te llamas?</string>
+    <string name="pedir_nombre_msg">Será tu nombre en los eventos que crees.</string>
     <string name="asistente_sin_nombre">Sin nombre</string>
     <string name="error_fecha">Elige una fecha</string>
     <string name="error_sin_asistentes">Añade al menos un asistente</string>
@@ -68,7 +71,6 @@
     <string name="evento_cerrado">Cuenta cerrada</string>
     <string name="reabrir_cuenta">Reabrir la cuenta</string>
     <string name="confirmar_cerrar_cuenta">¿Poner el candado y generar el informe definitivo? Ya no se podrán añadir apuntes.</string>
-    <string name="error_cerrar_apuntes_abiertos">Para cerrar la cuenta, todos los apuntes deben tener su importe pagado.</string>
     <string name="solo_admin">Solo el administrador puede hacerlo (modo restringido).</string>
     <string name="compartir_evento">Enviar por QR o archivo</string>
     <string name="compartir_titulo">Pasar el evento a otra persona</string>
@@ -76,11 +78,17 @@
     <string name="paga_fmt">Paga %1$s</string>
     <string name="presupuestado_fmt">Presupuestado: %1$s</string>
     <string name="gastado_fmt">Gastado: %1$s</string>
-    <string name="pagado_fmt">Pagado: %1$s</string>
     <string name="saldado_fmt">Saldado: %1$s</string>
     <string name="ver_mapa">Ver en el mapa</string>
-    <string name="apunte_abierto">Abierto</string>
-    <string name="apunte_cerrado">Cerrado</string>
+    <string name="seccion_adjuntos">ADJUNTOS</string>
+    <string name="anadir_adjunto">Añadir archivo</string>
+    <string name="sin_adjuntos">Aún no hay adjuntos.</string>
+    <string name="cd_adjunto">Adjunto</string>
+    <string name="adjunto_grande_titulo">Archivo grande</string>
+    <string name="adjunto_grande">El archivo es grande (%1$s). ¿Adjuntarlo igualmente?</string>
+    <string name="adjunto_error">No se pudo adjuntar ese archivo.</string>
+    <string name="adjunto_sin_visor">No hay ninguna app para abrir este archivo.</string>
+    <string name="confirmar_quitar_adjunto">¿Quitar este adjunto?</string>
 
     <!-- Formulario de apunte -->
     <string name="titulo_nuevo_apunte">Nuevo apunte</string>
@@ -89,7 +97,6 @@
     <string name="campo_pagador">Quién paga</string>
     <string name="campo_presupuestado">Presupuestado (opcional)</string>
     <string name="campo_gastado">Gastado</string>
-    <string name="campo_pagado">Pagado (necesario para cerrar el apunte)</string>
     <string name="seccion_categoria">CATEGORÍA</string>
     <string name="cat_restaurante">Restaurante</string>
     <string name="cat_copas">Copas</string>
@@ -100,11 +107,11 @@
     <string name="cat_sustancias">Sustancias</string>
     <string name="cat_cash">Efectivo</string>
     <string name="cat_otros">Otros</string>
-    <string name="foto_recibo">Tique</string>
+    <string name="foto_recibo">Ticket</string>
     <string name="quitar_foto">Quitar foto</string>
-    <string name="cd_foto_recibo">Foto del tique</string>
+    <string name="cd_foto_recibo">Foto del ticket</string>
     <string name="accion_compartir">Compartir</string>
-    <string name="compartir_recibo_asunto">Tique: %1$s</string>
+    <string name="compartir_recibo_asunto">Ticket: %1$s</string>
     <string name="seccion_reparto">REPARTO</string>
     <string name="reparto_igual">A partes iguales</string>
     <string name="reparto_porcentual">Porcentajes</string>
@@ -138,7 +145,6 @@
     <string name="fila_total">TOTAL</string>
     <string name="sub_presupuestado">Total presupuestado: %1$s</string>
     <string name="sub_gastado">Total gastado: %1$s</string>
-    <string name="sub_pagado">Total pagado (apuntes): %1$s</string>
     <string name="sub_saldado">Total saldado: %1$s</string>
     <string name="sub_pendiente">Pendiente de liquidar: %1$s</string>
 
@@ -154,9 +160,38 @@
     <string name="importar_quien">¿Quién eres tú en este evento?</string>
     <string name="sync_asunto">Evento de Bote: %1$s</string>
     <string name="sync_explicacion">Comparte el archivo del evento con los demás asistentes; al importarlo en su Bote todos quedan sincronizados.</string>
+    <!-- Sincronización manual -->
+    <string name="sync_ahora">Sincronizar ahora</string>
+    <string name="sync_en_curso">Sincronizando…</string>
+    <string name="sync_ok">Sincronizado.</string>
+    <string name="sync_ok_cambios">Sincronizado: llegaron cambios nuevos.</string>
+    <string name="sync_sin_servidor">Este evento no tiene servidor de sincronización.</string>
+    <string name="sync_sin_red">Sin conexión. Inténtalo más tarde.</string>
+    <string name="sync_error_auth">La clave del servidor de este evento es incorrecta.</string>
+    <string name="sync_error_servidor">El servidor de sincronización no respondió bien. Revisa la URL y que hayas ejecutado el SQL.</string>
+    <string name="sync_nada">No hay eventos con servidor de sincronización.</string>
+    <string name="sync_resumen">%1$d sincronizados · %2$d con fallo</string>
+    <string name="ultima_sync_fmt">Última sincronización: %1$s</string>
+    <string name="ultima_sync_nunca">Sin sincronizar aún</string>
+    <string name="sync_bloqueada">La sincronización en la nube necesita una suscripción activa.</string>
+    <string name="sync_error_cifrado">La copia remota va cifrada y tu frase falta o no coincide con la del grupo. Revisa Ajustes; no se ha subido nada.</string>
+    <!-- Suscripción (Play) -->
+    <string name="seccion_suscripcion">SINCRONIZACIÓN EN LA NUBE</string>
+    <string name="suscripcion_activa_desc">Suscripción activa. La sincronización está desbloqueada. ¡Gracias!</string>
+    <string name="suscripcion_oferta">Desbloquea la sincronización automática entre tus dispositivos por una pequeña cuota anual.</string>
+    <string name="suscripcion_boton">Suscribirme</string>
+    <string name="suscripcion_gestionar">Gestionar suscripción</string>
+    <string name="suscripcion_no_disponible">Las suscripciones no están disponibles ahora mismo.</string>
+    <!-- Cifrado extremo a extremo -->
+    <string name="seccion_e2e">CIFRADO EXTREMO A EXTREMO</string>
+    <string name="e2e_frase">Frase de cifrado</string>
+    <string name="e2e_ayuda">Si pones una frase, los datos sincronizados se cifran en tu dispositivo antes de subirlos: el servidor solo ve bloques opacos. Todos en el grupo deben usar la MISMA frase. Si la olvidas, la copia remota no se puede leer (tus datos locales siguen intactos). Con frase puesta, el avatar del evento tampoco se sube.</string>
 
     <!-- Ajustes -->
     <string name="ajustes_titulo">Ajustes</string>
+    <string name="seccion_identidad">TU NOMBRE</string>
+    <string name="campo_nombre_usuario">Tu nombre</string>
+    <string name="nombre_usuario_ayuda">Se usa como tu nombre al crear un evento. Puedes cambiarlo en cada evento.</string>
     <string name="seccion_tema">TEMA</string>
     <string name="tema_blanco">Blanco</string>
     <string name="tema_negro">Negro</string>
@@ -187,7 +222,9 @@
     <string name="campo_sync_url">URL del proyecto</string>
     <string name="campo_sync_key">Clave API (anon)</string>
     <string name="sync_nube_ayuda">Gratis en supabase.com: crea un proyecto, ejecuta el SQL del README y pega aquí la URL y la clave anon. Se ofrece como opción «Por defecto» al crear un evento; cada grupo puede usar su propio servidor.</string>
-    <string name="sync_nube_hecho">Sincronizado con la nube.</string>
+    <string name="sync_probar">Probar conexión</string>
+    <string name="sync_prueba_ok">Conexión correcta: servidor y clave válidos.</string>
+    <string name="sync_prueba_mal">No se pudo conectar: revisa la URL, la clave anon y que hayas ejecutado el SQL.</string>
     <!-- Selector de servidor en el formulario de evento -->
     <string name="seccion_sync_evento">SINCRONIZACIÓN</string>
     <string name="sync_local">Local</string>
@@ -196,6 +233,17 @@
     <string name="sync_local_desc">Este evento se queda en el dispositivo. Compártelo por QR o archivo.</string>
     <string name="sync_defecto_desc">Usa tu servidor por defecto (Ajustes). Viaja con el evento, así los demás se conectan solos.</string>
     <string name="sync_otro_desc">Servidor propio de este grupo. Viaja con el evento; quien lo importe se conecta automáticamente.</string>
+    <string name="seccion_auto_sync">SINCRONIZACIÓN EN SEGUNDO PLANO</string>
+    <string name="auto_sync">Sincronizar cada hora en segundo plano</string>
+    <string name="auto_sync_wifi">Solo con WiFi</string>
+    <string name="auto_sync_ayuda">Mantiene al día los eventos sincronizados por su cuenta, más o menos cada hora. Los eventos ya saldados se saltan.</string>
+    <string name="seccion_backup">COPIA DE SEGURIDAD</string>
+    <string name="backup_exportar">Exportar todos los eventos</string>
+    <string name="backup_ayuda">Guarda todos los eventos (apuntes, asistentes, registro) en un único archivo que puedes conservar donde quieras. Para restaurar, usa «Importar evento» en la pantalla principal con ese archivo: los eventos se fusionan por identidad, sin duplicar nada. Las fotos de tickets y los adjuntos no se incluyen.</string>
+    <string name="backup_nada">No hay eventos que exportar.</string>
+    <string name="backup_ok">Copia guardada.</string>
+    <string name="backup_error">No se pudo guardar la copia.</string>
+    <string name="backup_importado_fmt">Copia restaurada: %1$d eventos.</string>
     <string name="seccion_notificaciones">NOTIFICACIONES</string>
     <string name="notif_evento">Recordatorio el día del evento</string>
     <string name="notif_cierre">Aviso al cerrar una cuenta</string>
@@ -210,6 +258,13 @@
     <string name="notif_cierre_texto">Consulta el informe para liquidar.</string>
     <string name="notif_pagos_titulo">Pagos pendientes: %1$s</string>
     <string name="notif_pagos_texto">Aún hay gente sin liquidar su parte.</string>
+    <string name="accion_ver_informe">Ver informe</string>
+    <string name="accion_he_pagado">He pagado mi parte</string>
+    <string name="notif_liquidacion_titulo">Pago enviado: %1$s</string>
+    <string name="notif_liquidacion_varios">%1$d eventos podrían cuadrar. Toca para elegir.</string>
+    <string name="liquidacion_confirmar_titulo">¿Marcar tu pago como hecho?</string>
+    <string name="liquidacion_label_fmt">A %1$s · %2$s</string>
+    <string name="liquidacion_elegir">¿Qué pago has hecho?</string>
 
     <!-- Registro de actividad -->
     <string name="registro_titulo">Registro</string>
