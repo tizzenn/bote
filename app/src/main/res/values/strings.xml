@@ -237,6 +237,13 @@
     <string name="auto_sync">Sync every hour in the background</string>
     <string name="auto_sync_wifi">Only on Wi-Fi</string>
     <string name="auto_sync_ayuda">Keeps synced events up to date on their own, about once an hour. Settled events are skipped.</string>
+    <string name="seccion_backup">BACKUP</string>
+    <string name="backup_exportar">Export all events</string>
+    <string name="backup_ayuda">Saves every event (entries, attendees, activity log) into a single file you can keep anywhere. To restore, use "Import event" on the main screen with that file: events merge by identity, nothing gets duplicated. Receipt photos and attachments are not included.</string>
+    <string name="backup_nada">There are no events to export.</string>
+    <string name="backup_ok">Backup saved.</string>
+    <string name="backup_error">Couldn\'t save the backup.</string>
+    <string name="backup_importado_fmt">Backup restored: %1$d events.</string>
     <string name="seccion_notificaciones">NOTIFICATIONS</string>
     <string name="notif_evento">Reminder on the event day</string>
     <string name="notif_cierre">Alert when a tab is closed</string>

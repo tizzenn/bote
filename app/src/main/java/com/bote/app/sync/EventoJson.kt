@@ -118,6 +118,42 @@ object EventoJson {
     }
 
     /**
+     * Copia de seguridad completa: todos los eventos en un único archivo.
+     * Cada elemento es exactamente lo que produce [exportar], así que la
+     * restauración reutiliza la misma fusión por UUID (sin duplicados).
+     */
+    fun exportarTodo(eventos: List<String>): String {
+        val raiz = JSONObject()
+        raiz.put("app", "bote")
+        raiz.put("backup", 1)
+        val lista = JSONArray()
+        for (e in eventos) lista.put(JSONObject(e))
+        raiz.put("eventos", lista)
+        return raiz.toString()
+    }
+
+    /** True si el texto es una copia de seguridad de [exportarTodo]. */
+    fun esBackup(texto: String): Boolean = try {
+        val j = JSONObject(texto)
+        j.optString("app") == "bote" && j.has("backup")
+    } catch (e: Exception) {
+        false
+    }
+
+    /** Restaura una copia de seguridad; devuelve cuántos eventos se importaron. */
+    suspend fun importarTodo(dao: BoteDao, texto: String): Int {
+        val raiz = JSONObject(texto)
+        require(raiz.optString("app") == "bote" && raiz.has("backup")) {
+            "No es una copia de seguridad de Bote"
+        }
+        val lista = raiz.getJSONArray("eventos")
+        for (i in 0 until lista.length()) {
+            importar(dao, lista.getJSONObject(i).toString())
+        }
+        return lista.length()
+    }
+
+    /**
      * Invitación a un evento sincronizado: en vez del evento entero, el QR
      * lleva solo las credenciales (uuid + servidor). Siempre cabe en un QR
      * pequeño y legible; el contenido llega en la primera sincronización.

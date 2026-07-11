@@ -237,6 +237,13 @@
     <string name="auto_sync">Sincronizar cada hora en segundo plano</string>
     <string name="auto_sync_wifi">Solo con WiFi</string>
     <string name="auto_sync_ayuda">Mantiene al día los eventos sincronizados por su cuenta, más o menos cada hora. Los eventos ya saldados se saltan.</string>
+    <string name="seccion_backup">COPIA DE SEGURIDAD</string>
+    <string name="backup_exportar">Exportar todos los eventos</string>
+    <string name="backup_ayuda">Guarda todos los eventos (apuntes, asistentes, registro) en un único archivo que puedes conservar donde quieras. Para restaurar, usa «Importar evento» en la pantalla principal con ese archivo: los eventos se fusionan por identidad, sin duplicar nada. Las fotos de tickets y los adjuntos no se incluyen.</string>
+    <string name="backup_nada">No hay eventos que exportar.</string>
+    <string name="backup_ok">Copia guardada.</string>
+    <string name="backup_error">No se pudo guardar la copia.</string>
+    <string name="backup_importado_fmt">Copia restaurada: %1$d eventos.</string>
     <string name="seccion_notificaciones">NOTIFICACIONES</string>
     <string name="notif_evento">Recordatorio el día del evento</string>
     <string name="notif_cierre">Aviso al cerrar una cuenta</string>

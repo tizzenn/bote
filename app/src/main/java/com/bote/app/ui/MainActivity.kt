@@ -347,6 +347,17 @@ class MainActivity : BaseActivity() {
             try {
                 val json = SyncCodec.decodificar(texto)
                 val dao = AppDatabase.get(this@MainActivity).dao()
+                // Copia de seguridad completa: restaura todos los eventos
+                // (fusión por UUID, sin duplicar) y se queda en la lista.
+                if (EventoJson.esBackup(json)) {
+                    val n = EventoJson.importarTodo(dao, json)
+                    Toast.makeText(
+                        this@MainActivity,
+                        getString(R.string.backup_importado_fmt, n),
+                        Toast.LENGTH_LONG
+                    ).show()
+                    return@launch
+                }
                 // Invitación (QR pequeño de un evento con servidor): se crea el
                 // evento conectado y el contenido llega en la primera sync, que
                 // dispara el propio detalle al abrirse.
