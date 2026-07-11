@@ -111,8 +111,9 @@ class AddEditEventoActivity : BaseActivity() {
         }
         binding.btnManual.setOnClickListener { dialogoAsistente() }
         // El sabor play no lleva READ_CONTACTS (política de Google Play):
-        // se oculta el botón y los asistentes se añaden a mano.
-        if (com.bote.app.BuildConfig.FLAVOR == "play") {
+        // se oculta el botón y los asistentes se añaden a mano. El booleano
+        // lo aporta cada sabor en res/values/flavor.xml.
+        if (!resources.getBoolean(R.bool.permite_contactos)) {
             binding.btnContactos.visibility = View.GONE
         }
         binding.btnContactos.setOnClickListener {

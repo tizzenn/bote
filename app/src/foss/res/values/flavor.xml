@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- F-Droid: el selector desde contactos está disponible. -->
+    <bool name="permite_contactos">true</bool>
+</resources>
