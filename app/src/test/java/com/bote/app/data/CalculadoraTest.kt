@@ -67,7 +67,8 @@ class CalculadoraTest {
                 repartos = listOf(Reparto(1, 1, 10000), Reparto(1, 2, 0))
             )
         )
-        assertEquals(1000, partes[1L])
+        // 1000L: el valor del mapa es Long? y JUnit compararía Integer≠Long
+        assertEquals(1000L, partes[1L])
         assertTrue(2L !in partes)
     }
 
