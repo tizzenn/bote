@@ -1,0 +1,9 @@
+• Hourly background sync and a "sync now" button with clear error messages
+• Invitation QR: always fits and scans on the first try
+• Optional end-to-end encryption of synced data
+• Attachments per event (photos and PDFs, local only)
+• Full backup to a single file
+• Configurable name (goodbye literal "Me")
+• Simpler closing: per-entry "paid" is gone
+• Detects your outgoing Bizum to mark you as settled
+• New icon (money bag) and assorted fixes

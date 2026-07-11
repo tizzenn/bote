@@ -1,0 +1,9 @@
+• Sincronización automática cada hora y botón «sincronizar ahora» con avisos claros de error
+• QR de invitación: siempre cabe y se escanea a la primera
+• Cifrado extremo a extremo opcional de los datos sincronizados
+• Adjuntos por evento (fotos y PDF, solo locales)
+• Copia de seguridad completa a un archivo
+• Tu nombre configurable (adiós al «Yo» literal)
+• Se simplifica el cierre: fuera el «pagado» por apunte
+• Detección de tu Bizum de pago para marcarte como saldado
+• Icono nuevo (bolsa de dinero) y mejoras varias
