@@ -4,18 +4,27 @@ with the minimum set of transfers needed to settle up.
 
 Features:
 
-* Event cards with avatar, date, location, title and description.
-* Attendees added from your contacts or by hand, each with a colored initials
-  avatar.
-* Entries (a good or service paid by one person) with an icon category and
-  budgeted, spent and paid amounts.
+* Event cards with avatar, date, location and attachments (photos and PDFs,
+  local only).
+* Attendees added from your contacts or by hand, each with a colored
+  initials avatar, plus a configurable name for yourself.
+* Entries (a good or service paid by one person) with an icon category,
+  budgeted and spent amounts, and a receipt photo.
 * Split by faders: equal parts or custom percentages, with pins to lock a
   share so moving one fader redistributes only the open ones.
-* Final report with who pays whom, category breakdown and per-user payment
-  marks.
-* Serverless sharing: an event travels as a JSON file or a QR code and merges
-  entry by entry (last edit wins, payment marks never lost, deletions stick).
+* Final report with who pays whom, category breakdown, per-user payment
+  marks and direct actions from the reminder notification.
+* Serverless sharing: an event travels as a JSON file or a QR code and
+  merges entry by entry (last edit wins, payment marks never lost,
+  deletions stick).
+* Full backup: every event into a single file, restorable without
+  duplicates.
+* Optional payment detector: turns your bank's purchase notification into an
+  entry and recognizes your outgoing settlement transfer. Everything is
+  processed on-device.
 
-Optional automatic cloud sync against a user-provided Supabase / PostgREST
-server is available but disabled by default; every event defaults to
-local-only sharing. The app is fully usable offline.
+Optional automatic cloud sync (manual and hourly in the background) uses a
+user-provided Supabase / PostgREST server and is disabled by default; every
+event defaults to local-only sharing. Server-backed events are shared with a
+small invitation QR that always fits, and synced data can be end-to-end
+encrypted with a group passphrase. The app is fully usable offline.

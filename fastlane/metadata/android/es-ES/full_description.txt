@@ -4,19 +4,28 @@ genera el informe final con las transferencias mínimas para quedar en paz.
 
 Funcionalidad:
 
-* Fichas de evento con avatar, fecha, ubicación, título y descripción.
-* Asistentes añadidos desde los contactos o a mano, con avatar de iniciales de
-  color.
-* Apuntes (un bien o servicio pagado por una persona) con categoría de icono e
-  importes presupuestado, gastado y pagado.
+* Fichas de evento con avatar, fecha, ubicación y adjuntos (fotos y PDF,
+  solo locales).
+* Asistentes añadidos desde los contactos o a mano, con avatar de iniciales
+  de color y tu nombre configurable.
+* Apuntes (un bien o servicio pagado por una persona) con categoría de
+  icono, importes presupuestado y gastado, y foto del ticket.
 * Reparto por faders: partes iguales o porcentajes, con pines para fijar una
   parte de modo que mover un fader redistribuye solo los abiertos.
-* Informe final con quién paga a quién, desglose por categorías y marcas de
-  pago por usuario.
+* Informe final con quién paga a quién, desglose por categorías, marcas de
+  pago por usuario y acciones directas desde la notificación de recordatorio.
 * Compartir sin servidor: el evento viaja como archivo JSON o código QR y se
-  fusiona apunte a apunte (gana la edición más reciente, las marcas de pago no
-  se pierden y los borrados no resucitan).
+  fusiona apunte a apunte (gana la edición más reciente, las marcas de pago
+  no se pierden y los borrados no resucitan).
+* Copia de seguridad completa: todos los eventos a un único archivo,
+  restaurable sin duplicar nada.
+* Detector opcional de pagos en notificaciones: convierte la compra del banco
+  en apunte y reconoce tu Bizum de liquidación. Todo se procesa en el
+  dispositivo.
 
-La sincronización automática opcional en la nube contra un servidor Supabase /
-PostgREST propio está disponible pero desactivada por defecto; cada evento es
-local salvo que se indique. La app es totalmente usable sin conexión.
+La sincronización automática opcional en la nube (manual y cada hora en
+segundo plano) usa un servidor Supabase / PostgREST propio y está desactivada
+por defecto; cada evento es local salvo que se indique. Los eventos con
+servidor se comparten con un QR de invitación pequeño que siempre cabe, y los
+datos pueden cifrarse de extremo a extremo con una frase compartida del
+grupo. La app es totalmente usable sin conexión.
