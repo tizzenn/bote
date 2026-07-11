@@ -110,6 +110,11 @@ class AddEditEventoActivity : BaseActivity() {
             )
         }
         binding.btnManual.setOnClickListener { dialogoAsistente() }
+        // El sabor play no lleva READ_CONTACTS (política de Google Play):
+        // se oculta el botón y los asistentes se añaden a mano.
+        if (com.bote.app.BuildConfig.FLAVOR == "play") {
+            binding.btnContactos.visibility = View.GONE
+        }
         binding.btnContactos.setOnClickListener {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS)
                 == PackageManager.PERMISSION_GRANTED
@@ -147,6 +152,19 @@ class AddEditEventoActivity : BaseActivity() {
         }
 
         binding.toggleSync.addOnButtonCheckedListener { _, _, _ -> refrescarSync() }
+        binding.btnProbarSync.setOnClickListener {
+            Toast.makeText(this, R.string.sync_en_curso, Toast.LENGTH_SHORT).show()
+            val url = binding.campoSyncUrl.text?.toString().orEmpty()
+            val key = binding.campoSyncKey.text?.toString().orEmpty()
+            lifecycleScope.launch {
+                val ok = com.bote.app.sync.SyncRemoto.probar(url, key)
+                Toast.makeText(
+                    this@AddEditEventoActivity,
+                    if (ok) R.string.sync_prueba_ok else R.string.sync_prueba_mal,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
 
         if (eventoId == 0L) {
             binding.toggleModo.check(R.id.btnColaborativo)

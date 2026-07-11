@@ -1,7 +1,7 @@
 package com.bote.app.sync
 
-import android.util.Base64
 import java.security.SecureRandom
+import java.util.Base64
 import javax.crypto.Cipher
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.GCMParameterSpec
@@ -45,13 +45,14 @@ object Cifrado {
         System.arraycopy(sal, 0, todo, 1, sal.size)
         System.arraycopy(iv, 0, todo, 1 + sal.size, iv.size)
         System.arraycopy(cripto, 0, todo, 1 + sal.size + iv.size, cripto.size)
-        return Base64.encodeToString(todo, Base64.NO_WRAP)
+        // java.util.Base64 (API 26+) y no android.util: así es testeable en JVM.
+        return Base64.getEncoder().encodeToString(todo)
     }
 
     /** Descifra un blob de [cifrar]; devuelve null si la frase no cuadra. */
     fun descifrar(blob: String, frase: String): String? {
         return try {
-            val todo = Base64.decode(blob, Base64.NO_WRAP)
+            val todo = Base64.getDecoder().decode(blob)
             if (todo.isEmpty() || todo[0].toInt() != VERSION) return null
             val minimo = 1 + BYTES_SAL + BYTES_IV
             if (todo.size <= minimo) return null

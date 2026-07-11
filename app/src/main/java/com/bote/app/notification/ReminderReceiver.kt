@@ -44,12 +44,13 @@ class ReminderReceiver : BroadcastReceiver() {
                             // Ya no hay nada pendiente: se retira la alarma periódica.
                             NotificationScheduler.reprogramar(context, datos.evento, false)
                         } else {
-                            NotificationHelper.notificar(
+                            NotificationHelper.notificarPagosPendientes(
                                 context,
                                 (eventoId * 2 + 1).toInt(),
                                 context.getString(R.string.notif_pagos_titulo, nombre),
                                 context.getString(R.string.notif_pagos_texto),
-                                eventoId
+                                eventoId,
+                                ofrecerMarcarPago = datos.miAsistente()?.liquidado == false
                             )
                         }
                     }

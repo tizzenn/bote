@@ -122,15 +122,19 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Todas las migraciones, expuestas también para el test instrumentado. */
+        internal val MIGRACIONES = arrayOf(
+            MIGRACION_1_2, MIGRACION_2_3, MIGRACION_3_4, MIGRACION_4_5, MIGRACION_5_6
+        )
+
         fun get(context: Context): AppDatabase =
             instancia ?: synchronized(this) {
                 instancia ?: Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "bote.db"
-                ).addMigrations(
-                    MIGRACION_1_2, MIGRACION_2_3, MIGRACION_3_4, MIGRACION_4_5, MIGRACION_5_6
-                ).build().also { instancia = it }
+                ).addMigrations(*MIGRACIONES)
+                    .build().also { instancia = it }
             }
     }
 }

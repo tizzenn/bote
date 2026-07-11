@@ -136,6 +136,9 @@ class MainActivity : BaseActivity() {
     private suspend fun migrarNombreCreador() {
         val nombre = Ajustes.nombreUsuario(this)
         if (nombre.isBlank()) return
+        // Solo hace falta una vez (y con nombre ya configurado): sin el flag
+        // se cargaba el grafo completo de cada evento en cada arranque.
+        if (Ajustes.migracionNombreHecha(this)) return
         val dao = AppDatabase.get(this).dao()
         val literales = setOf("Yo", "Me", getString(R.string.asistente_yo))
         for (evento in dao.todosEventos()) {
@@ -149,6 +152,7 @@ class MainActivity : BaseActivity() {
                 dao.actualizarAsistente(creador.copy(nombre = nombre))
             }
         }
+        Ajustes.marcarMigracionNombreHecha(this)
     }
 
     /** Con una liquidación detectada, confirma marcarla (o elige entre varias). */
@@ -343,7 +347,14 @@ class MainActivity : BaseActivity() {
             try {
                 val json = SyncCodec.decodificar(texto)
                 val dao = AppDatabase.get(this@MainActivity).dao()
-                val eventoId = EventoJson.importar(dao, json)
+                // Invitación (QR pequeño de un evento con servidor): se crea el
+                // evento conectado y el contenido llega en la primera sync, que
+                // dispara el propio detalle al abrirse.
+                val eventoId = if (EventoJson.esInvitacion(json)) {
+                    EventoJson.importarInvitacion(dao, json)
+                } else {
+                    EventoJson.importar(dao, json)
+                }
                 dao.insertarRegistro(
                     Registro(
                         eventoId = eventoId,

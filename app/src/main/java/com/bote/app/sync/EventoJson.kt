@@ -118,6 +118,61 @@ object EventoJson {
     }
 
     /**
+     * Invitación a un evento sincronizado: en vez del evento entero, el QR
+     * lleva solo las credenciales (uuid + servidor). Siempre cabe en un QR
+     * pequeño y legible; el contenido llega en la primera sincronización.
+     */
+    fun exportarInvitacion(evento: Evento): String {
+        val j = JSONObject()
+        j.put("app", "bote")
+        j.put("invitacion", 1)
+        j.put("uuid", evento.uuid)
+        j.put("titulo", evento.titulo)
+        j.put("syncUrl", evento.syncUrl)
+        j.put("syncKey", evento.syncKey)
+        return j.toString()
+    }
+
+    /** True si el texto (ya decodificado) es una invitación de [exportarInvitacion]. */
+    fun esInvitacion(texto: String): Boolean = try {
+        val j = JSONObject(texto)
+        j.optString("app") == "bote" && j.has("invitacion")
+    } catch (e: Exception) {
+        false
+    }
+
+    /**
+     * Acepta una invitación: crea el evento conectado a su servidor (vacío
+     * hasta la primera sync) o devuelve el existente si ya lo teníamos.
+     */
+    suspend fun importarInvitacion(dao: BoteDao, texto: String): Long {
+        val j = JSONObject(texto)
+        require(j.optString("app") == "bote" && j.has("invitacion")) {
+            "No es una invitación de Bote"
+        }
+        val uuid = j.getString("uuid")
+        val url = j.optString("syncUrl")
+        val key = j.optString("syncKey")
+        require(url.isNotBlank() && key.isNotBlank()) { "Invitación sin servidor" }
+        val previo = dao.eventoPorUuid(uuid)
+        if (previo != null) return previo.id
+        return dao.insertarEvento(
+            Evento(
+                uuid = uuid,
+                titulo = j.optString("titulo"),
+                fechaMillis = System.currentTimeMillis(),
+                soyCreador = false,
+                miAsistenteId = 0,
+                // Que la primera sync gane siempre el merge del evento.
+                modificadoMillis = 0,
+                syncActivo = true,
+                syncUrl = url,
+                syncKey = key
+            )
+        )
+    }
+
+    /**
      * Importa un evento. Si no existía se crea; si ya existía se fusiona:
      * los datos del evento y de cada apunte los gana la versión con la
      * modificación más reciente, los asistentes se unen por UUID (la marca

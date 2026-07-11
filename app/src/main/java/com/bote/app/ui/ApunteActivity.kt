@@ -143,7 +143,7 @@ class ApunteActivity : BaseActivity() {
         lifecycleScope.launch {
             val uri = withContext(Dispatchers.IO) {
                 val directorio = File(cacheDir, "compartir").apply { mkdirs() }
-                val destino = File(directorio, "tique.jpg")
+                val destino = File(directorio, "ticket.jpg")
                 File(fotoRecibo).copyTo(destino, overwrite = true)
                 FileProvider.getUriForFile(
                     this@ApunteActivity, "$packageName.fileprovider", destino

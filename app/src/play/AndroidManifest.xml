@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sabor Google Play: sin READ_CONTACTS. Google revisa este permiso con
+     lupa y es secundario (los asistentes se pueden añadir a mano); el sabor
+     foss de F-Droid lo conserva. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission
+        android:name="android.permission.READ_CONTACTS"
+        tools:node="remove" />
+
+</manifest>

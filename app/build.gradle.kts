@@ -18,6 +18,7 @@ android {
         targetSdk = 34
         versionCode = 23
         versionName = "3.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     // F-Droid: no incluir el bloque de metadatos de dependencias (cifrado con
@@ -112,6 +113,14 @@ dependencies {
 
     // Google Play Billing SOLO en el sabor play (no entra en F-Droid).
     "playImplementation"("com.android.billingclient:billing-ktx:6.2.1")
+
+    // Tests unitarios (JVM): Calculadora, Cifrado, Dinero
+    testImplementation("junit:junit:4.13.2")
+
+    // Tests instrumentados: migraciones de la base de datos
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:core:1.6.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
 
     // Códigos QR para sincronizar eventos (ZXing, Apache 2.0)
     implementation("com.google.zxing:core:3.5.3")

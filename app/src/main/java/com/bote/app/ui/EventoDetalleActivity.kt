@@ -522,10 +522,21 @@ class EventoDetalleActivity : BaseActivity() {
         }
     }
 
-    /** El evento entero cabe en un QR si no es muy grande; si no, archivo. */
+    /**
+     * QR para pasar el evento. Si tiene servidor, el QR es una INVITACIÓN
+     * (solo credenciales, siempre cabe y se lee bien); si es local, viaja el
+     * evento entero y, si no cabe, se cae a archivo.
+     */
     private fun mostrarQr() {
         val completo = datos ?: return
         lifecycleScope.launch {
+            if (completo.evento.sincronizable) {
+                val carga = withContext(Dispatchers.IO) {
+                    SyncCodec.comprimir(EventoJson.exportarInvitacion(completo.evento))
+                }
+                mostrarDialogoQr(carga)
+                return@launch
+            }
             val dao = AppDatabase.get(this@EventoDetalleActivity).dao()
             val borrados = dao.borradosDeEvento(eventoId)
             val carga = withContext(Dispatchers.IO) {
@@ -539,15 +550,19 @@ class EventoDetalleActivity : BaseActivity() {
                 compartirArchivo()
                 return@launch
             }
-            val bitmap = withContext(Dispatchers.IO) { QrUtil.generar(carga, 800) }
-            val vista = DialogQrBinding.inflate(layoutInflater)
-            vista.imagenQr.setImageBitmap(bitmap)
-            MaterialAlertDialogBuilder(this@EventoDetalleActivity)
-                .setTitle(R.string.compartir_qr)
-                .setView(vista.root)
-                .setPositiveButton(R.string.accion_cancelar, null)
-                .show()
+            mostrarDialogoQr(carga)
         }
+    }
+
+    private suspend fun mostrarDialogoQr(carga: String) {
+        val bitmap = withContext(Dispatchers.IO) { QrUtil.generar(carga, 800) }
+        val vista = DialogQrBinding.inflate(layoutInflater)
+        vista.imagenQr.setImageBitmap(bitmap)
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.compartir_qr)
+            .setView(vista.root)
+            .setPositiveButton(R.string.accion_cancelar, null)
+            .show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

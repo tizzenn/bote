@@ -9,6 +9,8 @@ import com.bote.app.data.Calculadora
 import com.bote.app.data.Dinero
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.text.Normalizer
 import kotlin.math.abs
@@ -22,11 +24,34 @@ import kotlin.math.abs
  */
 class DetectorPagos : NotificationListenerService() {
 
+    /** Ámbito atado al servicio: el trabajo en vuelo se cancela al destruirlo. */
+    private val ambito = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    override fun onDestroy() {
+        ambito.cancel()
+        super.onDestroy()
+    }
+
     companion object {
-        private var ultimoHash = 0
-        private var ultimoMillis = 0L
-        private var ultimoHashLiq = 0
-        private var ultimoMillisLiq = 0L
+        private const val VENTANA_DEDUPE_MILLIS = 120_000L
+        private const val MAX_RECIENTES = 32
+
+        /** Notificaciones ya vistas (hash → millis); aguanta ráfagas de varios
+         *  bancos intercalados, cosa que un único "último hash" no cubría. */
+        private val recientes = object : LinkedHashMap<Int, Long>(MAX_RECIENTES, 0.75f, false) {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Int, Long>?) =
+                size > MAX_RECIENTES
+        }
+
+        /** True si este hash ya se procesó hace poco; si no, lo registra. */
+        @Synchronized
+        private fun esRepetida(hash: Int): Boolean {
+            val ahora = System.currentTimeMillis()
+            val visto = recientes[hash]
+            if (visto != null && ahora - visto < VENTANA_DEDUPE_MILLIS) return true
+            recientes[hash] = ahora
+            return false
+        }
 
         private val PALABRAS_PAGO = listOf(
             "compra", "pago", "has pagado", "cargo", "bizum",
@@ -73,11 +98,7 @@ class DetectorPagos : NotificationListenerService() {
         if (cents <= 0) return
 
         // Evita duplicados cuando el banco reemite la misma notificación
-        val hash = (sbn.packageName + completo).hashCode()
-        val ahora = System.currentTimeMillis()
-        if (hash == ultimoHash && ahora - ultimoMillis < 120_000) return
-        ultimoHash = hash
-        ultimoMillis = ahora
+        if (esRepetida((sbn.packageName + completo).hashCode())) return
 
         val comercio = COMERCIO.find(completo)?.groupValues?.get(1)?.trim().orEmpty()
         NotificationHelper.notificarPagoDetectado(this, cents, comercio)
@@ -100,14 +121,10 @@ class DetectorPagos : NotificationListenerService() {
         val destinatario = DESTINATARIO.find(completo)?.groupValues?.get(1)?.trim()
             ?.substringBefore(" por ")?.trim().orEmpty()
 
-        val hash = ("liq" + completo).hashCode()
-        val ahora = System.currentTimeMillis()
-        if (hash == ultimoHashLiq && ahora - ultimoMillisLiq < 120_000) return
-        ultimoHashLiq = hash
-        ultimoMillisLiq = ahora
+        if (esRepetida(("liq" + completo).hashCode())) return
 
         val ctx = applicationContext
-        CoroutineScope(Dispatchers.IO).launch {
+        ambito.launch {
             val dao = AppDatabase.get(ctx).dao()
             val ids = mutableListOf<Long>()
             val etiquetas = mutableListOf<String>()

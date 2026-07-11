@@ -2,16 +2,20 @@ package com.bote.app.ui
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.lifecycle.lifecycleScope
 import com.bote.app.BaseActivity
 import com.bote.app.R
 import com.bote.app.config.Ajustes
 import com.bote.app.config.PaletaColor
 import com.bote.app.config.Tema
 import com.bote.app.databinding.ActivitySettingsBinding
+import com.bote.app.sync.SyncRemoto
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import kotlinx.coroutines.launch
 
 class SettingsActivity : BaseActivity() {
 
@@ -102,6 +106,12 @@ class SettingsActivity : BaseActivity() {
         binding.campoSyncKey.addTextChangedListener(GuardarTexto { texto ->
             Ajustes.guardarSyncKey(this, texto)
         })
+        binding.btnProbarSync.setOnClickListener {
+            probarConexion(
+                binding.campoSyncUrl.text?.toString().orEmpty(),
+                binding.campoSyncKey.text?.toString().orEmpty()
+            )
+        }
 
         // Sincronización en segundo plano (cada hora)
         binding.switchAutoSync.isChecked = Ajustes.autoSyncActivo(this)
@@ -138,6 +148,19 @@ class SettingsActivity : BaseActivity() {
         binding.switchPagos.isChecked = Ajustes.notifPagos(this)
         binding.switchPagos.setOnCheckedChangeListener { _, valor ->
             Ajustes.guardarNotifPagos(this, valor)
+        }
+    }
+
+    /** Prueba la conexión con el servidor de sincronización y avisa. */
+    private fun probarConexion(url: String, key: String) {
+        Toast.makeText(this, R.string.sync_en_curso, Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            val ok = SyncRemoto.probar(url, key)
+            Toast.makeText(
+                this@SettingsActivity,
+                if (ok) R.string.sync_prueba_ok else R.string.sync_prueba_mal,
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 

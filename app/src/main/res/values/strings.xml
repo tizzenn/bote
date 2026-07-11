@@ -19,6 +19,7 @@
     <string name="num_asistentes">%1$d attendees</string>
     <string name="pendiente_liquidar">Pending settlement</string>
     <string name="evento_saldado">Settled</string>
+    <string name="evento_sincronizado">Cloud-synced event</string>
     <string name="total_fmt">Total: %1$s</string>
 
     <!-- Event form -->
@@ -221,7 +222,9 @@
     <string name="campo_sync_url">Project URL</string>
     <string name="campo_sync_key">API key (anon)</string>
     <string name="sync_nube_ayuda">Free at supabase.com: create a project, run the SQL from the README and paste the URL and anon key here. This is offered as the "Default" option when creating an event; each group can still use its own server.</string>
-    <string name="sync_nube_hecho">Synced with the cloud.</string>
+    <string name="sync_probar">Test connection</string>
+    <string name="sync_prueba_ok">Connection OK: server and key are valid.</string>
+    <string name="sync_prueba_mal">Couldn\'t connect: check the URL, the anon key and that the SQL setup ran.</string>
     <!-- Sync server picker in the event form -->
     <string name="seccion_sync_evento">SYNC</string>
     <string name="sync_local">Local</string>
@@ -248,6 +251,8 @@
     <string name="notif_cierre_texto">Check the report to settle up.</string>
     <string name="notif_pagos_titulo">Pending payments: %1$s</string>
     <string name="notif_pagos_texto">Someone has not settled their share yet.</string>
+    <string name="accion_ver_informe">View report</string>
+    <string name="accion_he_pagado">I\'ve paid my share</string>
     <string name="notif_liquidacion_titulo">Payment sent: %1$s</string>
     <string name="notif_liquidacion_varios">%1$d events could match. Tap to pick.</string>
     <string name="liquidacion_confirmar_titulo">Mark your payment as done?</string>

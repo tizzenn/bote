@@ -109,6 +109,16 @@ object Ajustes {
         prefs(context).edit().putString(CLAVE_NOMBRE_USUARIO, valor.trim()).apply()
     }
 
+    private const val CLAVE_MIGRACION_NOMBRE = "migracion_nombre_hecha"
+
+    /** True si ya se renombraron los creadores antiguos ("Yo"/vacíos). */
+    fun migracionNombreHecha(context: Context): Boolean =
+        prefs(context).getBoolean(CLAVE_MIGRACION_NOMBRE, false)
+
+    fun marcarMigracionNombreHecha(context: Context) {
+        prefs(context).edit().putBoolean(CLAVE_MIGRACION_NOMBRE, true).apply()
+    }
+
     // ── Notificaciones ────────────────────────────────────────────
 
     fun notifEvento(context: Context): Boolean =

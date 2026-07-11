@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Auto-backup (API < 31): la cuota es de 25 MB, así que entran la base de
+     datos y las preferencias pero NO las fotos ni los adjuntos (podrían
+     desplazar a la BD fuera del backup en silencio). -->
+<full-backup-content>
+    <include domain="database" path="." />
+    <include domain="sharedpref" path="." />
+</full-backup-content>
