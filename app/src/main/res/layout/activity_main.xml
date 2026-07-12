@@ -46,7 +46,7 @@
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/filtro_saldados" />
+                    android:text="@string/filtro_archivados" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chipTodos"

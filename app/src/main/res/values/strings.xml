@@ -6,6 +6,7 @@
     <string name="sin_eventos">No events yet.\nTap + to create the first one.</string>
     <string name="filtro_activos">Active</string>
     <string name="filtro_saldados">Settled</string>
+    <string name="filtro_archivados">Archived</string>
     <string name="filtro_todos">All</string>
     <string name="accion_ajustes">Settings</string>
     <string name="accion_importar">Import event</string>

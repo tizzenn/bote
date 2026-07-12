@@ -254,6 +254,10 @@ class MainActivity : BaseActivity() {
         adapter.actualizar(ordenados)
         binding.vacio.visibility = if (ordenados.isEmpty()) android.view.View.VISIBLE
         else android.view.View.GONE
+        // En "Archivados" no se crean eventos: el botón "+" se oculta.
+        binding.fabNuevo.visibility =
+            if (binding.grupoFiltros.checkedChipId == R.id.chipSaldados)
+                android.view.View.GONE else android.view.View.VISIBLE
     }
 
     /**

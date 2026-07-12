@@ -6,6 +6,7 @@
     <string name="sin_eventos">Aún no hay eventos.\nPulsa + para crear el primero.</string>
     <string name="filtro_activos">Activos</string>
     <string name="filtro_saldados">Saldados</string>
+    <string name="filtro_archivados">Archivados</string>
     <string name="filtro_todos">Todos</string>
     <string name="accion_ajustes">Ajustes</string>
     <string name="accion_importar">Importar evento</string>
