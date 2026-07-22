@@ -1,17 +1,20 @@
 name: Mantener Supabase despierto
 
-# Supabase pausa los proyectos del plan gratuito tras ~7 días sin actividad.
-# Esta consulta mínima cada 3 días cuenta como tráfico real de API y de BD.
+# Supabase pausa los proyectos del plan gratuito por inactividad. Una lectura
+# no bastó (se pausó igual), así que aquí hacemos una ESCRITURA real (upsert de
+# una fila de control) cada 2 días: cuenta mejor como actividad de la BD.
+# La fila uuid=__keepalive__ es inofensiva: la app nunca la consulta.
+# Aun así, el plan gratuito puede dormir el proyecto; si pasa, se restaura a mano.
 on:
   schedule:
-    - cron: "17 9 */3 * *"
+    - cron: "17 9 */2 * *"
   workflow_dispatch: {}
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Consulta mínima a la API REST
+      - name: Escritura mínima a la API REST
         env:
           URL: ${{ secrets.SUPABASE_URL }}
           KEY: ${{ secrets.SUPABASE_ANON_KEY }}
@@ -20,6 +23,9 @@ jobs:
             echo "Faltan los secrets SUPABASE_URL / SUPABASE_ANON_KEY" >&2
             exit 1
           fi
-          curl -fsS "${URL%/}/rest/v1/eventos_sync?select=uuid&limit=1" \
-            -H "apikey: $KEY" -H "Authorization: Bearer $KEY" >/dev/null
-          echo "Ping correcto: $(date -u)"
+          curl -fsS -X POST "${URL%/}/rest/v1/eventos_sync?on_conflict=uuid" \
+            -H "apikey: $KEY" -H "Authorization: Bearer $KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: resolution=merge-duplicates" \
+            -d "[{\"uuid\":\"__keepalive__\",\"datos\":{\"ping\":\"$(date -u +%FT%TZ)\"}}]"
+          echo "Ping (escritura) correcto: $(date -u)"
